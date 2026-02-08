@@ -43,10 +43,6 @@ services:
     networks: [ appnet ]
     restart: unless-stopped
 
-  volumes:
-    pgdata:
-    uploads:
-
   db:
     image: postgres:16-alpine
     env_file: .env
@@ -65,3 +61,4 @@ networks:
 
 volumes:
   pgdata:
+  uploads:
