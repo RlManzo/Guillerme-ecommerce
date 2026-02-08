@@ -102,3 +102,100 @@
 }
 
 
+.navbar {
+  background: var(--crema);
+  position: relative;
+}
+
+.logo {
+  flex: 0 0 auto;
+}
+
+.menu-items {
+  flex: 1 1 auto;
+}
+
+/* Desktop default */
+.menu-items {
+  display: flex;
+  gap: 18px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  /* baja altura del logo en mobile */
+  .logo img.logo-img {
+    height: 52px;   /* clave: 120px en mobile rompe */
+  }
+
+  /* el contenedor principal que hoy tiene p-4 te agranda todo */
+  .navbar.col-12 {
+    padding: 12px !important; /* pisa el p-4 */
+  }
+
+  /* Por defecto oculto */
+  .menu-items {
+    display: none;
+  }
+
+  /* Cuando abrís el menú: overlay */
+  .menu-items.open {
+    display: flex;
+    position: fixed;
+    top: 72px;            /* ajustá según la altura real de tu navbar */
+    left: 0;
+    right: 0;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 20px;
+    padding: 22px 16px;
+
+    background: #0f2335;  /* el azul de tu screenshot */
+    z-index: 10000;
+
+    /* importante para que no se pase de alto */
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+  }
+
+  /* Links más “clickeables” */
+  .menu-items.open a.all {
+    color: #45ACB4;
+    font-size: 18px;
+    padding: 10px 0;
+  }
+
+  /* Header / user menu: a veces se desordena si queda inline */
+  .menu-items.open app-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .menu-items { display: none !important; }         // gana a .d-flex
+  .menu-items.open { display: flex !important; }    // y al abrir también
+
+
+  .user-dropdown {
+    right: 50%;
+    transform: translateX(50%);
+    min-width: 220px;
+  }
+
+  .user-email {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
