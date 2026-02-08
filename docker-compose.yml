@@ -6,12 +6,9 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./infra/certbot/www:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - frontend
-      - backend
-    networks: [ appnet ]
+    
+    networks: [appnet]
     restart: unless-stopped
 
   backend:
@@ -40,10 +37,6 @@ services:
     networks: [ appnet ]
     restart: unless-stopped
 
-  volumes:
-    pgdata:
-    uploads:
-
   db:
     image: postgres:16-alpine
     env_file: .env
@@ -51,10 +44,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    # IMPORTANTE: en VPS NO exponer 5432 al mundo.
-    # En local podés comentar/descomentar o usar override.
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks: [appnet]
@@ -66,3 +55,4 @@ networks:
 
 volumes:
   pgdata:
+  uploads:
