@@ -16,6 +16,7 @@
     box-sizing: border-box;
 }
 
+
 :root{
   --azul: #1C2D46;
   --celeste: #45ACB4;
@@ -28,6 +29,21 @@
   --magenta: #B43A8C;     /* letras sombra */
   --crema: #FFF6E8;       /* fondo suave */
   --borde: rgba(28,45,70,.12);
+}
+
+html, body {
+  width: 90%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body{
@@ -371,7 +387,8 @@ a.botonPresupuesto{
 
 }
 .controlesCarrousel{
-    width: 1350px;
+  width: 100%;
+  max-width: 100%;
 }
 /*Carousel*/
 .buttons {
@@ -1154,7 +1171,9 @@ footer{
         height: 450px !important;
     }
     .modalContainer{
-        left: 30px !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
     }
     .botonBuscador{
         margin-left: 25px !important;
