@@ -56,7 +56,10 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // PROD
-        config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com"));
+        config.setAllowedOrigins(List.of(
+                "https://libreriaguillermeguillerme.com",
+                "https://www.libreriaguillermeguillerme.com"
+        ));
 
         // Si también probás desde localhost:
          //config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com", "http://localhost:4300"));
