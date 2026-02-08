@@ -2,7 +2,7 @@ services:
   reverse-proxy:
     image: nginx:alpine
     ports:
-      - "8085:80"
+      - "${PROXY_PORT}:80"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
@@ -20,8 +20,28 @@ services:
   backend:
     build:
       context: ./guillerme-backend/guillerme-backend
+    env_file: .env
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+
+      # Mail
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
+
+      # App custom
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      APP_JWT_EXPIRATION_MINUTES: ${APP_JWT_EXPIRATION_MINUTES}
+      APP_MAIL_ADMIN_TO: ${APP_MAIL_ADMIN_TO}
+      APP_MAIL_FROM: ${APP_MAIL_FROM}
+      APP_MAIL_CONTACT_CHANNEL: ${APP_MAIL_CONTACT_CHANNEL}
+      APP_MAIL_SIGNATURE: ${APP_MAIL_SIGNATURE}
+
     depends_on:
       - db
     networks: [appnet]
@@ -29,10 +49,13 @@ services:
 
   db:
     image: postgres:16-alpine
+    env_file: .env
     environment:
-      POSTGRES_DB: guillerme
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # IMPORTANTE: en VPS NO exponer 5432 al mundo.
+    # En local podés comentar/descomentar o usar override.
     ports:
       - "5432:5432"
     volumes:
@@ -46,4 +69,3 @@ networks:
 
 volumes:
   pgdata:
-
