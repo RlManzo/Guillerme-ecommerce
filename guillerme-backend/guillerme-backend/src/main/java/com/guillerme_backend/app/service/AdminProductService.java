@@ -38,6 +38,7 @@ public class AdminProductService {
             p.setServicios(it.servicios);
             p.setKeywords(it.keywords);
             p.setActivo(it.activo == null ? true : it.activo);
+            p.setPrecio(it.precio);
 
             Product saved = productRepository.save(p);
             ids.add(saved.getId());
