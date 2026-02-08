@@ -6,12 +6,9 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./infra/certbot/www:/var/www/certbot
       - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - frontend
-      - backend
-    networks: [ appnet ]
+    
+    networks: [appnet]
     restart: unless-stopped
 
   backend:
