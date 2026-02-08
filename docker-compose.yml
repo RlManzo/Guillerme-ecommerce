@@ -23,29 +23,29 @@ services:
     env_file: .env
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-
-      # Mail
       SPRING_MAIL_HOST: ${SPRING_MAIL_HOST}
       SPRING_MAIL_PORT: ${SPRING_MAIL_PORT}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-
-      # App custom
       APP_JWT_SECRET: ${APP_JWT_SECRET}
       APP_JWT_EXPIRATION_MINUTES: ${APP_JWT_EXPIRATION_MINUTES}
       APP_MAIL_ADMIN_TO: ${APP_MAIL_ADMIN_TO}
       APP_MAIL_FROM: ${APP_MAIL_FROM}
       APP_MAIL_CONTACT_CHANNEL: ${APP_MAIL_CONTACT_CHANNEL}
       APP_MAIL_SIGNATURE: ${APP_MAIL_SIGNATURE}
-
+    volumes:
+      - uploads:/uploads
     depends_on:
       - db
-    networks: [appnet]
+    networks: [ appnet ]
     restart: unless-stopped
+
+  volumes:
+    pgdata:
+    uploads:
 
   db:
     image: postgres:16-alpine
