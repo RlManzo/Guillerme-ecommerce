@@ -7,7 +7,15 @@ services:
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-    
+    depends_on:
+      - backend
+      - frontend
+    networks: [appnet]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./guillerme-frontend
     networks: [appnet]
     restart: unless-stopped
 
@@ -34,7 +42,7 @@ services:
       - uploads:/uploads
     depends_on:
       - db
-    networks: [ appnet ]
+    networks: [appnet]
     restart: unless-stopped
 
   db:
