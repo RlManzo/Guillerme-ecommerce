@@ -54,10 +54,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    # IMPORTANTE: en VPS NO exponer 5432 al mundo.
-    # En local podés comentar/descomentar o usar override.
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks: [appnet]
