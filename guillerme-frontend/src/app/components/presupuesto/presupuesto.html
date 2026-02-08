@@ -1,0 +1,53 @@
+<section class="col-12 ps-0 pe-0 d-flex flex-column justify-content-center align-items-center" id="presupuesto">
+  <div class="box-title-contact text-center d-flex justify-content-center align-items-center">
+    <h4 data-aos="fade-up">Escribinos</h4>
+    <img src="./assets/iconoHeader.svg" alt="icono" data-aos="zoom-in">
+  </div>
+
+  <div class="box-p-contact text-center d-flex justify-content-center align-items-center">
+    <p>
+      Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+    </p>
+  </div>
+
+  <div class="col-12 mt-4 d-flex justify-content-center align-items-center box-form">
+    <form [formGroup]="form" (ngSubmit)="enviarPresupuesto()" id="messageForm" >
+
+      <div class="box-level-one d-flex d-row flex-wrap justify-content-around align-items-center">
+
+        <div class="box-son-level-one" data-aos="zoom-in">
+          <label for="name">Nombre</label>
+          <input type="text" id="name" formControlName="nombre" required>
+        </div>
+
+        <div class="box-son-level-one" data-aos="zoom-in">
+          <label for="contacto">E-mail / Teléfono</label>
+          <input type="text" id="contacto" formControlName="contacto" required>
+        </div>
+
+        <div class="box-son-level-one" data-aos="zoom-in">
+          <label for="selectProduct">Seleccionar motivo</label>
+          <select class="form-select" id="selectProduct" formControlName="producto">
+            <option value="" selected>Elegir</option>
+            <option value="Carrito">Mayorista</option>
+            <option value="Tazas">minorista</option>
+            <option value="Tazas">Libreria</option>
+            <option value="Gorras">Combos</option>
+            <option value="Llaveros">Envios</option>
+            <option value="Remeras">Medios de Pago</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="box-son-level-two" data-aos="zoom-in">
+        <label for="message">Cuentanos tu idea:</label>
+        <textarea id="message" rows="4" formControlName="mensaje" required></textarea>
+
+        <!-- en el original era input submit, lo dejamos igual -->
+        <input type="submit" value="Enviar Mensaje" data-aos="fade-right" data-aos-offset="50" data-aos-easing="ease-in-sine">
+      </div>
+
+    </form>
+  </div>
+</section>

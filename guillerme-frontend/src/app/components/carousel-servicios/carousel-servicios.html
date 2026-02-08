@@ -1,0 +1,18 @@
+<section
+  class="col-12 ps-0 pe-0"
+  id="servicios"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  
+
+  <section class="carousel">
+    <article
+      class="carousel-image"
+      *ngFor="let item of items; let i = index"
+      [class.active]="i === activeIndex"
+    >
+      <img [src]="item.banner" [alt]="item.alt" />
+    </article>
+  </section>
+</section>

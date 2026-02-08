@@ -1,0 +1,41 @@
+<div class="container" style="max-width: 520px; margin-top: 40px;">
+  <h2>Iniciar sesión</h2>
+
+  <div class="alert alert-danger mt-3" *ngIf="error()">{{ error() }}</div>
+
+  <form class="mt-3" (submit)="$event.preventDefault(); submit()">
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input
+        class="form-control"
+        type="email"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        name="email"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Contraseña</label>
+      <input
+        class="form-control"
+        type="password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        name="password"
+        required
+        minlength="6"
+      />
+    </div>
+
+    <button class="btn btn-primary w-100" [disabled]="loading()">
+      {{ loading() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+
+  <p class="mt-3">
+    ¿No tenés cuenta?
+    <a [routerLink]="['/register']">Registrate</a>
+  </p>
+</div>

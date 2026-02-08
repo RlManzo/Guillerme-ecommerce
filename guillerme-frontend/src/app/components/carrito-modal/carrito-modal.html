@@ -1,0 +1,45 @@
+<div
+  class="modalContainer"
+  [class.show]="store.cartOpen()"
+  (click)="close()"
+>
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content modalColor modalColor">
+
+      <div class="modal-header modalTextoCarrito">
+        <h5 class="modal-title modalTitulo">CARRITO DE PRESUPUESTO</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+      </div>
+
+      <div class="modal-body">
+        @if (store.cart().length === 0) {
+          <div>sin productos</div>
+        } @else {
+          <ul class="listStyles">
+            <li class="carritoContainer" *ngFor="let it of store.cart()">
+              <button class="botonEliminar"   (click)="remove(it.producto.id)">X</button>
+
+              <img class="imgCarrito" [src]="it.producto.img" [alt]="it.producto.nombre" />
+
+              <div class="titleCards">
+                <h6>{{ it.producto.nombre }}</h6>
+                <div class="catCant">cantidad: {{ it.cantidad }}</div>
+              </div>
+            </li>
+          </ul>
+        }
+      </div>
+
+      <div class="modal-footer d-flex justify-content-end">
+        <button
+            class="text-center botonHeader"
+            [disabled]="!hasItems() || sending()"
+            (click)="completarCompra()"
+            >
+            {{ sending() ? 'Enviando...' : 'Completar compra' }}
+            </button>
+        </div>
+
+    </div>
+  </div>
+</div>

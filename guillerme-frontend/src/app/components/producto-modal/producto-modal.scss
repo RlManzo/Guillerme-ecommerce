@@ -1,0 +1,95 @@
+/* ====== SCOPE: SOLO modal producto nuevo ====== */
+.modal-producto .producto-modal-body {
+  padding: 28px 28px 22px 28px;
+}
+
+/* ancho similar al original */
+.modal-producto {
+  border-radius: 18px;
+  border: none;
+}
+.modal { --bs-modal-width: 820px; }
+
+/* X arriba derecha OK */
+.modal-producto .closeModal{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+}
+
+/* ====== RESETEOS CRÍTICOS (lo que te lo rompe) ====== */
+.modal-producto .textModalProducto,
+.modal-producto .textDescriptionModal,
+.modal-producto .caracteristicaColor,
+.modal-producto .buttonCategoria,
+.modal-producto .botonesDetalleModal{
+  position: static !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* ====== Imagen principal: que NO se desborde ====== */
+.modal-producto .imgModal{
+  width: 345px !important;
+  height: 330px !important;
+  border-radius: 15px;
+  border: 1.5px solid var(--celeste);
+  object-fit: contain;          /* clave para remeras verticales */
+  background: #fff;
+  display: block;
+  margin: 0 !important;         /* mata los -12 / +50 del original */
+}
+
+/* thumbs */
+.modal-producto .imgModalDetail{
+  width: 83px;
+  height: 83px;
+  object-fit: cover;
+  margin: 10px 0 12px 0 !important;
+  border-radius: 8px;
+}
+
+/* textos */
+.modal-producto .textModalProducto{
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--azul);
+  margin: 6px 0 8px 0 !important;
+}
+
+.modal-producto .textDescriptionModal{
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: rgba(28,45,70,.75);
+  margin: 0 0 12px 0 !important;
+  text-align: left;
+}
+
+/* chips */
+.modal-producto .modalCategoria{
+  border-radius: 15px;
+  padding: 5px 14px;
+  border: 1px solid var(--celeste);
+  background: transparent;
+  margin: 0 10px 10px 0 !important;
+  width: auto !important;     /* evita “cajitas” raras */
+  font-family: "Inter", sans-serif;
+  color: var(--azul);
+}
+
+/* botones: adentro del modal, alineados como original */
+.modal-producto .botonesDetalleModal{
+  display: flex !important;
+  justify-content: flex-start;
+  gap: 14px;
+  margin-top: 18px !important;
+}
+
+.modal-producto .botonDetalle1,
+.modal-producto .botonDetalle2{
+  width: 140px;
+  height: 40px;
+  border-radius: 50px;
+}

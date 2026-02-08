@@ -1,0 +1,18 @@
+.admin-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 16px;
+
+  h1{
+    font-family: 'Calistoga', cursive;
+    margin:0;
+    font-size: 34px;
+  }
+
+  .back{
+    color: var(--celeste);
+    text-decoration:none;
+    font-weight: 700;
+  }
+}

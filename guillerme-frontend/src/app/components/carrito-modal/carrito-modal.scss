@@ -1,0 +1,13 @@
+/* Hace lo mismo que Bootstrap: display block cuando se abre */
+.modalContainer.show {
+  display: block !important;
+}
+
+/* (Opcional) backdrop simple para oscurecer el fondo */
+.modalContainer.show::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: -1;
+}

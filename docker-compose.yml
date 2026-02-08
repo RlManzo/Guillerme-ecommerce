@@ -1,0 +1,49 @@
+services:
+  reverse-proxy:
+    image: nginx:alpine
+    ports:
+      - "8085:80"
+    volumes:
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - frontend
+      - backend
+    networks: [appnet]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./guillerme-frontend
+    networks: [appnet]
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./guillerme-backend/guillerme-backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - db
+    networks: [appnet]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: guillerme
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [appnet]
+    restart: unless-stopped
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  pgdata:
+

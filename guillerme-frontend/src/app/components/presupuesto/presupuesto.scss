@@ -1,0 +1,48 @@
+.presupuesto {
+  padding: 60px 16px;
+  background: #f7f9fa;
+
+  h4 {
+    font-weight: 800;
+  }
+
+  p {
+    opacity: 0.85;
+  }
+}
+
+.form-presupuesto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 24px;
+
+  input,
+  textarea {
+    border-radius: 30px;
+    border: 1px solid #cfd9de;
+    padding: 12px 18px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  textarea {
+    border-radius: 18px;
+    resize: none;
+  }
+}
+
+.boton-presupuesto {
+  margin-top: 10px;
+  background: #45acb4;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: #37939a;
+  }
+}

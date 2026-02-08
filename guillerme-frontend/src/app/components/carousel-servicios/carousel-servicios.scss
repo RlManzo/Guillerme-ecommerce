@@ -1,0 +1,29 @@
+.carousel {
+  position: relative;
+}
+
+.carousel-image {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+}
+
+.carousel-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  &.active {
+    outline: 2px solid #45acb4; // opcional, si no querés esto lo sacamos
+    border-radius: 8px;
+  }
+}

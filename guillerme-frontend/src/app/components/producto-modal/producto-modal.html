@@ -1,0 +1,106 @@
+<div
+  class="modal fade"
+  id="staticBackdrop"
+  data-bs-backdrop="static"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content modal-producto">
+      <button
+        type="button"
+        class="btn-close closeModal"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+        (click)="onClose()"
+      ></button>
+
+      <div class="modal-body producto-modal-body">
+        <ng-container *ngIf="producto(); else sinProducto">
+          <div class="row g-0 align-items-start">
+            <!-- thumbs -->
+            <div class="col-2 d-flex flex-column align-items-center">
+              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
+              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
+              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
+            </div>
+
+            <!-- imagen principal -->
+            <div class="col-5 d-flex justify-content-center">
+              <img
+                id="imageModal"
+                [src]="producto()!.img"
+                class="imgModal"
+                [alt]="producto()!.nombre"
+              />
+            </div>
+
+            <!-- info -->
+            <div class="col-5">
+              <h5 class="textModalProducto">
+                {{ producto()!.nombre }}
+              </h5>
+
+              <p class="textDescriptionModal">
+                {{ producto()!.infoModal }}
+              </p>
+
+              <div class="d-flex flex-column gap-2">
+                <div class="caracteristicaColor">
+                  <p class="m-0 mb-2">Color producto:</p>
+                  <button class="colorModal1" type="button" aria-label="Color ladrillo"></button>
+                  <button class="colorModal2" type="button" aria-label="Color azul"></button>
+                  <button class="colorModal3" type="button" aria-label="Color celeste"></button>
+                </div>
+
+                <div class="buttonCategoria">
+                  <button class="modalCategoria" type="button">
+                    {{ producto()!.detalle1 }}
+                  </button>
+                  <button class="modalCategoria" type="button">
+                    {{ producto()!.detalle2 }}
+                  </button>
+                </div>
+
+                <div class="buttonCategoria">
+                  <button class="modalCategoria" type="button">
+                    {{ producto()!.categoria1 }}
+                  </button>
+                  <button class="modalCategoria" type="button">
+                    {{ producto()!.categoria2 }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="botonesDetalleModal">
+                <button
+                  class="botonHeader botonDetalle1"
+                  type="button"
+                  (click)="onAgregar()"
+                >
+                  AGREGAR
+                </button>
+
+                <button
+                  class="botonHeader botonDetalle2"
+                  type="button"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  (click)="onClose()"
+                >
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #sinProducto>
+          <div class="text-center p-4">
+            <p class="m-0">No hay producto seleccionado.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

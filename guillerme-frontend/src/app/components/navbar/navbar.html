@@ -1,0 +1,88 @@
+<nav class="container-fluid navbar-fixed">
+  <div class="row">
+    <div class="navbar col-12 d-flex justify-content-around align-items-center p-4">
+
+      <div class="logo d-flex justify-content-center align-items-center">
+        <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
+        <ng-content></ng-content>
+      </div>
+
+      <div
+        class="menu-items d-flex justify-content-around align-items-center"
+        [ngClass]="{ 'open': menuOpen() }"
+      >
+        <a class="all sm-mini-phone all-colour" href="#servicios" (click)="closeMenu()">INICIO</a>
+        <a class="all" href="#producto" (click)="closeMenu()">PRODUCTOS</a>
+        <a class="all" href="#producto" (click)="closeMenu()">COMBOS</a>
+        <a class="all" href="#nosotros" (click)="closeMenu()">NOSOTROS</a>
+        <a class="all" href="#presupuesto" (click)="closeMenu()">CONTACTO</a>
+
+        <app-header></app-header>
+
+        <!-- Auth -->
+        <a
+          *ngIf="!isLogged()"
+          class="all"
+          routerLink="/login"
+          (click)="closeMenu()"
+        >
+          INGRESAR
+        </a>
+
+        <div *ngIf="isLogged()" class="user-menu" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="user-trigger"
+            (click)="toggleUserMenu()"
+            aria-label="Abrir menú de usuario"
+          >
+            <span class="user-email">{{ email() }}</span>
+            <span class="user-plus">+</span>
+          </button>
+
+          <div class="user-dropdown" *ngIf="userMenuOpen()">
+            <!-- ✅ SOLO ADMIN -->
+            <button
+              *ngIf="isAdmin()"
+              class="user-item"
+              type="button"
+              (click)="goAdminProducts()"
+            >
+              Admin productos
+            </button>
+
+            <button class="user-item" type="button" (click)="goOrders()">
+              Ver pedidos
+            </button>
+
+            <button class="user-item danger" type="button" (click)="logout()">
+              Salir
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="carrito d-flex justify-content-center align-items-center gap-3" *ngIf="!isAdmin()">
+        <div class="container-cart">
+            <button class="botonCarrito" type="button" (click)="openCart()">
+            <svg width="57" height="57" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.95499 40.4516C11.0522 45.9355 11.6009 48.6763 13.5697 50.2912C15.541 51.9062 18.3364 51.9062 23.9295 51.9062H33.8142C39.4074 51.9062 42.2027 51.9062 44.1716 50.2912C46.1429 48.6763 46.6891 45.9355 47.7887 40.4516L49.2137 33.3266C50.7907 25.4416 51.5792 21.4991 49.4417 18.889C47.3042 16.2812 43.281 16.2812 35.2392 16.2812H22.5069C14.4651 16.2812 10.4419 16.2812 8.30437 18.889C6.16687 21.4968 6.95537 25.4392 8.53237 33.3266L9.95499 40.4516Z" fill="#45ACB4"/>
+              <path d="M35.9961 25.7812C37.3078 25.7812 38.3711 24.7179 38.3711 23.4062C38.3711 22.0946 37.3078 21.0312 35.9961 21.0312C34.6844 21.0312 33.6211 22.0946 33.6211 23.4062C33.6211 24.7179 34.6844 25.7812 35.9961 25.7812Z" fill="#EDDA6A"/>
+              <path d="M21.7461 25.7812C23.0578 25.7812 24.1211 24.7179 24.1211 23.4062C24.1211 22.0946 23.0578 21.0312 21.7461 21.0312C20.4344 21.0312 19.3711 22.0946 19.3711 23.4062C19.3711 24.7179 20.4344 25.7812 21.7461 25.7812Z" fill="#EDDA6A"/>
+              <path d="M23.5273 13.9063C23.5273 12.489 24.0903 11.1298 25.0925 10.1276C26.0946 9.1255 27.4538 8.5625 28.8711 8.5625C30.2883 8.5625 31.6475 9.1255 32.6497 10.1276C33.6518 11.1298 34.2148 12.489 34.2148 13.9063V16.2813H35.2385C36.1338 16.2813 36.9793 16.2813 37.7773 16.286V13.9063C37.7773 11.5442 36.839 9.27883 35.1688 7.60858C33.4985 5.93833 31.2332 5 28.8711 5C26.509 5 24.2437 5.93833 22.5734 7.60858C20.9032 9.27883 19.9648 11.5442 19.9648 13.9063V16.286C20.7628 16.2813 21.6083 16.2813 22.5037 16.2813H23.5273V13.9063Z" fill="#EDDA6A"/>
+            </svg>
+          </button>
+
+          <p class="numeroCarrito">{{ store.cartCount() }}</p>
+        </div>
+
+        <button class="hamburger hamburger--spring" type="button" (click)="toggleMenu()">
+          <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</nav>

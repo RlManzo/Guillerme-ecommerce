@@ -1,0 +1,104 @@
+.navbar-fixed{
+  position: sticky !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+}
+
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-trigger {
+  background: transparent;
+  border: 0;
+  color: var(--ladrillo);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.user-email {
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+.user-plus {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  background: #0f2335; // acorde a tu navbar
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.user-item {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  text-align: left;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.user-item.danger {
+  color: #ffb4a6;
+
+  &:hover {
+    background: rgba(234, 85, 52, 0.18);
+  }
+}
+
+.logo img.logo-img {
+  height: 120px;      // ajustá
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.navbar{
+  background: var(--crema);
+}
+
+.menu-items .all:hover{
+  color: var(--ladrillo);
+}
+
+.all-colour{
+  color: var(--ladrillo) !important;
+}
+
+
