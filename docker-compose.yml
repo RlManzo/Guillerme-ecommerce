@@ -7,6 +7,7 @@ services:
     volumes:
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - uploads:/uploads:ro
     depends_on:
       - backend
       - frontend
