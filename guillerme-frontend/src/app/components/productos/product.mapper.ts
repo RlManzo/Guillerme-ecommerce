@@ -33,8 +33,8 @@ function toAbsoluteImgUrl(path?: string | null): string {
 
   if (s.startsWith('http://') || s.startsWith('https://')) return s;
 
-  // rutas del backend
-  if (s.startsWith('/')) return `http://localhost:9193${s}`;
+  // Si viene "/uploads/..." lo resolvemos contra el host actual
+  if (s.startsWith('/')) return `${window.location.origin}${s}`;
 
   return s;
 }
