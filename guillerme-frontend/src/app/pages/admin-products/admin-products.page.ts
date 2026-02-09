@@ -14,6 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../components/productos/product.model';
 
 type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
+type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA';
 
 @Component({
   standalone: true,
@@ -68,10 +69,16 @@ export class AdminProductsPage implements OnInit {
   ] as const;
 
   // =========================
-  // ✅ Buscador + filtro + paginador (para la tabla)
+  // ✅ Buscador + filtro + ORDEN + paginador (para la tabla)
   // =========================
   q = signal<string>('');
   categoriaFilter = signal<CategoriaFilter>('ALL');
+
+  sortBy = signal<SortBy>('NEWEST');
+  onSortChange(v: SortBy) {
+    this.sortBy.set((v ?? 'NEWEST') as SortBy);
+    this.page.set(1);
+  }
 
   page = signal<number>(1);
   pageSize = signal<number>(10);
@@ -106,6 +113,23 @@ export class AdminProductsPage implements OnInit {
     );
   }
 
+  // ✅ para "más nuevo/antiguo": usa createdAt/created_at si existe; sino id
+  private getTimeOrId(p: any): number {
+    const t =
+      p?.createdAt ? new Date(p.createdAt).getTime()
+      : p?.created_at ? new Date(p.created_at).getTime()
+      : 0;
+
+    if (Number.isFinite(t) && t > 0) return t;
+    return Number(p?.id ?? 0);
+  }
+
+  private compareNombre(a: Product, b: Product): number {
+    const an = this.norm(a?.nombre ?? '');
+    const bn = this.norm(b?.nombre ?? '');
+    return an.localeCompare(bn);
+  }
+
   // Lista filtrada (search + categoria)
   readonly filteredProducts = computed(() => {
     const all = this.productsSig();
@@ -130,8 +154,35 @@ export class AdminProductsPage implements OnInit {
     });
   });
 
-  // total filtrado
-  totalFiltered = computed(() => this.filteredProducts().length);
+  // ✅ ordenado (se aplica sobre el filtrado)
+  readonly sortedProducts = computed(() => {
+    const list = [...this.filteredProducts()];
+    const mode = this.sortBy();
+
+    switch (mode) {
+      case 'AZ':
+        list.sort((a, b) => this.compareNombre(a, b));
+        break;
+
+      case 'ZA':
+        list.sort((a, b) => this.compareNombre(b, a));
+        break;
+
+      case 'OLDEST':
+        list.sort((a: any, b: any) => this.getTimeOrId(a) - this.getTimeOrId(b));
+        break;
+
+      case 'NEWEST':
+      default:
+        list.sort((a: any, b: any) => this.getTimeOrId(b) - this.getTimeOrId(a));
+        break;
+    }
+
+    return list;
+  });
+
+  // total filtrado (ya ordenado)
+  totalFiltered = computed(() => this.sortedProducts().length);
 
   // total de páginas
   totalPages = computed(() => {
@@ -156,7 +207,7 @@ export class AdminProductsPage implements OnInit {
     const start = (p - 1) * size;
     const end = start + size;
 
-    return this.filteredProducts().slice(start, end);
+    return this.sortedProducts().slice(start, end);
   });
 
   onSearchChange(v: string) {
@@ -177,47 +228,45 @@ export class AdminProductsPage implements OnInit {
     this.page.set(Math.min(this.totalPages(), this.page() + 1));
   }
 
- ngOnInit(): void {
-  this.showProducts.set(true);
-  this.showForm.set(false);
-  this.productsService.load().subscribe();
-}
+  ngOnInit(): void {
+    this.showProducts.set(true);
+    this.showForm.set(false);
+    this.productsService.load().subscribe();
+  }
 
   toggleForm() {
-  const next = !this.showForm();
+    const next = !this.showForm();
 
-  // si voy a mostrar el form, oculto la grilla
-  if (next) {
-    this.showProducts.set(false);
-    this.tab.set('single');
+    // si voy a mostrar el form, oculto la grilla
+    if (next) {
+      this.showProducts.set(false);
+      this.tab.set('single');
+    }
+
+    this.showForm.set(next);
   }
-
-  this.showForm.set(next);
-}
-
 
   toggleProducts() {
-  const next = !this.showProducts();
+    const next = !this.showProducts();
 
-  // si voy a mostrar productos, oculto el form
-  if (next) {
-    this.showForm.set(false);
-    // opcional: si querés asegurarte que no quede en bulk
-    // this.tab.set('single');
-    this.productsService.refresh().subscribe();
+    // si voy a mostrar productos, oculto el form
+    if (next) {
+      this.showForm.set(false);
+      // opcional: si querés asegurarte que no quede en bulk
+      // this.tab.set('single');
+      this.productsService.refresh().subscribe();
+    }
+
+    this.showProducts.set(next);
   }
-
-  this.showProducts.set(next);
-}
 
   /**
    * Si tenés proxy para /uploads, podés dejarlo así (return path).
    * Si no, prefijá con baseUrl del backend.
    */
   fileUrl(path?: string | null) {
-  return path ?? '';
-}
-
+    return path ?? '';
+  }
 
   // -----------------------------
   // CREATE (alta simple) DTO real + precio
@@ -282,49 +331,47 @@ export class AdminProductsPage implements OnInit {
     this.setField('keywords', this.toCsv(next) as any);
   }
 
-  onFileSelected(evt: Event, slot: 1|2|3) {
-  const input = evt.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
+  onFileSelected(evt: Event, slot: 1 | 2 | 3) {
+    const input = evt.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
 
-  this.uploadingImg.set(true);
-  this.adminApi.uploadImage(file).subscribe({
-    next: (res) => {
-      this.uploadingImg.set(false);
-      if (slot === 1) this.setField('imgUrl', res.url as any);
-      if (slot === 2) this.setField('imgUrl2', res.url as any);
-      if (slot === 3) this.setField('imgUrl3', res.url as any);
-      this.toast.success(`Imagen ${slot} subida`);
-    },
-    error: () => {
-      this.uploadingImg.set(false);
-      this.toast.error('No se pudo subir la imagen');
-    }
-  });
-}
+    this.uploadingImg.set(true);
+    this.adminApi.uploadImage(file).subscribe({
+      next: (res) => {
+        this.uploadingImg.set(false);
+        if (slot === 1) this.setField('imgUrl', res.url as any);
+        if (slot === 2) this.setField('imgUrl2', res.url as any);
+        if (slot === 3) this.setField('imgUrl3', res.url as any);
+        this.toast.success(`Imagen ${slot} subida`);
+      },
+      error: () => {
+        this.uploadingImg.set(false);
+        this.toast.error('No se pudo subir la imagen');
+      },
+    });
+  }
 
-onEditFileSelected(evt: Event, slot: 1|2|3) {
-  const input = evt.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
+  onEditFileSelected(evt: Event, slot: 1 | 2 | 3) {
+    const input = evt.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
 
-  this.uploadingImg.set(true);
-  this.adminApi.uploadImage(file).subscribe({
-    next: (res) => {
-      this.uploadingImg.set(false);
-      if (slot === 1) this.setEditField('imgUrl', res.url as any);
-      if (slot === 2) this.setEditField('imgUrl2', res.url as any);
-      if (slot === 3) this.setEditField('imgUrl3', res.url as any);
-      this.toast.success(`Imagen ${slot} lista (guardá para confirmar)`);
-    },
-    error: () => {
-      this.uploadingImg.set(false);
-      this.toast.error('No se pudo subir la imagen');
-    }
-  });
-}
-
-
+    this.uploadingImg.set(true);
+    this.adminApi.uploadImage(file).subscribe({
+      next: (res) => {
+        this.uploadingImg.set(false);
+        if (slot === 1) this.setEditField('imgUrl', res.url as any);
+        if (slot === 2) this.setEditField('imgUrl2', res.url as any);
+        if (slot === 3) this.setEditField('imgUrl3', res.url as any);
+        this.toast.success(`Imagen ${slot} lista (guardá para confirmar)`);
+      },
+      error: () => {
+        this.uploadingImg.set(false);
+        this.toast.error('No se pudo subir la imagen');
+      },
+    });
+  }
 
   saveSingle() {
     const data = this.form();
@@ -355,20 +402,19 @@ onEditFileSelected(evt: Event, slot: 1|2|3) {
           this.toast.success(`Creado #${res.id}`);
 
           this.form.set({
-              nombre: '',
-              descripcionCorta: '',
-              infoModal: '',
-              imgUrl: '',
-              imgUrl2: '',
-              imgUrl3: '',
-              categorias: '',
-              servicios: '',
-              keywords: '',
-              activo: true,
-              stock: 0,
-              precio: 0,
-            });
-
+            nombre: '',
+            descripcionCorta: '',
+            infoModal: '',
+            imgUrl: '',
+            imgUrl2: '',
+            imgUrl3: '',
+            categorias: '',
+            servicios: '',
+            keywords: '',
+            activo: true,
+            stock: 0,
+            precio: 0,
+          });
 
           this.showForm.set(false);
           this.productsService.refresh().subscribe();
@@ -485,9 +531,9 @@ onEditFileSelected(evt: Event, slot: 1|2|3) {
       nombre: p.nombre ?? '',
       descripcionCorta: p.descripcionCorta ?? '',
       infoModal: p.infoModal ?? '',
-        imgUrl: p.imgUrl ?? p.img ?? '',
-        imgUrl2: p.imgUrl2 ?? '',
-        imgUrl3: p.imgUrl3 ?? '',
+      imgUrl: p.imgUrl ?? p.img ?? '',
+      imgUrl2: p.imgUrl2 ?? '',
+      imgUrl3: p.imgUrl3 ?? '',
 
       categorias: (p.categorias ?? []).join(', '),
       servicios: (p.servicios ?? []).join(', '),
@@ -565,84 +611,89 @@ onEditFileSelected(evt: Event, slot: 1|2|3) {
 
   trackById = (_: number, p: Product) => p.id;
 
-toggleEdit(p: Product) {
-  if (this.isEditing(p.id)) {
-    this.cancelEdit();
-  } else {
-    this.startEdit(p);
-  }
-}
-
-private isVideoUrl(url?: string | null): boolean {
-  const u = (url ?? '').toLowerCase();
-  return (
-    u.endsWith('.mp4') ||
-    u.endsWith('.webm') ||
-    u.endsWith('.mov') ||
-    u.endsWith('.m4v') ||
-    u.includes('video')
-  );
-}
-
-// para usar desde el HTML
-isVideo(url?: string | null) {
-  return this.isVideoUrl(url);
-}
-
-private uploadMedia(file: File, onDone: (url: string) => void) {
-  // reusamos el mismo endpoint; backend lo hará "media"
-  this.uploadingImg.set(true);
-  this.adminApi.uploadImage(file).subscribe({
-    next: (res) => {
-      this.uploadingImg.set(false);
-      onDone(res.url as any);
-      this.toast.success('Archivo subido (guardá para confirmar)');
-    },
-    error: () => {
-      this.uploadingImg.set(false);
-      this.toast.error('No se pudo subir el archivo');
+  toggleEdit(p: Product) {
+    if (this.isEditing(p.id)) {
+      this.cancelEdit();
+    } else {
+      this.startEdit(p);
     }
-  });
-}
-
-onMediaSelected(evt: Event, slot: 1|2|3) {
-  const input = evt.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-
-  // opcional: límite distinto para video
-  const maxMb = file.type.startsWith('video/') ? 50 : 8;
-  if (file.size > maxMb * 1024 * 1024) {
-    this.toast.error(`El archivo supera ${maxMb}MB`);
-    input.value = '';
-    return;
   }
 
-  this.uploadMedia(file, (url) => {
-    if (slot === 1) this.setField('imgUrl', url as any);
-    if (slot === 2) this.setField('imgUrl2', url as any);
-    if (slot === 3) this.setField('imgUrl3', url as any);
-  });
-}
-
-onEditMediaSelected(evt: Event, slot: 1|2|3) {
-  const input = evt.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-
-  const maxMb = file.type.startsWith('video/') ? 50 : 8;
-  if (file.size > maxMb * 1024 * 1024) {
-    this.toast.error(`El archivo supera ${maxMb}MB`);
-    input.value = '';
-    return;
+  private isVideoUrl(url?: string | null): boolean {
+    const u = (url ?? '').toLowerCase();
+    return (
+      u.endsWith('.mp4') ||
+      u.endsWith('.webm') ||
+      u.endsWith('.mov') ||
+      u.endsWith('.m4v') ||
+      u.includes('video')
+    );
   }
 
-  this.uploadMedia(file, (url) => {
-    if (slot === 1) this.setEditField('imgUrl', url as any);
-    if (slot === 2) this.setEditField('imgUrl2', url as any);
-    if (slot === 3) this.setEditField('imgUrl3', url as any);
-  });
-}
+  // para usar desde el HTML
+  isVideo(url?: string | null) {
+    return this.isVideoUrl(url);
+  }
 
+  private uploadMedia(file: File, onDone: (url: string) => void) {
+    // reusamos el mismo endpoint; backend lo hará "media"
+    this.uploadingImg.set(true);
+    this.adminApi.uploadImage(file).subscribe({
+      next: (res) => {
+        this.uploadingImg.set(false);
+        onDone(res.url as any);
+        this.toast.success('Archivo subido (guardá para confirmar)');
+      },
+      error: (err) => {
+        this.uploadingImg.set(false);
 
+        // si backend devuelve {message: "..."}
+        const msg =
+          err?.error?.message ||
+          (err?.status === 413 ? 'El archivo es demasiado grande para subirlo' : null) ||
+          'No se pudo subir el archivo';
+
+        this.toast.error(msg);
+      },
+    });
+  }
+
+  onMediaSelected(evt: Event, slot: 1 | 2 | 3) {
+    const input = evt.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // opcional: límite distinto para video
+    const maxMb = file.type.startsWith('video/') ? 50 : 8;
+    if (file.size > maxMb * 1024 * 1024) {
+      this.toast.error(`El archivo supera ${maxMb}MB`);
+      input.value = '';
+      return;
+    }
+
+    this.uploadMedia(file, (url) => {
+      if (slot === 1) this.setField('imgUrl', url as any);
+      if (slot === 2) this.setField('imgUrl2', url as any);
+      if (slot === 3) this.setField('imgUrl3', url as any);
+    });
+  }
+
+  onEditMediaSelected(evt: Event, slot: 1 | 2 | 3) {
+    const input = evt.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const maxMb = file.type.startsWith('video/') ? 50 : 8;
+    if (file.size > maxMb * 1024 * 1024) {
+      this.toast.error(`El archivo supera ${maxMb}MB`);
+      input.value = '';
+      return;
+    }
+
+    this.uploadMedia(file, (url) => {
+      if (slot === 1) this.setEditField('imgUrl', url as any);
+      if (slot === 2) this.setEditField('imgUrl2', url as any);
+      if (slot === 3) this.setEditField('imgUrl3', url as any);
+    });
+  }
 }

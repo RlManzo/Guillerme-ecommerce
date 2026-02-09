@@ -59,6 +59,17 @@
         <option value="COMBOS">Combos</option>
         <option value="JUGUETERIA">Varios</option>
       </select>
+
+      <select
+          [ngModel]="sortBy()"
+          (ngModelChange)="onSortChange($event)"
+        >
+          <option value="NEWEST">Más nuevo</option>
+          <option value="OLDEST">Más antiguo</option>
+          <option value="AZ">Nombre (A → Z)</option>
+          <option value="ZA">Nombre (Z → A)</option>
+        </select>
+
     </div>
 
     <div style="overflow:auto;">
