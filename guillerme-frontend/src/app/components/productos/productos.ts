@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject, effect } from '@angular/core';
+import { Component, computed, signal, inject, effect, AfterViewInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -23,7 +23,7 @@ type FilterKey = 'all' | 'libreria' | 'combos' | 'jugueteria' | 'bazar';
   templateUrl: './productos.html',
   styleUrl: './productos.scss',
 })
-export class Productos {
+export class Productos implements AfterViewInit{
   private readonly productsService = inject(ProductsService);
   public readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
@@ -49,6 +49,24 @@ export class Productos {
 
     // cargar productos
     this.productsService.load().subscribe();
+  }
+
+  ngAfterViewInit(): void {
+    const el = document.getElementById('staticBackdrop');
+    if (!el) return;
+
+    el.addEventListener('hidden.bs.modal', () => {
+      // 1) limpia el store (por si cerró con X o click afuera)
+      this.store.selectProducto(null);
+
+      // 2) limpia residuos típicos
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
+
+      // 3) elimina backdrops que hayan quedado colgados
+      document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    });
   }
 
   private readonly productsSig = toSignal(this.productsService.products$, {

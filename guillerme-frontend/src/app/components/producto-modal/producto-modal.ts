@@ -22,10 +22,11 @@ export class ProductoModal {
   }
 
   onClose(): void {
-    // para que no quede "pegado" el producto en el modal
-    this.store.selectProducto(null);
-   
-  }
+  this.store.selectProducto(null);
+}
+
+
+
 
   splitInfo(text?: string | null): string[] {
   if (!text) return [];

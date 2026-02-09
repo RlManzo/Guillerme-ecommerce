@@ -40,24 +40,33 @@ function toAbsoluteImgUrl(path?: string | null): string {
 }
 
 export function mapProductFromApi(p: ProductResponseDto): Product {
-  const img = toAbsoluteImgUrl(p.imgUrl);
+  const img1 = toAbsoluteImgUrl(p.imgUrl);
+  const img2 = toAbsoluteImgUrl((p as any).imgUrl2); // si tu dto ya lo tiene, sacá el as any
+  const img3 = toAbsoluteImgUrl((p as any).imgUrl3);
+
+  const imagenes = [img1, img2, img3].filter(Boolean);
 
   return {
     id: p.id,
     nombre: p.nombre,
     descripcionCorta: p.descripcionCorta ?? '',
     infoModal: p.infoModal ?? p.descripcionCorta ?? '',
-    img,
+
+    img: img1,            // para compatibilidad
+    imgUrl: img1,         // ✅
+    imgUrl2: img2 || '',
+    imgUrl3: img3 || '',
+
+    imagenes,             // ✅ thumbs
 
     categorias: parseStringList(p.categorias),
     servicios: parseStringList(p.servicios),
     keywords: parseStringList(p.keywords),
 
     stock: p.stock,
+    precio: Number(p.precio ?? 0),
 
-    imagenes: img ? [img] : [],
     colores: [],
     variantes: [],
-    precio: Number(p.precio ?? 0),
   } as Product;
 }

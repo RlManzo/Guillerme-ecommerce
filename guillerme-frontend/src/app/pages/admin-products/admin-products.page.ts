@@ -177,9 +177,11 @@ export class AdminProductsPage implements OnInit {
     this.page.set(Math.min(this.totalPages(), this.page() + 1));
   }
 
-  ngOnInit(): void {
-    this.productsService.load().subscribe();
-  }
+ ngOnInit(): void {
+  this.showProducts.set(true);
+  this.showForm.set(false);
+  this.productsService.load().subscribe();
+}
 
   toggleForm() {
   const next = !this.showForm();
@@ -212,9 +214,10 @@ export class AdminProductsPage implements OnInit {
    * Si tenés proxy para /uploads, podés dejarlo así (return path).
    * Si no, prefijá con baseUrl del backend.
    */
-  fileUrl(path: string) {
-    return path;
-  }
+  fileUrl(path?: string | null) {
+  return path ?? '';
+}
+
 
   // -----------------------------
   // CREATE (alta simple) DTO real + precio
@@ -279,25 +282,49 @@ export class AdminProductsPage implements OnInit {
     this.setField('keywords', this.toCsv(next) as any);
   }
 
-  onFileSelected(evt: Event) {
-    const input = evt.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+  onFileSelected(evt: Event, slot: 1|2|3) {
+  const input = evt.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
 
-    this.uploadingImg.set(true);
-    this.adminApi.uploadImage(file).subscribe({
-      next: (res) => {
-        this.uploadingImg.set(false);
-        this.setField('imgUrl', res.url as any);
-        this.toast.success('Imagen subida');
-      },
-      error: (e) => {
-        console.error(e);
-        this.uploadingImg.set(false);
-        this.toast.error('No se pudo subir la imagen');
-      },
-    });
-  }
+  this.uploadingImg.set(true);
+  this.adminApi.uploadImage(file).subscribe({
+    next: (res) => {
+      this.uploadingImg.set(false);
+      if (slot === 1) this.setField('imgUrl', res.url as any);
+      if (slot === 2) this.setField('imgUrl2', res.url as any);
+      if (slot === 3) this.setField('imgUrl3', res.url as any);
+      this.toast.success(`Imagen ${slot} subida`);
+    },
+    error: () => {
+      this.uploadingImg.set(false);
+      this.toast.error('No se pudo subir la imagen');
+    }
+  });
+}
+
+onEditFileSelected(evt: Event, slot: 1|2|3) {
+  const input = evt.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  this.uploadingImg.set(true);
+  this.adminApi.uploadImage(file).subscribe({
+    next: (res) => {
+      this.uploadingImg.set(false);
+      if (slot === 1) this.setEditField('imgUrl', res.url as any);
+      if (slot === 2) this.setEditField('imgUrl2', res.url as any);
+      if (slot === 3) this.setEditField('imgUrl3', res.url as any);
+      this.toast.success(`Imagen ${slot} lista (guardá para confirmar)`);
+    },
+    error: () => {
+      this.uploadingImg.set(false);
+      this.toast.error('No se pudo subir la imagen');
+    }
+  });
+}
+
+
 
   saveSingle() {
     const data = this.form();
@@ -328,17 +355,20 @@ export class AdminProductsPage implements OnInit {
           this.toast.success(`Creado #${res.id}`);
 
           this.form.set({
-            nombre: '',
-            descripcionCorta: '',
-            infoModal: '',
-            imgUrl: '',
-            categorias: '',
-            servicios: '',
-            keywords: '',
-            activo: true,
-            stock: 0,
-            precio: 0,
-          });
+              nombre: '',
+              descripcionCorta: '',
+              infoModal: '',
+              imgUrl: '',
+              imgUrl2: '',
+              imgUrl3: '',
+              categorias: '',
+              servicios: '',
+              keywords: '',
+              activo: true,
+              stock: 0,
+              precio: 0,
+            });
+
 
           this.showForm.set(false);
           this.productsService.refresh().subscribe();
@@ -433,6 +463,8 @@ export class AdminProductsPage implements OnInit {
     descripcionCorta: '',
     infoModal: '',
     imgUrl: '',
+    imgUrl2: '',
+    imgUrl3: '',
     categorias: '',
     servicios: '',
     keywords: '',
@@ -452,7 +484,9 @@ export class AdminProductsPage implements OnInit {
       nombre: p.nombre ?? '',
       descripcionCorta: p.descripcionCorta ?? '',
       infoModal: p.infoModal ?? '',
-      imgUrl: (p.img ?? '') as any,
+        imgUrl: p.imgUrl ?? p.img ?? '',
+        imgUrl2: p.imgUrl2 ?? '',
+        imgUrl3: p.imgUrl3 ?? '',
 
       categorias: (p.categorias ?? []).join(', '),
       servicios: (p.servicios ?? []).join(', '),

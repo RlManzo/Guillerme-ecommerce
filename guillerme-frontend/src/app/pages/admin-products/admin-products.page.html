@@ -39,7 +39,9 @@
     <h3 style="margin: 0 0 10px 0;">Productos</h3>
 
     <!-- ✅ BUSCADOR + FILTRO CATEGORIA + PAGE SIZE -->
-    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin: 8px 0 12px;">
+    <div
+      style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin: 8px 0 12px;"
+    >
       <input
         style="min-width:260px;"
         placeholder="Buscar por nombre, descripción, keywords..."
@@ -57,8 +59,6 @@
         <option value="JUGUETERIA">Juguetería</option>
         <option value="BAZAR">Bazar</option>
       </select>
-
-      
     </div>
 
     <div style="overflow:auto;">
@@ -76,10 +76,96 @@
         </thead>
 
         <tbody>
-          <!-- ✅ ahora usamos pagedProducts() -->
           <tr *ngFor="let p of pagedProducts()">
+            <!-- ✅ IMÁGENES (ver / editar) -->
             <td>
-              <img class="thumb img-grid" [src]="fileUrl(p.img)" [alt]="p.nombre" />
+              <ng-container *ngIf="isEditing(p.id); else vImg">
+                <div
+                  style="display:flex; flex-direction:column; gap:8px; min-width: 220px;"
+                >
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:12px; opacity:.8;">Imagen 1</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onEditFileSelected($event, 1)"
+                    />
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:12px; opacity:.8;">Imagen 2</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onEditFileSelected($event, 2)"
+                    />
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:12px; opacity:.8;">Imagen 3</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onEditFileSelected($event, 3)"
+                    />
+                  </div>
+
+                  <div *ngIf="uploadingImg()" style="font-size: 12px; opacity: .8;">
+                    Subiendo imagen...
+                  </div>
+
+                  <!-- ✅ previews de lo que quedó en editRow (aún no guardado) -->
+                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+                    <img
+                      *ngIf="editRow().imgUrl"
+                      class="thumb img-grid"
+                      [src]="fileUrl(editRow().imgUrl)"
+                      [alt]="p.nombre"
+                    />
+                    <img
+                      *ngIf="editRow().imgUrl2"
+                      class="thumb img-grid"
+                      [src]="fileUrl(editRow().imgUrl2)"
+                      [alt]="p.nombre"
+                    />
+                    <img
+                      *ngIf="editRow().imgUrl3"
+                      class="thumb img-grid"
+                      [src]="fileUrl(editRow().imgUrl3)"
+                      [alt]="p.nombre"
+                    />
+                  </div>
+
+                  <div style="font-size:11px; opacity:.7;">
+                    * Subís y luego <b>Guardás</b> para confirmar.
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #vImg>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
+                  <!-- principal (fallback a p.img si no hay imgUrl) -->
+                  <img
+                    class="thumb img-grid"
+                    [src]="fileUrl(p.imgUrl || p.img)"
+                    [alt]="p.nombre"
+                  />
+
+                  <img
+                    *ngIf="p.imgUrl2"
+                    class="thumb img-grid"
+                    [src]="fileUrl(p.imgUrl2)"
+                    [alt]="p.nombre"
+                  />
+
+                  <img
+                    *ngIf="p.imgUrl3"
+                    class="thumb img-grid"
+                    [src]="fileUrl(p.imgUrl3)"
+                    [alt]="p.nombre"
+                  />
+                </div>
+              </ng-template>
             </td>
 
             <td>
@@ -162,20 +248,22 @@
       </table>
 
       <!-- ✅ PAGINADOR -->
-      <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top: 12px;">
-        <select
-        [ngModel]="pageSize()"
-        (ngModelChange)="pageSize.set(+$event); page.set(1)"
+      <div
+        style="display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top: 12px;"
       >
-        <option [ngValue]="5">5 por página</option>
-        <option [ngValue]="10">10 por página</option>
-        <option [ngValue]="20">20 por página</option>
-        <option [ngValue]="50">50 por página</option>
-      </select>
+        <select
+          [ngModel]="pageSize()"
+          (ngModelChange)="pageSize.set(+$event); page.set(1)"
+        >
+          <option [ngValue]="5">5 por página</option>
+          <option [ngValue]="10">10 por página</option>
+          <option [ngValue]="20">20 por página</option>
+          <option [ngValue]="50">50 por página</option>
+        </select>
 
-      <div style="font-size:12px; opacity:.8;">
-        Mostrando {{ pagedProducts().length }} de {{ totalFiltered() }}
-      </div>
+        <div style="font-size:12px; opacity:.8;">
+          Mostrando {{ pagedProducts().length }} de {{ totalFiltered() }}
+        </div>
 
         <button (click)="goPrev()" [disabled]="page() <= 1">Anterior</button>
 
@@ -209,9 +297,15 @@
           />
         </label>
 
+        <!-- ✅ 3 imágenes -->
         <label>
-          <span>Imagen (subir archivo)</span>
-          <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+          <span>Imágenes (hasta 3)</span>
+
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="file" accept="image/*" (change)="onFileSelected($event, 1)" />
+            <input type="file" accept="image/*" (change)="onFileSelected($event, 2)" />
+            <input type="file" accept="image/*" (change)="onFileSelected($event, 3)" />
+          </div>
 
           <div
             *ngIf="uploadingImg()"
@@ -220,17 +314,45 @@
             Subiendo imagen...
           </div>
 
-          <div *ngIf="form().imgUrl" style="margin-top: 8px;">
-            <div style="font-size: 12px; opacity: .8;">Guardada como:</div>
-            <div style="font-size: 12px; word-break: break-all;">
-              {{ form().imgUrl }}
-            </div>
+          <!-- ✅ previews -->
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px;">
+            <ng-container *ngIf="form().imgUrl">
+              <img
+                [src]="fileUrl(form().imgUrl)"
+                alt="preview 1"
+                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+              />
+            </ng-container>
 
-            <img
-              [src]="fileUrl(form().imgUrl ?? '')"
-              alt="preview"
-              style="margin-top:8px; max-width: 180px; border-radius: 8px; border: 1px solid #ddd;"
-            />
+            <ng-container *ngIf="form().imgUrl2">
+              <img
+                [src]="fileUrl(form().imgUrl2)"
+                alt="preview 2"
+                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+              />
+            </ng-container>
+
+            <ng-container *ngIf="form().imgUrl3">
+              <img
+                [src]="fileUrl(form().imgUrl3)"
+                alt="preview 3"
+                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+              />
+            </ng-container>
+          </div>
+
+          <!-- ✅ paths guardados -->
+          <div *ngIf="form().imgUrl" style="margin-top: 8px;">
+            <div style="font-size: 12px; opacity: .8;">Guardadas como:</div>
+            <div style="font-size: 12px; word-break: break-all;">
+              1) {{ form().imgUrl }}
+            </div>
+            <div *ngIf="form().imgUrl2" style="font-size: 12px; word-break: break-all;">
+              2) {{ form().imgUrl2 }}
+            </div>
+            <div *ngIf="form().imgUrl3" style="font-size: 12px; word-break: break-all;">
+              3) {{ form().imgUrl3 }}
+            </div>
           </div>
         </label>
 
@@ -317,17 +439,6 @@
             (ngModelChange)="setField('stock', +$event)"
           />
         </label>
-
-        <!--
-        <label style="display:flex; align-items:center; gap:10px; margin-top: 8px;">
-          <input
-            type="checkbox"
-            [ngModel]="form().activo"
-            (ngModelChange)="setField('activo', $event)"
-          />
-          <span>Activo</span>
-        </label>
-        -->
       </div>
 
       <div class="actions">

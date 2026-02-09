@@ -20,6 +20,9 @@ export interface Product {
   keywords?: string[];            // para buscador (sinónimos)
   stock?: number;
   precio?: number;
+   imgUrl: string;     // o img: string según estés usando
+  imgUrl2?: string;
+  imgUrl3?: string;
 }
 
 

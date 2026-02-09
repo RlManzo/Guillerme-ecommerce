@@ -23,5 +23,9 @@ export function mapProductFromApi(dto: any): Product {
     // si tu Product tiene más campos, dejalos opcionales o mapealos acá
     servicios: splitToList(dto.servicios) as any,  // si lo tenés como array real, mejor adaptarlo
     variantes: [], // si no viene de BD
+    imgUrl: dto.imgUrl ?? dto.img_url ?? '',
+    imgUrl2: dto.imgUrl2 ?? dto.img_url2 ?? '',
+    imgUrl3: dto.imgUrl3 ?? dto.img_url3 ?? '',
+
   } as Product;
 }
