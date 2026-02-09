@@ -224,7 +224,8 @@ export class AdminProductsPage implements OnInit {
     descripcionCorta: '',
     infoModal: '',
     imgUrl: '',
-
+    imgUrl2: '',
+    imgUrl3: '',
     categorias: '',
     servicios: '',
     keywords: '',

@@ -7,7 +7,8 @@ export type CreateProductRequest = {
   descripcionCorta?: string | null;
   infoModal?: string | null;
   imgUrl?: string | null;
-
+  imgUrl2?: string;
+  imgUrl3?: string;
   categorias?: string | null;
   servicios?: string | null;
   keywords?: string | null;
