@@ -2,26 +2,46 @@
   <div class="lks-detail">
     <!-- izquierda -->
     <div class="lks-left">
-      <!-- ✅ Imagen grande cambia con el thumb -->
-      <img
-        class="lks-main-img"
-        [src]="bigImg()"
-        [alt]="producto()!.nombre"
-      />
+  <!-- ✅ contenedor relativo para flechas -->
+  <div class="lks-main-wrap">
+    <img class="lks-main-img" [src]="bigImg()" [alt]="producto()!.nombre" />
 
-      <!-- ✅ Thumbs reales -->
-      <div class="lks-thumbs" *ngIf="imagenes().length > 1">
-  <button
-    class="lks-thumb"
-    type="button"
-    *ngFor="let url of imagenes()"
-    (click)="selectImg(url)"
-    [class.active]="selectedImg() === url"
-  >
-    <img [src]="url" [alt]="producto()!.nombre" />
-  </button>
+    <!-- ✅ flechas (solo si hay más de 1 imagen) -->
+    <button
+      *ngIf="imagenes().length > 1"
+      type="button"
+      class="lks-nav left"
+      (click)="prevImg()"
+      aria-label="Imagen anterior"
+    >
+      ‹
+    </button>
+
+    <button
+      *ngIf="imagenes().length > 1"
+      type="button"
+      class="lks-nav right"
+      (click)="nextImg()"
+      aria-label="Imagen siguiente"
+    >
+      ›
+    </button>
+  </div>
+
+  <!-- ✅ Thumbs -->
+  <div class="lks-thumbs" *ngIf="imagenes().length > 1">
+    <button
+      class="lks-thumb"
+      type="button"
+      *ngFor="let url of imagenes()"
+      (click)="selectImg(url)"
+      [class.active]="bigImg() === url"
+    >
+      <img [src]="url" [alt]="producto()!.nombre" />
+    </button>
+  </div>
 </div>
-    </div>
+
 
     <!-- derecha -->
     <div class="lks-right">

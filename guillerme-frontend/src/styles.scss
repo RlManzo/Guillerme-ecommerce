@@ -3108,3 +3108,38 @@ footer{
   border-radius: 10px;
 }
 
+.lks-main-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lks-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: rgba(255,255,255,.85);
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lks-nav.left  { left: 10px; }
+.lks-nav.right { right: 10px; }
+
+.lks-nav:hover {
+  background: rgba(255,255,255,.98);
+}
+
+.lks-thumb.active {
+  outline: 2px solid rgba(234, 85, 52, .8); // o tu color
+  outline-offset: 2px;
+}
+

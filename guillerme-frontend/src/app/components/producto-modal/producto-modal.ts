@@ -69,4 +69,31 @@ export class ProductoModal {
   // ✅ src real de la imagen grande (selected o fallback)
   readonly bigImg = computed(() => this.selectedImg() || this.mainImg());
 
+ // ✅ índice actual dentro de imagenes()
+  private currentIndex(): number {
+    const imgs = this.imagenes();
+    if (!imgs.length) return -1;
+    const cur = this.bigImg();
+    const idx = imgs.indexOf(cur);
+    return idx >= 0 ? idx : 0;
+  }
+
+  // ✅ ir a la anterior (wrap)
+  prevImg() {
+    const imgs = this.imagenes();
+    if (imgs.length <= 1) return;
+    const idx = this.currentIndex();
+    const next = (idx - 1 + imgs.length) % imgs.length;
+    this.selectedImg.set(imgs[next]);
+  }
+
+  // ✅ ir a la siguiente (wrap)
+  nextImg() {
+    const imgs = this.imagenes();
+    if (imgs.length <= 1) return;
+    const idx = this.currentIndex();
+    const next = (idx + 1) % imgs.length;
+    this.selectedImg.set(imgs[next]);
+  }
+
 }
