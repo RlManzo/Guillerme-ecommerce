@@ -24,11 +24,11 @@
 
       <div style="display:flex; gap:8px; align-items:center;">
         <button (click)="toggleProducts()" class="verProductos">
-          {{ showProducts() ? 'Ocultar productos' : 'Ver productos' }}
+          {{ showProducts() ? 'Ocultar productos X' : 'Ver productos' }}
         </button>
 
         <button class="primary" (click)="toggleForm()">
-          {{ showForm() ? 'Cerrar' : 'Agregar producto' }}
+          {{ showForm() ? 'Cerrar X' : 'Agregar producto +' }}
         </button>
       </div>
     </div>
@@ -53,11 +53,11 @@
         [ngModel]="categoriaFilter()"
         (ngModelChange)="onCategoriaChange($event)"
       >
-        <option value="ALL">Todas las categorías</option>
+        <!-- ✅ mantener igual -->
+        <option value="ALL">Todas</option>
         <option value="LIBRERIA">Librería</option>
         <option value="COMBOS">Combos</option>
-        <option value="JUGUETERIA">Juguetería</option>
-        <option value="BAZAR">Bazar</option>
+        <option value="JUGUETERIA">Varios</option>
       </select>
     </div>
 
@@ -76,88 +76,22 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let p of pagedProducts()">
-            <!-- ✅ IMÁGENES (ver / editar) -->
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vImg">
-                <div
-                  style="display:flex; flex-direction:column; gap:8px; min-width: 220px;"
-                >
-                  <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="font-size:12px; opacity:.8;">Imagen 1</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onEditFileSelected($event, 1)"
-                    />
-                  </div>
-
-                  <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="font-size:12px; opacity:.8;">Imagen 2</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onEditFileSelected($event, 2)"
-                    />
-                  </div>
-
-                  <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="font-size:12px; opacity:.8;">Imagen 3</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      (change)="onEditFileSelected($event, 3)"
-                    />
-                  </div>
-
-                  <div *ngIf="uploadingImg()" style="font-size: 12px; opacity: .8;">
-                    Subiendo imagen...
-                  </div>
-
-                  <!-- ✅ previews de lo que quedó en editRow (aún no guardado) -->
-                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
-                    <img
-                      *ngIf="editRow().imgUrl"
-                      class="thumb img-grid"
-                      [src]="fileUrl(editRow().imgUrl)"
-                      [alt]="p.nombre"
-                    />
-                    <img
-                      *ngIf="editRow().imgUrl2"
-                      class="thumb img-grid"
-                      [src]="fileUrl(editRow().imgUrl2)"
-                      [alt]="p.nombre"
-                    />
-                    <img
-                      *ngIf="editRow().imgUrl3"
-                      class="thumb img-grid"
-                      [src]="fileUrl(editRow().imgUrl3)"
-                      [alt]="p.nombre"
-                    />
-                  </div>
-
-                  <div style="font-size:11px; opacity:.7;">
-                    * Subís y luego <b>Guardás</b> para confirmar.
-                  </div>
-                </div>
-              </ng-container>
-
-              <ng-template #vImg>
+          <ng-container *ngFor="let p of pagedProducts(); trackBy: trackById">
+            <!-- FILA NORMAL (solo lectura) -->
+            <tr>
+              <td>
                 <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
-                  <!-- principal (fallback a p.img si no hay imgUrl) -->
                   <img
                     class="thumb img-grid"
                     [src]="fileUrl(p.imgUrl || p.img)"
                     [alt]="p.nombre"
                   />
-
                   <img
                     *ngIf="p.imgUrl2"
                     class="thumb img-grid"
                     [src]="fileUrl(p.imgUrl2)"
                     [alt]="p.nombre"
                   />
-
                   <img
                     *ngIf="p.imgUrl3"
                     class="thumb img-grid"
@@ -165,85 +99,228 @@
                     [alt]="p.nombre"
                   />
                 </div>
-              </ng-template>
-            </td>
+              </td>
 
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vNombre">
-                <input
-                  [ngModel]="editRow().nombre"
-                  (ngModelChange)="setEditField('nombre', $event)"
-                />
-              </ng-container>
-              <ng-template #vNombre>{{ p.nombre }}</ng-template>
-            </td>
+              <td>{{ p.nombre }}</td>
+              <td>{{ p.descripcionCorta }}</td>
+              <td>{{ (p.keywords ?? []).join(', ') || '-' }}</td>
+              <td>{{ p.stock ?? 0 }}</td>
+              <td>{{ (p.precio ?? 0) | number:'1.2-2' }}</td>
 
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vDesc">
-                <input
-                  [ngModel]="editRow().descripcionCorta"
-                  (ngModelChange)="setEditField('descripcionCorta', $event)"
-                />
-              </ng-container>
-              <ng-template #vDesc>{{ p.descripcionCorta }}</ng-template>
-            </td>
-
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vKw">
-                <input
-                  placeholder="kw1, kw2, kw3"
-                  [ngModel]="editRow().keywords"
-                  (ngModelChange)="setEditField('keywords', $event)"
-                />
-              </ng-container>
-              <ng-template #vKw>{{ (p.keywords ?? []).join(', ') || '-' }}</ng-template>
-            </td>
-
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vStock">
-                <input
-                  type="number"
-                  min="0"
-                  style="width: 90px;"
-                  [ngModel]="editRow().stock"
-                  (ngModelChange)="setEditField('stock', +$event)"
-                />
-              </ng-container>
-              <ng-template #vStock>{{ p.stock ?? 0 }}</ng-template>
-            </td>
-
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vPrecio">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  style="width: 110px;"
-                  [ngModel]="editRow().precio"
-                  (ngModelChange)="setEditField('precio', +$event)"
-                />
-              </ng-container>
-              <ng-template #vPrecio>{{ (p.precio ?? 0) | number:'1.2-2' }}</ng-template>
-            </td>
-
-            <td>
-              <ng-container *ngIf="isEditing(p.id); else vBtns">
-                <button (click)="cancelEdit()">Cancelar</button>
-                <button
-                  class="primary"
-                  (click)="saveEdit(p.id)"
-                  [disabled]="savingRow()"
-                >
-                  {{ savingRow() ? 'Guardando...' : 'Guardar' }}
+              <td style="display:flex; justify-content:space-between; gap:8px;">
+                <button (click)="toggleEdit(p)" class="btn btn-primary">
+                  {{ isEditing(p.id) ? 'Cerrar' : 'Modificar' }}
                 </button>
-              </ng-container>
+                <button class="btn btn-danger" (click)="remove(p.id)">Eliminar</button>
+              </td>
+            </tr>
 
-              <ng-template #vBtns>
-                <button (click)="startEdit(p)">Modificar</button>
-                <button class="danger" (click)="remove(p.id)">Eliminar</button>
-              </ng-template>
-            </td>
-          </tr>
+            <!-- FILA DESPLEGABLE (editor) -->
+            <tr *ngIf="isEditing(p.id)">
+              <td colspan="7">
+                <div class="row-editor">
+                  <div class="row-editor__top">
+                    <div class="row-editor__title">
+                      Editando: <b>{{ p.nombre }}</b>
+                    </div>
+
+                    <div class="row-editor__actions">
+                      <button (click)="cancelEdit()" class="btn btn-secondary">
+                        Cancelar
+                      </button>
+                      <button
+                        class="btn btn-success"
+                        (click)="saveEdit(p.id)"
+                        [disabled]="savingRow()"
+                      >
+                        {{ savingRow() ? 'Guardando...' : 'Guardar' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="row-editor__grid">
+                    <!-- MEDIA (imagen o video) -->
+                    <div class="row-editor__block">
+                      <div class="row-editor__label">Media (imagen o video)</div>
+
+                      <div class="row-editor__uploads">
+                        <label>
+                          <span>Archivo 1</span>
+                          <!-- ✅ edición: onEditMediaSelected -->
+                          <input
+                            type="file"
+                            accept="image/*,video/*"
+                            (change)="onEditMediaSelected($event, 1)"
+                          />
+                        </label>
+
+                        <label>
+                          <span>Archivo 2</span>
+                          <input
+                            type="file"
+                            accept="image/*,video/*"
+                            (change)="onEditMediaSelected($event, 2)"
+                          />
+                        </label>
+
+                        <label>
+                          <span>Archivo 3</span>
+                          <input
+                            type="file"
+                            accept="image/*,video/*"
+                            (change)="onEditMediaSelected($event, 3)"
+                          />
+                        </label>
+
+                        <div *ngIf="uploadingImg()" class="row-editor__hint">
+                          Subiendo archivo...
+                        </div>
+                      </div>
+
+                      <!-- ✅ previews: img o video -->
+                      <div class="row-editor__previews">
+                        <ng-container *ngIf="editRow().imgUrl as e1">
+                          <ng-container *ngIf="!isVideo(e1); else ev1">
+                            <img
+                              class="thumb img-grid"
+                              [src]="fileUrl(e1)"
+                              [alt]="p.nombre"
+                            />
+                          </ng-container>
+                          <ng-template #ev1>
+                            <video
+                              class="thumb img-grid"
+                              [src]="fileUrl(e1)"
+                              controls
+                              muted
+                              playsinline
+                            ></video>
+                          </ng-template>
+                        </ng-container>
+
+                        <ng-container *ngIf="editRow().imgUrl2 as e2">
+                          <ng-container *ngIf="!isVideo(e2); else ev2">
+                            <img
+                              class="thumb img-grid"
+                              [src]="fileUrl(e2)"
+                              [alt]="p.nombre"
+                            />
+                          </ng-container>
+                          <ng-template #ev2>
+                            <video
+                              class="thumb img-grid"
+                              [src]="fileUrl(e2)"
+                              controls
+                              muted
+                              playsinline
+                            ></video>
+                          </ng-template>
+                        </ng-container>
+
+                        <ng-container *ngIf="editRow().imgUrl3 as e3">
+                          <ng-container *ngIf="!isVideo(e3); else ev3">
+                            <img
+                              class="thumb img-grid"
+                              [src]="fileUrl(e3)"
+                              [alt]="p.nombre"
+                            />
+                          </ng-container>
+                          <ng-template #ev3>
+                            <video
+                              class="thumb img-grid"
+                              [src]="fileUrl(e3)"
+                              controls
+                              muted
+                              playsinline
+                            ></video>
+                          </ng-template>
+                        </ng-container>
+                      </div>
+
+                      <div class="row-editor__hint">
+                        * Subís y luego <b>Guardás</b> para confirmar.
+                      </div>
+                    </div>
+
+                    <!-- CAMPOS -->
+                    <div class="row-editor__fields">
+                      <label>
+                        <span>Nombre</span>
+                        <input
+                          [ngModel]="editRow().nombre"
+                          (ngModelChange)="setEditField('nombre', $event)"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Descripción corta</span>
+                        <input
+                          [ngModel]="editRow().descripcionCorta"
+                          (ngModelChange)="setEditField('descripcionCorta', $event)"
+                        />
+                      </label>
+
+                      <label class="full">
+                        <span>Info Modal (larga)</span>
+                        <textarea
+                          rows="3"
+                          [ngModel]="editRow().infoModal"
+                          (ngModelChange)="setEditField('infoModal', $event)"
+                        ></textarea>
+                      </label>
+
+                      <label class="full">
+                        <span>Keywords (csv)</span>
+                        <input
+                          placeholder="kw1, kw2, kw3"
+                          [ngModel]="editRow().keywords"
+                          (ngModelChange)="setEditField('keywords', $event)"
+                        />
+                      </label>
+
+                      <!-- ✅ edición: categoria apunta a editRow + setEditField -->
+                      <label class="full">
+                        <span>Categoría</span>
+                        <select
+                          [ngModel]="editRow().categorias"
+                          (ngModelChange)="setEditField('categorias', $event)"
+                        >
+                          <option value="" disabled>Seleccioná una categoría</option>
+                          <option value="Libreria">Libreria</option>
+                          <option value="combos">Combos</option>
+                          <option value="jugueteria">Varios</option>
+                        </select>
+                        <div style="font-size: 12px; opacity: .7; margin-top: 6px;">
+                          Se guarda en <b>categorias</b> como texto (MVP).
+                        </div>
+                      </label>
+
+                      <label>
+                        <span>Stock</span>
+                        <input
+                          type="number"
+                          min="0"
+                          [ngModel]="editRow().stock"
+                          (ngModelChange)="setEditField('stock', +$event)"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Precio</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          [ngModel]="editRow().precio"
+                          (ngModelChange)="setEditField('precio', +$event)"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
 
@@ -277,12 +354,9 @@
   </section>
 
   <div class="tabs">
-    <button (click)="tab.set('single')" [class.active]="tab() === 'single'">
-      Producto nuevo
+    <button (click)="toggleForm()" [class.active]="tab() === 'single'">
+      Producto nuevo +
     </button>
-    <!-- <button (click)="tab.set('bulk')" [class.active]="tab() === 'bulk'">
-      Carga masiva
-    </button>-->
   </div>
 
   <!-- SINGLE -->
@@ -297,47 +371,81 @@
           />
         </label>
 
-        <!-- ✅ 3 imágenes -->
+        <!-- ✅ 3 slots media (imagen o video) -->
         <label>
-          <span>Imágenes (hasta 3)</span>
+          <span>Media (hasta 3) · imagen o video</span>
 
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <input type="file" accept="image/*" (change)="onFileSelected($event, 1)" />
-            <input type="file" accept="image/*" (change)="onFileSelected($event, 2)" />
-            <input type="file" accept="image/*" (change)="onFileSelected($event, 3)" />
+            <!-- ✅ alta: onMediaSelected -->
+            <input type="file" accept="image/*,video/*" (change)="onMediaSelected($event, 1)" />
+            <input type="file" accept="image/*,video/*" (change)="onMediaSelected($event, 2)" />
+            <input type="file" accept="image/*,video/*" (change)="onMediaSelected($event, 3)" />
           </div>
 
           <div
             *ngIf="uploadingImg()"
             style="font-size: 12px; opacity: .8; margin-top: 6px;"
           >
-            Subiendo imagen...
+            Subiendo archivo...
           </div>
 
-          <!-- ✅ previews -->
+          <!-- ✅ previews (img o video) -->
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px;">
-            <ng-container *ngIf="form().imgUrl">
-              <img
-                [src]="fileUrl(form().imgUrl)"
-                alt="preview 1"
-                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
-              />
+            <ng-container *ngIf="form().imgUrl as u1">
+              <ng-container *ngIf="!isVideo(u1); else fv1">
+                <img
+                  [src]="fileUrl(u1)"
+                  alt="preview 1"
+                  style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+                />
+              </ng-container>
+              <ng-template #fv1>
+                <video
+                  [src]="fileUrl(u1)"
+                  controls
+                  muted
+                  playsinline
+                  style="max-width: 180px; border-radius: 8px; border: 1px solid #ddd;"
+                ></video>
+              </ng-template>
             </ng-container>
 
-            <ng-container *ngIf="form().imgUrl2">
-              <img
-                [src]="fileUrl(form().imgUrl2)"
-                alt="preview 2"
-                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
-              />
+            <ng-container *ngIf="form().imgUrl2 as u2">
+              <ng-container *ngIf="!isVideo(u2); else fv2">
+                <img
+                  [src]="fileUrl(u2)"
+                  alt="preview 2"
+                  style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+                />
+              </ng-container>
+              <ng-template #fv2>
+                <video
+                  [src]="fileUrl(u2)"
+                  controls
+                  muted
+                  playsinline
+                  style="max-width: 180px; border-radius: 8px; border: 1px solid #ddd;"
+                ></video>
+              </ng-template>
             </ng-container>
 
-            <ng-container *ngIf="form().imgUrl3">
-              <img
-                [src]="fileUrl(form().imgUrl3)"
-                alt="preview 3"
-                style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
-              />
+            <ng-container *ngIf="form().imgUrl3 as u3">
+              <ng-container *ngIf="!isVideo(u3); else fv3">
+                <img
+                  [src]="fileUrl(u3)"
+                  alt="preview 3"
+                  style="max-width: 120px; border-radius: 8px; border: 1px solid #ddd;"
+                />
+              </ng-container>
+              <ng-template #fv3>
+                <video
+                  [src]="fileUrl(u3)"
+                  controls
+                  muted
+                  playsinline
+                  style="max-width: 180px; border-radius: 8px; border: 1px solid #ddd;"
+                ></video>
+              </ng-template>
             </ng-container>
           </div>
 
@@ -373,7 +481,7 @@
           ></textarea>
         </label>
 
-        <!-- ✅ CATEGORÍA: desplegable -->
+        <!-- ✅ CATEGORÍA: desplegable (alta) -->
         <label class="full">
           <span>Categoría</span>
           <select
@@ -382,9 +490,8 @@
           >
             <option value="" disabled>Seleccioná una categoría</option>
             <option value="Libreria">Libreria</option>
-            <option value="combos">combos</option>
-            <option value="jugueteria">jugueteria</option>
-            <option value="bazar">bazar</option>
+            <option value="combos">Combos</option>
+            <option value="jugueteria">Varios</option>
           </select>
           <div style="font-size: 12px; opacity: .7; margin-top: 6px;">
             Se guarda en <b>categorias</b> como texto (MVP).

@@ -13,7 +13,7 @@ import { ProductsService } from '../../components/productos/products.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../components/productos/product.model';
 
-type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'JUGUETERIA' | 'BAZAR';
+type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
 
 @Component({
   standalone: true,
@@ -51,7 +51,7 @@ export class AdminProductsPage implements OnInit {
   // =========================
   // Catálogos UI (alta simple)
   // =========================
-  readonly categoriasOpts = ['Libreria', 'combos', 'jugueteria', 'bazar'] as const;
+  readonly categoriasOpts = ['Libreria', 'combos', 'varios'] as const;
 
   // ✅ Lista de keywords disponibles (editá cuando quieras)
   readonly keywordsOpts = [
@@ -119,9 +119,9 @@ export class AdminProductsPage implements OnInit {
           ? 'libreria'
           : cat === 'COMBOS'
             ? 'combos'
-            : cat === 'JUGUETERIA'
-              ? 'jugueteria'
-              : 'bazar';
+            : cat === 'VARIOS'
+              ? 'varios'
+              : 'libreria';
 
     return all.filter((p) => {
       const okSearch = !q || this.productText(p).includes(q);
@@ -372,6 +372,7 @@ onEditFileSelected(evt: Event, slot: 1|2|3) {
 
           this.showForm.set(false);
           this.productsService.refresh().subscribe();
+          this.toggleProducts();
         },
         error: (e) => {
           this.loading.set(false);
@@ -561,4 +562,87 @@ onEditFileSelected(evt: Event, slot: 1|2|3) {
       },
     });
   }
+
+  trackById = (_: number, p: Product) => p.id;
+
+toggleEdit(p: Product) {
+  if (this.isEditing(p.id)) {
+    this.cancelEdit();
+  } else {
+    this.startEdit(p);
+  }
+}
+
+private isVideoUrl(url?: string | null): boolean {
+  const u = (url ?? '').toLowerCase();
+  return (
+    u.endsWith('.mp4') ||
+    u.endsWith('.webm') ||
+    u.endsWith('.mov') ||
+    u.endsWith('.m4v') ||
+    u.includes('video')
+  );
+}
+
+// para usar desde el HTML
+isVideo(url?: string | null) {
+  return this.isVideoUrl(url);
+}
+
+private uploadMedia(file: File, onDone: (url: string) => void) {
+  // reusamos el mismo endpoint; backend lo hará "media"
+  this.uploadingImg.set(true);
+  this.adminApi.uploadImage(file).subscribe({
+    next: (res) => {
+      this.uploadingImg.set(false);
+      onDone(res.url as any);
+      this.toast.success('Archivo subido (guardá para confirmar)');
+    },
+    error: () => {
+      this.uploadingImg.set(false);
+      this.toast.error('No se pudo subir el archivo');
+    }
+  });
+}
+
+onMediaSelected(evt: Event, slot: 1|2|3) {
+  const input = evt.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  // opcional: límite distinto para video
+  const maxMb = file.type.startsWith('video/') ? 50 : 8;
+  if (file.size > maxMb * 1024 * 1024) {
+    this.toast.error(`El archivo supera ${maxMb}MB`);
+    input.value = '';
+    return;
+  }
+
+  this.uploadMedia(file, (url) => {
+    if (slot === 1) this.setField('imgUrl', url as any);
+    if (slot === 2) this.setField('imgUrl2', url as any);
+    if (slot === 3) this.setField('imgUrl3', url as any);
+  });
+}
+
+onEditMediaSelected(evt: Event, slot: 1|2|3) {
+  const input = evt.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const maxMb = file.type.startsWith('video/') ? 50 : 8;
+  if (file.size > maxMb * 1024 * 1024) {
+    this.toast.error(`El archivo supera ${maxMb}MB`);
+    input.value = '';
+    return;
+  }
+
+  this.uploadMedia(file, (url) => {
+    if (slot === 1) this.setEditField('imgUrl', url as any);
+    if (slot === 2) this.setEditField('imgUrl2', url as any);
+    if (slot === 3) this.setEditField('imgUrl3', url as any);
+  });
+}
+
+
 }
