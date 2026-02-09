@@ -1,4 +1,4 @@
-<div class="container py-4 orders-page">
+<div class="container py-4 orders-page" style="position: relative !important; top: 50px !important;">
   <div class="admin-header">
     <h1>Pedidos · Admin</h1>
   </div>
@@ -69,11 +69,11 @@
         <button class="btn btn-primary" type="button" (click)="applyFilters()">
           Buscar
         </button>
-        <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">
+        <button class="btn btn-secondary" type="button" (click)="resetFilters()">
           Limpiar
         </button>
-        <button class="btn btn-outline-secondary" type="button" (click)="refresh()">
-          Refrescar
+        <button class="btn btn-warning" type="button" (click)="refresh()">
+          Recargar
         </button>
       </div>
 
@@ -151,7 +151,7 @@
       <div class="card" *ngIf="selected(); else emptyDetail">
         <div class="card-header d-flex justify-content-between align-items-center">
           <span>Detalle pedido nro#{{ selected()!.id }}</span>
-          <button class="btn btn-sm btn-outline-secondary" type="button" (click)="closeDetail()">
+          <button class="btn btn-sm btn-danger" type="button" (click)="closeDetail()">
             Cerrar
           </button>
         </div>
@@ -178,7 +178,7 @@
             </div>
 
             <button
-              class="btn btn-primary"
+              class="btn btn-success"
               type="button"
               (click)="saveStatus()"
               [disabled]="savingStatus()"
