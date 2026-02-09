@@ -116,7 +116,7 @@
               <td>{{ p.descripcionCorta }}</td>
               <td>{{ (p.keywords ?? []).join(', ') || '-' }}</td>
               <td>{{ p.stock ?? 0 }}</td>
-              <td>{{ (p.precio ?? 0) | number:'1.2-2' }}</td>
+              <td>${{ (p.precio ?? 0) | number:'1.2-2' }}</td>
 
               <td style="display:flex; justify-content:space-between; gap:8px;">
                 <button (click)="toggleEdit(p)" class="btn btn-primary">
