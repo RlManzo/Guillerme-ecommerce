@@ -18,19 +18,20 @@ export class ProductoModal {
   readonly selectedImg = signal<string>('');
 
   // ✅ lista de imágenes disponibles (1..3)
-  readonly imagenes = computed(() => {
+    readonly imagenes = computed(() => {
     const p: any = this.producto();
     if (!p) return [];
 
     const list = [
-      p.imgUrl ?? p.img ?? '',
-      p.imgUrl2 ?? '',
-      p.imgUrl3 ?? '',
+      ...(Array.isArray(p.imagenes) ? p.imagenes : []),
+      p.imgUrl,
+      p.imgUrl2,
+      p.imgUrl3,
+      p.img,
     ]
       .map((x: any) => String(x ?? '').trim())
       .filter(Boolean);
 
-    // quitar duplicados por las dudas
     return Array.from(new Set(list));
   });
 
@@ -63,4 +64,14 @@ export class ProductoModal {
       .map((s) => s.trim())
       .filter(Boolean);
   }
+
+    // ✅ imagen principal (fallback seguro para el template)
+  readonly mainImg = computed(() => {
+    const imgs = this.imagenes();
+    return imgs[0] ?? '';
+  });
+
+  // ✅ src real de la imagen grande (selected o fallback)
+  readonly bigImg = computed(() => this.selectedImg() || this.mainImg());
+
 }

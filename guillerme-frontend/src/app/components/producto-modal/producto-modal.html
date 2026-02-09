@@ -2,34 +2,36 @@
   <div class="lks-detail">
     <!-- izquierda -->
     <div class="lks-left">
+      <!-- ✅ Imagen grande cambia con el thumb -->
       <img
         class="lks-main-img"
-        [src]="selectedImg() || producto()!.img"
+        [src]="bigImg()"
         [alt]="producto()!.nombre"
       />
 
+      <!-- ✅ Thumbs reales -->
       <div class="lks-thumbs" *ngIf="imagenes().length > 1">
-        <button
-          class="lks-thumb"
-          type="button"
-          *ngFor="let img of imagenes()"
-          (click)="selectImg(img)"
-          [attr.aria-label]="'Ver imagen ' + img"
-          [class.active]="selectedImg() === img"
-        >
-          <img [src]="img" [alt]="producto()!.nombre" />
-        </button>
-      </div>
+  <button
+    class="lks-thumb"
+    type="button"
+    *ngFor="let url of imagenes()"
+    (click)="selectImg(url)"
+    [class.active]="selectedImg() === url"
+  >
+    <img [src]="url" [alt]="producto()!.nombre" />
+  </button>
+</div>
     </div>
-
 
     <!-- derecha -->
     <div class="lks-right">
       <h2 class="lks-title">{{ producto()!.nombre }}</h2>
       <div class="lks-underline"></div>
 
-      <!-- si infoModal te viene como texto con saltos / bullets, lo mostramos prolijo -->
-      <ul class="lks-bullets" *ngIf="splitInfo(producto()!.infoModal).length; else sinBullets">
+      <ul
+        class="lks-bullets"
+        *ngIf="splitInfo(producto()!.infoModal).length; else sinBullets"
+      >
         <li *ngFor="let it of splitInfo(producto()!.infoModal)">{{ it }}</li>
       </ul>
 
@@ -40,40 +42,40 @@
       <div class="lks-row">
         <div class="lks-label">Categoría:</div>
         <div class="lks-value">
-          {{ (producto()!.categorias?.length ? producto()!.categorias!.join(', ') : '-') }}
+          {{
+            producto()!.categorias?.length
+              ? producto()!.categorias!.join(', ')
+              : '-'
+          }}
         </div>
       </div>
 
       <div class="lks-chips" *ngIf="producto()!.keywords?.length">
-        <span class="lks-chip" *ngFor="let k of producto()!.keywords">{{ k }}</span>
+        <span class="lks-chip" *ngFor="let k of producto()!.keywords">
+          {{ k }}
+        </span>
       </div>
 
       <div class="lks-row">
-  <div class="lks-label">Precio:</div>
-  <div class="lks-value">{{ producto()!.precio ?? 0 | currency:'ARS':'symbol':'1.0-0' }}</div>
-</div>
+        <div class="lks-label">Precio:</div>
+        <div class="lks-value">
+          {{ (producto()!.precio ?? 0) | currency:'ARS':'symbol':'1.0-0' }}
+        </div>
+      </div>
 
-<div class="lks-row">
-  <div class="lks-label">Stock:</div>
-  <div class="lks-value">{{ producto()!.stock ?? 0 }}</div>
-</div>
-
-
+      <div class="lks-row">
+        <div class="lks-label">Stock:</div>
+        <div class="lks-value">{{ producto()!.stock ?? 0 }}</div>
+      </div>
 
       <div class="lks-actions">
         <button class="lks-btn primary" type="button" (click)="onAgregar()">
           AGREGAR
         </button>
 
-        <button
-          class="lks-btn secondary"
-          type="button"
-          data-bs-dismiss="modal"
-          (click)="onClose()"
-        >
+        <button class="lks-btn secondary" type="button" (click)="onClose()">
           CANCELAR
         </button>
-
       </div>
     </div>
   </div>
