@@ -1,6 +1,7 @@
 import { Component, inject, computed, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShopStore } from '../../shared/store/shop.store';
+import { ToastService } from '../../shared/service/toast.service';
 
 @Component({
   selector: 'app-producto-modal',
@@ -10,6 +11,7 @@ import { ShopStore } from '../../shared/store/shop.store';
 })
 export class ProductoModal {
   readonly store = inject(ShopStore);
+  private readonly toast = inject(ToastService);
 
   // signal readonly desde el store
   readonly producto = this.store.selected;
@@ -46,6 +48,7 @@ export class ProductoModal {
     const p = this.producto();
     if (!p) return;
     this.store.addToCart(p);
+    this.toast.success('Producto agregado al carrito');
   }
 
   onClose(): void {
