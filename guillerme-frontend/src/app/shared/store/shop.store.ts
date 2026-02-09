@@ -18,6 +18,8 @@ export interface Producto {
   keywords?: string[];     // desde BD
   stock?: number;
   precio?: number;
+
+  imagenes?: string[];
 }
 
 export interface CartItem {

@@ -187,20 +187,23 @@ export class Productos implements AfterViewInit{
     info: p.descripcionCorta ?? '',
     infoModal: p.infoModal ?? p.descripcionCorta ?? '',
 
-    cat: /* tu lógica */ 'all',
+    cat: 'all',
 
     categoria1: (p.servicios?.[0] as any) ?? '',
     categoria2: (p.servicios?.[1] as any) ?? '',
     detalle1: p.variantes?.[0]?.label ?? '',
     detalle2: p.variantes?.[1]?.label ?? '',
 
-    // ✅ nuevos (para modal)
     categorias: p.categorias ?? [],
     keywords: p.keywords ?? [],
     stock: p.stock ?? 0,
     precio: p.precio ?? 0,
+
+    // ✅ CLAVE
+    imagenes: p.imagenes ?? [p.img].filter(Boolean),
   };
 }
+
 
 
 

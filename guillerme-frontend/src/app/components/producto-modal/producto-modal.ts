@@ -19,21 +19,16 @@ export class ProductoModal {
 
   // ✅ lista de imágenes disponibles (1..3)
     readonly imagenes = computed(() => {
-    const p: any = this.producto();
-    if (!p) return [];
+  const p = this.producto();
+  if (!p) return [];
 
-    const list = [
-      ...(Array.isArray(p.imagenes) ? p.imagenes : []),
-      p.imgUrl,
-      p.imgUrl2,
-      p.imgUrl3,
-      p.img,
-    ]
-      .map((x: any) => String(x ?? '').trim())
-      .filter(Boolean);
+  const list = (p.imagenes ?? [p.img])
+    .map(x => String(x ?? '').trim())
+    .filter(Boolean);
 
-    return Array.from(new Set(list));
-  });
+  return Array.from(new Set(list));
+});
+
 
   constructor() {
     // ✅ cuando cambia el producto, seteo por default la primera imagen
