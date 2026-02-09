@@ -1,4 +1,5 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, HostListener, computed } from '@angular/core';
+
 import { CommonModule, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Header } from '../header/header';
@@ -28,18 +29,15 @@ export class Navbar {
   // ✅ nuevo: solo admin
   isAdmin = this.auth.isAdmin;
 
-  @HostListener('document:click')
-  onDocClick() {
-    this.closeUserMenu();
-  }
-
   toggleMenu() {
-    this.menuOpen.update((v) => !v);
-  }
+  this.menuOpen.update((v) => !v);
+  if (!this.menuOpen()) this.productsOpen.set(false);
+}
 
-  closeMenu() {
-    this.menuOpen.set(false);
-  }
+closeMenu() {
+  this.menuOpen.set(false);
+  this.productsOpen.set(false);
+}
 
   openCart() {
     this.store.openCart();
@@ -76,4 +74,38 @@ export class Navbar {
     this.closeMenu();
     this.router.navigateByUrl('/admin/products');
   }
+
+  readonly productsOpen = signal(false);
+
+openProductsMenu() {
+  // Solo hover en desktop
+  if (window.innerWidth > 768) this.productsOpen.set(true);
+}
+
+closeProductsMenu() {
+  if (window.innerWidth > 768) this.productsOpen.set(false);
+}
+
+
+toggleProductsMenu(ev: MouseEvent) {
+  // en desktop el hover manda, no el click
+  if (window.innerWidth > 768) return;
+
+  ev.preventDefault();
+  ev.stopPropagation();
+  this.productsOpen.update(v => !v);
+}
+
+closeAllMenus() {
+  this.productsOpen.set(false);
+  this.closeUserMenu();
+  this.closeMenu();
+}
+
+@HostListener('document:click')
+onDocClick() {
+  this.productsOpen.set(false);
+  this.closeUserMenu();
+}
+
 }

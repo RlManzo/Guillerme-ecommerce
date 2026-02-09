@@ -3,7 +3,8 @@
 
     <!-- Buscador -->
     <section class="col-12 mt-5 mb-4 box-header-buscador">
-      <form class="form-buscador" (submit)="$event.preventDefault();">
+      <form class="form-buscador" (submit)="$event.preventDefault();" (click)="$event.stopPropagation()">
+
         <input
           type="text"
           placeholder="  ¿Qué estas buscando?"
@@ -11,6 +12,7 @@
           [value]="query"
           (input)="onInput($event)"
           (focus)="openResults()"
+          (click)="$event.stopPropagation()"
         />
 
         <i class="iconInput">
@@ -23,7 +25,7 @@
         <div
           class="card shadow-sm buscadorContainer"
           *ngIf="resultsOpen"
-          style="opacity: 1;"
+          (click)="$event.stopPropagation()"
         >
           <button type="button" class="btn-close" aria-label="Close" (click)="closeResults()"></button>
 

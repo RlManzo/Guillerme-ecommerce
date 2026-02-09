@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ProductsService } from '../productos/products.service'; // <-- ajustá path
@@ -46,8 +46,8 @@ export class Header {
   }
 
   openResults() {
-    this.resultsOpen = true;
-  }
+  this.resultsOpen = this.query.trim().length > 0;
+}
 
   closeResults() {
     this.resultsOpen = false;
@@ -84,4 +84,9 @@ export class Header {
       detalle2: p.variantes?.[1]?.label ?? '',
     } as unknown as Producto;
   }
+
+  @HostListener('document:click')
+onDocClick() {
+  this.closeResults();
+}
 }

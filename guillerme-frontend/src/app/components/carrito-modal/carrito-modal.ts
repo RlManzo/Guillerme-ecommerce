@@ -5,6 +5,8 @@ import { ShopStore } from '../../shared/store/shop.store';
 import { OrdersService } from '../../shared/orders/orders.service';
 import { AuthService } from '../../shared/auth/auth.service';
 import { ToastService } from '../../shared/service/toast.service';
+import { MatDialog } from '@angular/material/dialog';
+import { OrderSuccessDialogComponent } from './order-success-dialog';
 
 @Component({
   selector: 'app-carrito-modal',
@@ -19,6 +21,8 @@ export class CarritoModal {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+
+  private readonly dialog = inject(MatDialog);
 
   readonly hasItems = computed(() => this.store.cartCount() > 0);
   readonly sending = signal(false);
@@ -36,43 +40,56 @@ export class CarritoModal {
   }
 
   completarCompra() {
-    // 1) cerrar modal bootstrap
-    this.hideBootstrapModal();
 
-    // 2) si no está logueado -> login
-    if (!this.auth.isLogged()) {
-      this.toast.error('Iniciá sesión para completar la compra');
-      this.router.navigateByUrl('/login');
-      return;
-    }
-
-    // 3) armar payload desde el carrito
-    const cart = this.store.cart();
-    if (!cart.length) return;
-
-    const body = {
-      items: cart.map((it) => ({
-        productId: it.producto.id,
-        qty: it.cantidad,
-      })),
-      comment: null,
-    };
-
-    // 4) llamar checkout
-    this.sending.set(true);
-    this.orders.checkout(body).subscribe({
-      next: (res) => {
-        this.sending.set(false);
-        this.store.clearCart();
-        this.toast.success(`Pedido #${res.orderId} enviado. Te contactaremos pronto.`);
-      },
-      error: (e) => {
-        console.error(e);
-        this.sending.set(false);
-        this.toast.error('No se pudo completar la compra. Probá de nuevo.');
-      },
-    });
+  // si no está logueado -> login
+  if (!this.auth.isLogged()) {
+    this.toast.error('Iniciá sesión para completar la compra');
+    this.router.navigateByUrl('/login');
+    return;
   }
+
+  // armar payload desde el carrito
+  const cart = this.store.cart();
+  if (!cart.length) return;
+
+  const body = {
+    items: cart.map((it) => ({
+      productId: it.producto.id,
+      qty: it.cantidad,
+    })),
+    comment: null,
+  };
+
+  // llamar checkout
+  this.sending.set(true);
+  this.orders.checkout(body).subscribe({
+    next: (res) => {
+      this.sending.set(false);
+      this.store.clearCart();
+
+      this.close();
+
+      // ✅ cartel Angular Material
+      this.dialog.open(OrderSuccessDialogComponent, {
+        width: '520px',
+        maxWidth: '92vw',
+        data: {
+          message:
+            '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recorda que nos estaremos comunicando con usted por WhatsApp para completar el pago y acordar el envío solo desde este numero: .',
+        },
+      });
+
+      // (opcional) si querés mantener un toast corto:
+       this.toast.success(`Pedido #${res.orderId} enviado.`);
+    },
+    error: (e) => {
+      console.error(e);
+      this.sending.set(false);
+      this.toast.error('No se pudo completar la compra. Probá de nuevo.');
+    },
+  });
+}
+
 
   private hideBootstrapModal() {
     const open = document.querySelector('.modal.show') as HTMLElement | null;

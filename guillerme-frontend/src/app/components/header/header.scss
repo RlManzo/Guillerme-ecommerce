@@ -1,0 +1,40 @@
+.box-header-buscador {
+  /* si querés mantener el buscador prolijo dentro de navbar */
+}
+
+.form-buscador {
+  position: relative; /* CLAVE para anclar el dropdown */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inputBusqueda {
+  width: 100%;
+  max-width: 420px; /* ajustá a tu diseño */
+  padding-right: 46px; /* espacio para la lupita */
+}
+
+.iconInput {
+  right: calc(50% - 210px + 12px); 
+  /* si preferís más simple: poné el input y el icon dentro de un wrapper */
+}
+
+/* DROPDOWN flotante */
+.buscadorContainer {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px; /* igual que el input */
+  z-index: 20000; /* arriba del navbar */
+  overflow: hidden;
+}
+
+/* lista */
+.containerLi {
+  max-height: 280px;
+  overflow-y: auto;
+}

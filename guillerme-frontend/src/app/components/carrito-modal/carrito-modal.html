@@ -7,7 +7,7 @@
     <div class="modal-content modalColor modalColor">
 
       <div class="modal-header modalTextoCarrito">
-        <h5 class="modal-title modalTitulo">CARRITO DE PRESUPUESTO</h5>
+        <h5 class="modal-title modalTitulo">CARRITO DE COMPRAS</h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
       </div>
 
@@ -31,14 +31,16 @@
       </div>
 
       <div class="modal-footer d-flex justify-content-end">
-        <button
+        @if (hasItems()) {
+          <button
             class="text-center botonHeader"
-            [disabled]="!hasItems() || sending()"
+            [disabled]="sending()"
             (click)="completarCompra()"
-            >
+          >
             {{ sending() ? 'Enviando...' : 'Completar compra' }}
-            </button>
-        </div>
+          </button>
+        }
+      </div>
 
     </div>
   </div>
