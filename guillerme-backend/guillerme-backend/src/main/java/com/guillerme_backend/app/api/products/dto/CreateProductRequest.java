@@ -15,6 +15,9 @@ public class CreateProductRequest {
     public String descripcionCorta;
     public String infoModal;
     public String imgUrl;
+    public String imgUrl2;
+    public String imgUrl3;
+
 
     // MVP: vienen como string (CSV o JSON string)
     public String categorias;
@@ -30,4 +33,6 @@ public class CreateProductRequest {
     @NotNull
     @DecimalMin("0.00")
     public BigDecimal precio;
+
+
 }

@@ -23,7 +23,18 @@ export class ProductoModal {
 
   onClose(): void {
     // para que no quede "pegado" el producto en el modal
-    this.store.selectProducto(null as unknown as Producto);
+    this.store.selectProducto(null);
    
   }
+
+  splitInfo(text?: string | null): string[] {
+  if (!text) return [];
+  return text
+    .split(/\r?\n|•|- /g)     // separa por saltos, bullets o “- ”
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+
+
 }

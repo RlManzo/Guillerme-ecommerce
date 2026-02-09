@@ -34,6 +34,8 @@ public class AdminProductService {
             p.setDescripcionCorta(it.descripcionCorta);
             p.setInfoModal(it.infoModal);
             p.setImgUrl(it.imgUrl);
+            p.setImgUrl2(it.imgUrl2);
+            p.setImgUrl3(it.imgUrl3);
             p.setCategorias(it.categorias);
             p.setServicios(it.servicios);
             p.setKeywords(it.keywords);
@@ -81,6 +83,8 @@ public class AdminProductService {
         p.setDescripcionCorta(it.descripcionCorta);
         p.setInfoModal(it.infoModal);
         p.setImgUrl(it.imgUrl);
+        p.setImgUrl2(it.imgUrl2);
+        p.setImgUrl3(it.imgUrl3);
         p.setCategorias(it.categorias);
         p.setServicios(it.servicios);
         p.setKeywords(it.keywords);

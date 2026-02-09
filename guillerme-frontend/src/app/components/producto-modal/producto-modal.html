@@ -1,106 +1,78 @@
-<div
-  class="modal fade"
-  id="staticBackdrop"
-  data-bs-backdrop="static"
-  tabindex="-1"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content modal-producto">
-      <button
-        type="button"
-        class="btn-close closeModal"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-        (click)="onClose()"
-      ></button>
+<ng-container *ngIf="producto(); else sinProducto">
+  <div class="lks-detail">
+    <!-- izquierda -->
+    <div class="lks-left">
+      <img
+        class="lks-main-img"
+        [src]="producto()!.img"
+        [alt]="producto()!.nombre"
+      />
 
-      <div class="modal-body producto-modal-body">
-        <ng-container *ngIf="producto(); else sinProducto">
-          <div class="row g-0 align-items-start">
-            <!-- thumbs -->
-            <div class="col-2 d-flex flex-column align-items-center">
-              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
-              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
-              <img [src]="producto()!.img" class="imgModalDetail" [alt]="producto()!.nombre" />
-            </div>
+      <div class="lks-thumbs">
+        <button class="lks-thumb" type="button">
+          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
+        </button>
+        <button class="lks-thumb" type="button">
+          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
+        </button>
+        <button class="lks-thumb" type="button">
+          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
+        </button>
+      </div>
+    </div>
 
-            <!-- imagen principal -->
-            <div class="col-5 d-flex justify-content-center">
-              <img
-                id="imageModal"
-                [src]="producto()!.img"
-                class="imgModal"
-                [alt]="producto()!.nombre"
-              />
-            </div>
+    <!-- derecha -->
+    <div class="lks-right">
+      <h2 class="lks-title">{{ producto()!.nombre }}</h2>
+      <div class="lks-underline"></div>
 
-            <!-- info -->
-            <div class="col-5">
-              <h5 class="textModalProducto">
-                {{ producto()!.nombre }}
-              </h5>
+      <!-- si infoModal te viene como texto con saltos / bullets, lo mostramos prolijo -->
+      <ul class="lks-bullets" *ngIf="splitInfo(producto()!.infoModal).length; else sinBullets">
+        <li *ngFor="let it of splitInfo(producto()!.infoModal)">{{ it }}</li>
+      </ul>
 
-              <p class="textDescriptionModal">
-                {{ producto()!.infoModal }}
-              </p>
+      <ng-template #sinBullets>
+        <p class="lks-desc">{{ producto()!.infoModal }}</p>
+      </ng-template>
 
-              <div class="d-flex flex-column gap-2">
-                <div class="caracteristicaColor">
-                  <p class="m-0 mb-2">Color producto:</p>
-                  <button class="colorModal1" type="button" aria-label="Color ladrillo"></button>
-                  <button class="colorModal2" type="button" aria-label="Color azul"></button>
-                  <button class="colorModal3" type="button" aria-label="Color celeste"></button>
-                </div>
+      <div class="lks-row">
+        <div class="lks-label">Categoría:</div>
+        <div class="lks-value">
+          {{ (producto()!.categorias?.length ? producto()!.categorias!.join(', ') : '-') }}
+        </div>
+      </div>
 
-                <div class="buttonCategoria">
-                  <button class="modalCategoria" type="button">
-                    {{ producto()!.detalle1 }}
-                  </button>
-                  <button class="modalCategoria" type="button">
-                    {{ producto()!.detalle2 }}
-                  </button>
-                </div>
+      <div class="lks-chips" *ngIf="producto()!.keywords?.length">
+        <span class="lks-chip" *ngFor="let k of producto()!.keywords">{{ k }}</span>
+      </div>
 
-                <div class="buttonCategoria">
-                  <button class="modalCategoria" type="button">
-                    {{ producto()!.categoria1 }}
-                  </button>
-                  <button class="modalCategoria" type="button">
-                    {{ producto()!.categoria2 }}
-                  </button>
-                </div>
-              </div>
+      <div class="lks-row">
+  <div class="lks-label">Precio:</div>
+  <div class="lks-value">{{ producto()!.precio ?? 0 | currency:'ARS':'symbol':'1.0-0' }}</div>
+</div>
 
-              <div class="botonesDetalleModal">
-                <button
-                  class="botonHeader botonDetalle1"
-                  type="button"
-                  (click)="onAgregar()"
-                >
-                  AGREGAR
-                </button>
+<div class="lks-row">
+  <div class="lks-label">Stock:</div>
+  <div class="lks-value">{{ producto()!.stock ?? 0 }}</div>
+</div>
 
-                <button
-                  class="botonHeader botonDetalle2"
-                  type="button"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  (click)="onClose()"
-                >
-                  CANCELAR
-                </button>
-              </div>
-            </div>
-          </div>
-        </ng-container>
 
-        <ng-template #sinProducto>
-          <div class="text-center p-4">
-            <p class="m-0">No hay producto seleccionado.</p>
-          </div>
-        </ng-template>
+
+      <div class="lks-actions">
+        <button class="lks-btn primary" type="button" (click)="onAgregar()">
+          AGREGAR
+        </button>
+
+        <button class="lks-btn secondary" type="button" (click)="onClose()">
+          CANCELAR
+        </button>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
+
+<ng-template #sinProducto>
+  <div class="text-center p-4">
+    <p class="m-0">No hay producto seleccionado.</p>
+  </div>
+</ng-template>

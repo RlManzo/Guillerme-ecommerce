@@ -52,8 +52,8 @@ export class Productos {
   }
 
   private readonly productsSig = toSignal(this.productsService.products$, {
-    initialValue: [] as Product[],
-  });
+  initialValue: [] as Product[],
+});
 
   // -------------------------
   // Helpers de categoría
@@ -162,32 +162,29 @@ export class Productos {
   }
 
   private toProducto(p: Product): Producto {
-    return {
-      id: p.id,
-      nombre: p.nombre,
-      img: p.img,
-      info: p.descripcionCorta ?? '',
-      infoModal: p.infoModal ?? p.descripcionCorta ?? '',
+  return {
+    id: p.id,
+    nombre: p.nombre,
+    img: p.img,
+    info: p.descripcionCorta ?? '',
+    infoModal: p.infoModal ?? p.descripcionCorta ?? '',
 
-      // ⚠️ tu modelo viejo usa "cat" (cat1/cat2/etc).
-      // Si lo necesitás sí o sí, mapeo algo estable:
-      cat:
-        this.hasCat(p, 'combos')
-          ? 'combos'
-          : this.hasCat(p, 'libreria')
-          ? 'libreria'
-          : this.hasCat(p, 'jugueteria')
-          ? 'jugueteria'
-          : this.hasCat(p, 'bazar')
-          ? 'bazar'
-          : 'all',
+    cat: /* tu lógica */ 'all',
 
-      categoria1: (p.servicios?.[0] as any) ?? '',
-      categoria2: (p.servicios?.[1] as any) ?? '',
-      detalle1: p.variantes?.[0]?.label ?? '',
-      detalle2: p.variantes?.[1]?.label ?? '',
-    } as unknown as Producto;
-  }
+    categoria1: (p.servicios?.[0] as any) ?? '',
+    categoria2: (p.servicios?.[1] as any) ?? '',
+    detalle1: p.variantes?.[0]?.label ?? '',
+    detalle2: p.variantes?.[1]?.label ?? '',
+
+    // ✅ nuevos (para modal)
+    categorias: p.categorias ?? [],
+    keywords: p.keywords ?? [],
+    stock: p.stock ?? 0,
+    precio: p.precio ?? 0,
+  };
+}
+
+
 
   formatPrice(value: number | string | null | undefined): string {
   const n = typeof value === 'string' ? Number(value) : value;

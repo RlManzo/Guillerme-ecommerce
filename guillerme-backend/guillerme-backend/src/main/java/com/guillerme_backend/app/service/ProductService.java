@@ -41,6 +41,8 @@ public class ProductService {
         p.setDescripcionCorta(blankToNull(req.descripcionCorta));
         p.setInfoModal(blankToNull(req.infoModal));
         p.setImgUrl(blankToNull(req.imgUrl));
+        p.setImgUrl2(blankToNull(req.imgUrl2));
+        p.setImgUrl3(blankToNull(req.imgUrl3));
         p.setCategorias(blankToNull(req.categorias));
         p.setServicios(blankToNull(req.servicios));
         p.setKeywords(blankToNull(req.keywords));

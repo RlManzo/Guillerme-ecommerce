@@ -149,4 +149,25 @@
   }
 }
 
+.lks-modal-dialog{
+  max-width: 1100px;
+}
+
+.lks-modal-content{
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden; /* ✅ para que todo quede prolijo */
+  box-shadow: 0 18px 50px rgba(0,0,0,.18);
+}
+
+.lks-modal-body{
+  padding: 28px;
+}
+
+.lks-modal-close{
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+}
 

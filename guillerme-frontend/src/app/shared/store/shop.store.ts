@@ -13,6 +13,11 @@ export interface Producto {
   categoria2: string;
   detalle1: string;
   detalle2: string;
+
+  categorias?: string[];   // desde BD: "libreria" o "tazas, ceramica"
+  keywords?: string[];     // desde BD
+  stock?: number;
+  precio?: number;
 }
 
 export interface CartItem {
@@ -34,9 +39,9 @@ export class ShopStore {
   private readonly _selected = signal<Producto | null>(null);
   readonly selected = this._selected.asReadonly();
 
-  selectProducto(p: Producto) {
-    this._selected.set(p);
-  }
+  selectProducto(p: Producto | null) {
+  this._selected.set(p);
+}
 
   addToCart(p: Producto) {
     const cart = this._cart();
@@ -77,4 +82,6 @@ export class ShopStore {
     setCart(items: CartItem[]) {
     this._cart.set(items ?? []);
   }
+
+  
 }

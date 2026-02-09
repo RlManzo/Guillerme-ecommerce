@@ -19,15 +19,10 @@ export class ProductsService {
   private readonly _error$ = new BehaviorSubject<string | null>(null);
   error$ = this._error$.asObservable();
 
-  getSnapshot(): Product[] {
-    return this._products$.value;
-  }
-
   load() {
     this._loading$.next(true);
     this._error$.next(null);
 
-    // Si tenés proxy.conf.json, esto puede ser solo '/api/products'
     return this.http.get<ProductResponseDto[]>('/api/products').pipe(
       tap((rows) => {
         const mapped = (rows ?? []).map(mapProductFromApi);
@@ -43,7 +38,6 @@ export class ProductsService {
     );
   }
 
-  // si querés refrescar manualmente (misma idea que load)
   refresh() {
     return this.load();
   }

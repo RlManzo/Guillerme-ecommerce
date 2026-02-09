@@ -45,6 +45,19 @@ public class Product {
     @Column(name = "precio", nullable = false, precision = 12, scale = 2)
     private BigDecimal precio = BigDecimal.ZERO;
 
+    @Column(name = "img_url_2", columnDefinition = "text")
+    private String imgUrl2;
+
+    @Column(name = "img_url_3", columnDefinition = "text")
+    private String imgUrl3;
+
+    public String getImgUrl2() { return imgUrl2; }
+    public void setImgUrl2(String imgUrl2) { this.imgUrl2 = imgUrl2; }
+
+    public String getImgUrl3() { return imgUrl3; }
+    public void setImgUrl3(String imgUrl3) { this.imgUrl3 = imgUrl3; }
+
+
     public BigDecimal getPrecio() { return precio; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
     public Long getId() { return id; }
