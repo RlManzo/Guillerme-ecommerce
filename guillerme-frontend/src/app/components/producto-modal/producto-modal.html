@@ -4,22 +4,24 @@
     <div class="lks-left">
       <img
         class="lks-main-img"
-        [src]="producto()!.img"
+        [src]="selectedImg() || producto()!.img"
         [alt]="producto()!.nombre"
       />
 
-      <div class="lks-thumbs">
-        <button class="lks-thumb" type="button">
-          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
-        </button>
-        <button class="lks-thumb" type="button">
-          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
-        </button>
-        <button class="lks-thumb" type="button">
-          <img [src]="producto()!.img" [alt]="producto()!.nombre" />
+      <div class="lks-thumbs" *ngIf="imagenes().length > 1">
+        <button
+          class="lks-thumb"
+          type="button"
+          *ngFor="let img of imagenes()"
+          (click)="selectImg(img)"
+          [attr.aria-label]="'Ver imagen ' + img"
+          [class.active]="selectedImg() === img"
+        >
+          <img [src]="img" [alt]="producto()!.nombre" />
         </button>
       </div>
     </div>
+
 
     <!-- derecha -->
     <div class="lks-right">
