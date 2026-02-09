@@ -6,8 +6,8 @@ type ServicioKey = 'filgo1' | 'filgo2' | 'filgo3' | 'filgo4';
 interface ServicioItem {
   key: ServicioKey;
   label: string;
-  icon: string;  
-  banner: string; 
+  icon: string;
+  banner: string;
   alt: string;
 }
 
@@ -51,7 +51,6 @@ export class CarouselServicios implements OnInit, OnDestroy {
   ];
 
   activeIndex = 0;
-
   private intervalId: any;
 
   ngOnInit(): void {
@@ -62,9 +61,25 @@ export class CarouselServicios implements OnInit, OnDestroy {
     this.stopCarousel();
   }
 
-  setActive(index: number): void {
+  private resetTimer(): void {
+    // Reinicia el autoplay cuando el usuario interactúa
+    this.startCarousel();
+  }
+
+  next(): void {
+    this.activeIndex = (this.activeIndex + 1) % this.items.length;
+    this.resetTimer();
+  }
+
+  prev(): void {
+    this.activeIndex = (this.activeIndex - 1 + this.items.length) % this.items.length;
+    this.resetTimer();
+  }
+
+  goTo(index: number): void {
     if (index === this.activeIndex) return;
     this.activeIndex = index;
+    this.resetTimer();
   }
 
   startCarousel(): void {
@@ -81,7 +96,6 @@ export class CarouselServicios implements OnInit, OnDestroy {
     }
   }
 
-  // Opcional: si querés que al pasar el mouse se pause
   onMouseEnter(): void {
     this.stopCarousel();
   }

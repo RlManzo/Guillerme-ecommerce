@@ -1,29 +1,106 @@
 .carousel {
   position: relative;
+  width: 100%;
+  overflow: hidden;
 }
 
+/* Slides: fade */
 .carousel-image {
-  display: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 350ms ease;
+  pointer-events: none;
 
   &.active {
-    display: block;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   img {
     width: 100%;
     height: auto;
     display: block;
+    user-select: none;
   }
 }
 
-.carousel-button {
+/* Para que el contenedor tenga altura: usamos el primer slide como "medidor" */
+.carousel::before {
+  content: "";
+  display: block;
+  padding-top: 38%; /* ajustá: 38%~45% según el alto de tus banners */
+}
+
+/* Flechas laterales tipo Filgo */
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+
   border: 0;
-  background: transparent;
-  padding: 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 34px;
+  line-height: 1;
   cursor: pointer;
 
-  &.active {
-    outline: 2px solid #45acb4; // opcional, si no querés esto lo sacamos
-    border-radius: 8px;
+  z-index: 5;
+}
+
+.nav-arrow.left {
+  left: 0;
+}
+
+.nav-arrow.right {
+  right: 0;
+}
+
+/* Hover suave */
+.nav-arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Bolitas */
+.dots {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 6;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+
+.dot.active {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Mobile: flechas un poco más chicas */
+@media (max-width: 768px) {
+  .nav-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 30px;
+  }
+
+  .dots {
+    bottom: 8px;
   }
 }

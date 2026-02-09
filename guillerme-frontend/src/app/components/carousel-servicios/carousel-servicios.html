@@ -1,18 +1,51 @@
 <section
-  class="col-12 ps-0 pe-0"
+  class="col-12 ps-0 pe-0 carousel-wrap"
   id="servicios"
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()"
 >
-  
-
   <section class="carousel">
+    <!-- Slides -->
     <article
       class="carousel-image"
       *ngFor="let item of items; let i = index"
       [class.active]="i === activeIndex"
+      [attr.aria-hidden]="i !== activeIndex"
     >
       <img [src]="item.banner" [alt]="item.alt" />
     </article>
+
+    <!-- Flecha izquierda -->
+    <button
+      type="button"
+      class="nav-arrow left"
+      aria-label="Anterior"
+      (click)="prev()"
+    >
+      ‹
+    </button>
+
+    <!-- Flecha derecha -->
+    <button
+      type="button"
+      class="nav-arrow right"
+      aria-label="Siguiente"
+      (click)="next()"
+    >
+      ›
+    </button>
+
+    <!-- Bolitas -->
+    <div class="dots" role="tablist" aria-label="Paginación carrusel">
+      <button
+        type="button"
+        class="dot"
+        *ngFor="let _ of items; let i = index"
+        [class.active]="i === activeIndex"
+        (click)="goTo(i)"
+        [attr.aria-label]="'Ir a slide ' + (i + 1)"
+        [attr.aria-current]="i === activeIndex ? 'true' : null"
+      ></button>
+    </div>
   </section>
 </section>
