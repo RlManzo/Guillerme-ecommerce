@@ -70,11 +70,23 @@
             </button>
 
             <div class="dropdown-menu-custom">
-              <a class="dropdown-item" href="#producto" (click)="closeAllMenus()">Todos los productos</a>
-              <a class="dropdown-item" href="#libreria" (click)="closeAllMenus()">Librería</a>
-              <a class="dropdown-item" href="#combos" (click)="closeAllMenus()">Combos</a>
-              
+              <a class="dropdown-item" href="#producto" (click)="goProducts('all'); $event.preventDefault()">
+                Todos los productos
+              </a>
+
+              <a class="dropdown-item" href="#producto" (click)="goProducts('libreria'); $event.preventDefault()">
+                Librería
+              </a>
+
+              <a class="dropdown-item" href="#producto" (click)="goProducts('combos'); $event.preventDefault()">
+                Combos
+              </a>
+
+              <a class="dropdown-item" href="#producto" (click)="goProducts('varios'); $event.preventDefault()">
+                Varios
+              </a>
             </div>
+
           </div>
 
 

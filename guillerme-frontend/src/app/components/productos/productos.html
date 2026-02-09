@@ -10,111 +10,230 @@
   <div class="sectionProd">
 
     <div class="d-flex selectStyles text-center" data-aos="fade-right">
-  <h5 class="selectText all"
-      [ngClass]="{ 'all-colour': filtro() === 'all' }"
-      (click)="setFilter('all')">
+  <h5
+    class="selectText all"
+    [ngClass]="{ 'all-colour': filtro() === 'all' }"
+    (click)="setFilter('all')"
+  >
     TODOS
   </h5>
 
-  <h5 class="selectText all"
-      [ngClass]="{ 'all-colour': filtro() === 'libreria' }"
-      (click)="setFilter('libreria')">
+  <h5
+    class="selectText all"
+    [ngClass]="{ 'all-colour': filtro() === 'libreria' }"
+    (click)="setFilter('libreria')"
+  >
     LIBRERÍA
   </h5>
 
-  <h5 class="selectText all"
-      [ngClass]="{ 'all-colour': filtro() === 'combos' }"
-      (click)="setFilter('combos')">
+  <h5
+    class="selectText all"
+    [ngClass]="{ 'all-colour': filtro() === 'combos' }"
+    (click)="setFilter('combos')"
+  >
     COMBOS
   </h5>
 
-  <h5 class="selectText all"
-      [ngClass]="{ 'all-colour': filtro() === 'jugueteria' }"
-      (click)="setFilter('jugueteria')">
-    JUGUETERÍA
-  </h5>
-
-  <h5 class="selectText all"
-      [ngClass]="{ 'all-colour': filtro() === 'bazar' }"
-      (click)="setFilter('bazar')">
-    BAZAR
+  <h5
+    class="selectText all"
+    [ngClass]="{ 'all-colour': filtro() === 'varios' }"
+    (click)="setFilter('varios')"
+  >
+    VARIOS
   </h5>
 </div>
+
+<!-- PANEL FILTROS (nuevo) -->
+<div class="lks-filters">
+  <!-- Buscar -->
+  <div class="lks-field">
+    <label class="lks-label">Buscar</label>
+    <input
+      class="lks-input"
+      placeholder="Buscar por nombre, descripción, keywords..."
+      [ngModel]="q()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </div>
+
+  <!-- Ordenar -->
+  <div class="lks-field">
+    <label class="lks-label">Ordenar</label>
+    <select class="lks-input" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
+      <option value="NEWEST">Más nuevo</option>
+      <option value="OLDEST">Más antiguo</option>
+      <option value="AZ">A → Z</option>
+      <option value="ZA">Z → A</option>
+      <option value="CHEAPEST">Más barato</option>
+      <option value="EXPENSIVE">Más caro</option>
+    </select>
+  </div>
+
+  <!-- Precio (dropdown) -->
+  <div class="lks-field price-field" (clickOutside)="priceOpen=false">
+    <label class="lks-label">Precio</label>
+
+    <!-- “input” único (botón) -->
+    <button
+      type="button"
+      class="lks-input lks-price-trigger"
+      (click)="priceOpen = !priceOpen; $event.stopPropagation()"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="priceOpen"
+    >
+      <span class="lks-price-text">
+        {{
+          (minPrice() != null || maxPrice() != null)
+            ? ('$ ' + (minPrice() ?? 0) + ' — $ ' + (maxPrice() ?? '∞'))
+            : 'Filtrar por precio'
+        }}
+      </span>
+      <span class="lks-caret">▾</span>
+    </button>
+
+    <!-- dropdown con rango -->
+    <div class="lks-price-pop" *ngIf="priceOpen" (click)="$event.stopPropagation()">
+      <div class="lks-price-row">
+        <div class="lks-field mini">
+          <label class="lks-label">Desde</label>
+          <input
+            class="lks-input"
+            type="number"
+            min="0"
+            [ngModel]="minPrice() ?? ''"
+            (ngModelChange)="onMinPriceChange($event)"
+          />
+        </div>
+
+        <div class="lks-field mini">
+          <label class="lks-label">Hasta</label>
+          <input
+            class="lks-input"
+            type="number"
+            min="0"
+            [ngModel]="maxPrice() ?? ''"
+            (ngModelChange)="onMaxPriceChange($event)"
+          />
+        </div>
+      </div>
+
+      <div class="lks-price-actions">
+        <button
+          type="button"
+          class="lks-btn ghost"
+          (click)="minPrice.set(null); maxPrice.set(null); page.set(0)"
+        >
+          Limpiar precio
+        </button>
+
+        <button
+          type="button"
+          class="lks-btn primary"
+          (click)="priceOpen=false"
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="lks-actions">
+    <button type="button" class="lks-btn btnAdd" (click)="applyFilters()">
+      Buscar
+    </button>
+
+    <button type="button" class="lks-btn ghost" (click)="clearFilters()">
+      Limpiar
+    </button>
+  </div>
+</div>
+
+
 
     <div id="contenedorProductos">
       <div id="cardsProductos" class="divProductos" data-aos="fade-right">
         <div class="product-card" *ngFor="let p of productosPaginados()">
-            <!-- zona imagen -->
-            <button
-              type="button"
-              class="product-media"
-              (click)="openDetalle(p)"
-              data-bs-toggle="modal"
-              data-bs-target="#staticBackdrop"
-              aria-label="Ver detalle"
-            >
+          <!-- zona media -->
+          <button
+            type="button"
+            class="product-media"
+            (click)="openDetalle(p)"
+            data-bs-toggle="modal"
+            data-bs-target="#staticBackdrop"
+            aria-label="Ver detalle"
+          >
+            <!-- ✅ si es video, renderiza video -->
+            <ng-container *ngIf="!isVideo(p.img); else cardVideo">
               <img class="product-img" [src]="p.img" [alt]="p.nombre" loading="lazy" />
-            </button>
+            </ng-container>
 
-            <div class="product-divider"></div>
+            <ng-template #cardVideo>
+              <video
+                class="product-img"
+                [src]="p.img"
+                muted
+                playsinline
+                preload="metadata"
+              ></video>
+            </ng-template>
+          </button>
 
-            <!-- textos -->
-            <div class="product-body">
-              <h5 class="product-title">{{ p.nombre }}</h5>
-              <p class="product-subtitle">{{ p.descripcionCorta }}</p>
-            </div>
+          <div class="product-divider"></div>
 
-            <!-- footer -->
-            <div class="product-footer">
-              <div class="product-price">{{ formatPrice(p.precio) }}</div>
-
-              <button class="btnAdd" type="button" (click)="add(p)">
-                AGREGAR
-              </button>
-            </div>
+          <!-- textos -->
+          <div class="product-body">
+            <h5 class="product-title">{{ p.nombre }}</h5>
+            <p class="product-subtitle">{{ p.descripcionCorta }}</p>
           </div>
 
-        
+          <!-- footer -->
+          <div class="product-footer">
+            <div class="product-price">{{ formatPrice(p.precio) }}</div>
+
+            <button class="btnAdd" type="button" (click)="add(p)">
+              AGREGAR
+            </button>
+          </div>
+        </div>
       </div>
+
       <div class="d-flex justify-content-center align-items-center gap-2 mt-3" style="bottom: 20px;">
-            <button class="btn btn-sm btn-outline-secondary"
-                    type="button"
-                    (click)="prevPage()"
-                    [disabled]="page() === 0">
-                Anterior
-            </button>
+        <button class="btn btn-sm btn-outline-secondary"
+                type="button"
+                (click)="prevPage()"
+                [disabled]="page() === 0">
+          Anterior
+        </button>
 
-            <span class="small text-muted">
-                Página {{ page() + 1 }} / {{ totalPages() }}
-            </span>
+        <span class="small text-muted">
+          Página {{ page() + 1 }} / {{ totalPages() }}
+        </span>
 
-            <button class="btn btn-sm btn-outline-secondary"
-                    type="button"
-                    (click)="nextPage()"
-                    [disabled]="page() + 1 >= totalPages()">
-                Siguiente
-            </button>
-            </div>
-
+        <button class="btn btn-sm btn-outline-secondary"
+                type="button"
+                (click)="nextPage()"
+                [disabled]="page() + 1 >= totalPages()">
+          Siguiente
+        </button>
+      </div>
     </div>
   </div>
-  
 
-  <!-- Modal detalle producto: lo deja tu ProductoModalComponent -->
- <div class="modal fade" id="staticBackdrop"  tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <button
+  <!-- Modal detalle producto -->
+  <div class="modal fade" id="staticBackdrop" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content">
+        <button
           type="button"
           class="btn-close lks-modal-close"
           data-bs-dismiss="modal"
           aria-label="Close"
         ></button>
-      <div class="modal-body">
-        <app-producto-modal></app-producto-modal>
+        <div class="modal-body">
+          <app-producto-modal></app-producto-modal>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
 </section>
