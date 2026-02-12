@@ -258,12 +258,16 @@ nav{
     box-shadow: 0px 1px 7px #45ACB4;
 }
 .botonEliminar{
-    border: none;
-    background-color: white;
-    position: absolute;
-   margin-left: 384px;
-
-
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  cursor: pointer;
+  pointer-events: auto;
+  background: transparent;
+  border: 0;
+  padding: 6px;
+  border-radius: 8px;
 }
 .botonCarrito{
     background: none;
@@ -403,6 +407,7 @@ a.botonPresupuesto{
 .carritoContainer{
     margin-top: 10px;
     border-bottom:1.5px dashed var(--celeste) ;
+    position: relative; /* clave */
 }
 .imgCarrito{
     position: absolute;
@@ -413,7 +418,7 @@ a.botonPresupuesto{
 .catCant{
  margin-left: -5px;
  border-radius: 15px;
- width: 90px;
+ width: 150px;
  padding: 2px;
  padding-left: 5px;
  padding-right: 5px;

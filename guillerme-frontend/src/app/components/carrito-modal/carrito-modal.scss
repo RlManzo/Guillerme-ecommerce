@@ -11,3 +11,23 @@
   background: rgba(0,0,0,.35);
   z-index: -1;
 }
+
+.qtyBtn{
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: #fff;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.qtyBtn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.botonEliminar .material-icons {
+  pointer-events: none;
+}
+

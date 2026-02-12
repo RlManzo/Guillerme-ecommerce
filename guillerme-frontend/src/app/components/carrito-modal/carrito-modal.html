@@ -4,7 +4,7 @@
   (click)="close()"
 >
   <div class="modal-dialog" (click)="$event.stopPropagation()">
-    <div class="modal-content modalColor modalColor">
+    <div class="modal-content modalColor">
 
       <div class="modal-header modalTextoCarrito">
         <h5 class="modal-title modalTitulo">CARRITO DE COMPRAS</h5>
@@ -13,20 +13,79 @@
 
       <div class="modal-body">
         @if (store.cart().length === 0) {
-          <div>sin productos</div>
+          <div class="text-muted">Sin productos</div>
         } @else {
           <ul class="listStyles">
             <li class="carritoContainer" *ngFor="let it of store.cart()">
-              <button class="botonEliminar"   (click)="remove(it.producto.id)">X</button>
+
+              <button class="botonEliminar" type="button" (click)="remove(it.producto.id, $event)">
+                <span class="material-icons">delete</span>
+              </button>
 
               <img class="imgCarrito" [src]="it.producto.img" [alt]="it.producto.nombre" />
 
               <div class="titleCards">
-                <h6>{{ it.producto.nombre }}</h6>
-                <div class="catCant">cantidad: {{ it.cantidad }}</div>
+                <h6 class="mb-1">{{ it.producto.nombre }}</h6>
+
+                <!-- ✅ precio unitario (si lo tenés) -->
+                <div class="small text-muted" *ngIf="(it.producto.precio ?? 0) > 0">
+                  Unitario: {{ (it.producto.precio ?? 0) | currency:'ARS':'symbol':'1.0-0' }}
+                </div>
+
+                <!-- ✅ controls cantidad -->
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  
+
+                  <div class="catCant">
+                    Cantidad: <b>{{ it.cantidad }}</b>
+                    <span class="text-muted" *ngIf="(it.producto.stock ?? 0) > 0">
+                      / {{ it.producto.stock }}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="dec(it.producto.id, $event)"
+                    [disabled]="sending()"
+                  >
+                    −
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="inc(it.producto.id, $event)"
+                    [disabled]="sending() || !store.canInc(it.producto.id)"
+                    [title]="!store.canInc(it.producto.id) ? 'Sin stock disponible' : 'Sumar'"
+                  >
+                    +
+                  </button>
+
+                  <span class="small text-danger ms-2" *ngIf="(it.producto.stock ?? 0) <= 0">
+                    Sin stock
+                  </span>
+                </div>
+
+                <!-- ✅ subtotal por item -->
+                <div class="small mt-2">
+                  Subtotal:
+                  <b>{{ lineTotal(it) | currency:'ARS':'symbol':'1.0-0' }}</b>
+                </div>
               </div>
             </li>
           </ul>
+
+          <!-- ✅ totales del carrito -->
+          <div class="mt-3 border-top pt-3 d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+              Productos: <b>{{ totalItems() }}</b>
+            </div>
+
+            <div class="fw-semibold">
+              Total: {{ totalPrice() | currency:'ARS':'symbol':'1.0-0' }}
+            </div>
+          </div>
         }
       </div>
 
