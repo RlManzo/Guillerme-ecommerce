@@ -13,6 +13,8 @@ import { ProductsService } from '../../components/productos/products.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../components/productos/product.model';
 
+
+
 type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
 type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA';
 

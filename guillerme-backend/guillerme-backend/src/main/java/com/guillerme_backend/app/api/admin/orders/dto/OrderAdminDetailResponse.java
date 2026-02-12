@@ -25,5 +25,6 @@ public class OrderAdminDetailResponse {
         public String productNombre;
         public Integer qty;
         public String imgUrl;
+        public java.math.BigDecimal unitPrice;
     }
 }

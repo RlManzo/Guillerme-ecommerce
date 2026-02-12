@@ -15,7 +15,7 @@ export interface AdminOrderSummaryDto {
   totalItems: number;
 
   // ✅ según tu error, vos tenés userEmail
-  userEmail: string;
+  customerEmail: string;
 
   // ✅ y estos te faltan para el HTML (sumalos)
   customerNombre: string;
@@ -27,6 +27,7 @@ export interface AdminOrderItemDto {
   productNombre: string;
   qty: number;
   imgUrl?: string | null;
+  unitPrice: number;
 }
 
 export interface AdminOrderDetailDto {
@@ -34,7 +35,7 @@ export interface AdminOrderDetailDto {
   createdAt: string;
   status: OrderStatus;
 
-  userEmail: string;
+  customerEmail: string;
 
   customerNombre: string;
   customerApellido: string;

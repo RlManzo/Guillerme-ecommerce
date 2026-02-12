@@ -11,6 +11,8 @@ import {
   OrderStatus,
 } from '../../shared/admin/admin-orders.api';
 
+import { downloadPaidOrderPdf } from '../../shared/pdf/order-receipt.pdf';
+
 @Component({
   standalone: true,
   selector: 'app-admin-orders-page',
@@ -26,8 +28,8 @@ export class AdminOrdersPage {
   loading = signal(false);
   error = signal<string | null>(null);
 
-    fromDate = signal<string>(''); // YYYY-MM-DD
-    toDate = signal<string>('');   // YYYY-MM-DD
+  fromDate = signal<string>(''); // YYYY-MM-DD
+  toDate = signal<string>('');   // YYYY-MM-DD
 
   rows = signal<AdminOrderSummaryDto[]>([]);
   selected = signal<AdminOrderDetailDto | null>(null);
@@ -45,6 +47,22 @@ export class AdminOrdersPage {
   canPrev = computed(() => this.page() > 0);
   canNext = computed(() => this.page() + 1 < this.totalPages());
 
+  // ✅ totales para el detalle
+  totalItemsSelected = computed(() => {
+    const s = this.selected();
+    if (!s) return 0;
+    return (s.items ?? []).reduce((acc, it) => acc + (it.qty ?? 0), 0);
+  });
+
+  totalPriceSelected = computed(() => {
+    const s = this.selected();
+    if (!s) return 0;
+    return (s.items ?? []).reduce(
+      (acc, it) => acc + ((it.unitPrice ?? 0) * (it.qty ?? 0)),
+      0
+    );
+  });
+
   // edición status
   statusEdit = signal<OrderStatus>('NUEVO');
   savingStatus = signal(false);
@@ -57,11 +75,11 @@ export class AdminOrdersPage {
   ];
 
   readonly statusLabel: Record<OrderStatus, string> = {
-  NUEVO: 'NUEVO',
-  PENDIENTE_DE_PAGO: 'PENDIENTE DE PAGO',
-  PAGADO: 'PAGADO',
-  ENVIADO: 'ENVIADO',
-};
+    NUEVO: 'NUEVO',
+    PENDIENTE_DE_PAGO: 'PENDIENTE DE PAGO',
+    PAGADO: 'PAGADO',
+    ENVIADO: 'ENVIADO',
+  };
 
   ngOnInit() {
     if (!this.auth.isLogged()) {
@@ -75,10 +93,10 @@ export class AdminOrdersPage {
       return;
     }
 
-    this.load(); // ✅ carga inicial: trae todo sin buscar
+    this.load();
   }
 
-   load() {
+  load() {
     this.loading.set(true);
     this.error.set(null);
 
@@ -91,10 +109,8 @@ export class AdminOrdersPage {
       .list({
         q: qq || undefined,
         status: st || undefined,
-
-        from: from || undefined, // ✅ nuevo
-        to: to || undefined,     // ✅ nuevo
-
+        from: from || undefined,
+        to: to || undefined,
         page: this.page(),
         size: this.size(),
         sort: 'createdAt,desc',
@@ -121,11 +137,11 @@ export class AdminOrdersPage {
 
   applyFilters() {
     this.selected.set(null);
-    this.page.set(0); // ✅ al filtrar, vuelvo a página 1
+    this.page.set(0);
     this.load();
   }
 
-    resetFilters() {
+  resetFilters() {
     this.q.set('');
     this.statusFilter.set('');
     this.fromDate.set('');
@@ -193,10 +209,16 @@ export class AdminOrdersPage {
         // 1) actualizo detalle local
         this.selected.update((v) => (v ? { ...v, status: next } : v));
 
-        // 2) actualizo la fila en el listado
+        // 2) actualizo listado
         this.rows.update((arr) =>
           arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
         );
+
+        // 3) si queda PAGADO, descargar automáticamente
+        if (next === 'PAGADO') {
+          const updated = { ...(this.selected() as any), status: next };
+          downloadPaidOrderPdf(updated);
+        }
       },
       error: (e) => {
         console.error(e);
@@ -204,5 +226,11 @@ export class AdminOrdersPage {
         this.error.set('No se pudo actualizar el estado');
       },
     });
+  }
+
+  downloadPdf() {
+    const sel = this.selected();
+    if (!sel) return;
+    downloadPaidOrderPdf(sel);
   }
 }

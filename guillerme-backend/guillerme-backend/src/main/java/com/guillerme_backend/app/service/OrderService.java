@@ -68,6 +68,7 @@ public class OrderService {
             oi.setProductNombre(p.getNombre());
             oi.setQty(it.qty);
             oi.setImgUrl(p.getImgUrl());
+            oi.setUnitPrice(p.getPrecio());
             itemRepo.save(oi);
 
             // stock: recomendación = reservar/descontar acá solo si querés “bloquear”

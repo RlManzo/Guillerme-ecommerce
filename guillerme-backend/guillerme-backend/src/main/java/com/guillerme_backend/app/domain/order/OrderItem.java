@@ -2,6 +2,8 @@ package com.guillerme_backend.app.domain.order;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "order_items",
         indexes = {
@@ -29,6 +31,9 @@ public class OrderItem {
     @Column(nullable = false)
     private int qty;
 
+    @Column(name = "unit_price", precision = 12, scale = 2)
+    private BigDecimal unitPrice;
+
     // --- getters/setters ---
     public Long getId() { return id; }
 
@@ -46,4 +51,7 @@ public class OrderItem {
 
     public int getQty() { return qty; }
     public void setQty(int qty) { this.qty = qty; }
+
+    public BigDecimal getUnitPrice() {return unitPrice;}
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice;}
 }

@@ -58,13 +58,14 @@ public class SecurityConfig {
         // PROD
         config.setAllowedOrigins(List.of(
                 "https://libreriaguillermeguillerme.com",
-                "https://www.libreriaguillermeguillerme.com"
+                "https://www.libreriaguillermeguillerme.com",
+                "http://localhost:4300"
         ));
 
         // Si también probás desde localhost:
-        // config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com", "http://localhost:4300"));
+         //config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com", "http://localhost:4300"));
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
