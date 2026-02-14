@@ -6,6 +6,7 @@ import { CarouselServicios } from '../../components/carousel-servicios/carousel-
 import { ProductoModal } from '../../components/producto-modal/producto-modal';
 import { CarritoModal } from '../../components/carrito-modal/carrito-modal';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { BrandsCarouselComponent } from '../../components/brands-carousel/brands-carousel.component';
 
 @Component({
   selector: 'app-home',
@@ -17,9 +18,17 @@ import { FooterComponent } from '../../components/footer/footer.component';
     CarouselServicios,
     ProductoModal,
     CarritoModal,
+    BrandsCarouselComponent,
     FooterComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'], 
 })
-export class HomeComponent {}
+export class HomeComponent {
+  brands = [
+    { name: 'Filgo', logoUrl: 'assets/carousel/filgo-logo-circular.png' },
+    { name: 'Bic', logoUrl: 'assets/carousel/sharpie-logo.jpg' },
+    { name: 'Sharpie', logoUrl: 'assets/brands/sharpie.jpg' },
+    { name: 'Faber-Castell', logoUrl: 'assets/brands/faber.jpg' },
+  ];
+}

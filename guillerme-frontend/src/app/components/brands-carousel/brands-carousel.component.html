@@ -1,0 +1,52 @@
+<section class="brandsWrap" *ngIf="safeBrands().length > 0"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()">
+  <div class="box-title-contact text-center d-flex justify-content-center align-items-center">
+    <h4 class="title h4">{{ title }}</h4>
+    <img src="assets/logo-textos.png" alt="icono" data-aos="zoom-in" />
+  </div>
+
+  <br>
+  <br>
+
+  <div class="carouselRow">
+    <button class="navBtn left" type="button" (click)="prev()" aria-label="Anterior">
+      ‹
+    </button>
+
+    <div class="viewport">
+      <div class="logos">
+        <a
+          class="logoCard"
+          *ngFor="let b of visible()"
+          [href]="b.link || null"
+          [attr.role]="b.link ? 'link' : 'img'"
+          [attr.tabindex]="b.link ? 0 : -1"
+          [attr.aria-label]="b.name"
+          (click)="!b.link && $event.preventDefault()"
+        >
+          <img class="logoImg" [src]="b.logoUrl" [alt]="b.name" />
+        </a>
+      </div>
+
+      <div class="names">
+        <div class="name" *ngFor="let b of visible()">{{ b.name }}</div>
+      </div>
+    </div>
+
+    <button class="navBtn right" type="button" (click)="next()" aria-label="Siguiente">
+      ›
+    </button>
+  </div>
+
+  <div class="dots">
+    <button
+      type="button"
+      class="dot"
+      *ngFor="let _ of safeBrands(); let i = index"
+      [class.active]="isActiveDot(i)"
+      (click)="goTo(i)"
+      [attr.aria-label]="'Ir a ' + (i + 1)"
+    ></button>
+  </div>
+</section>
