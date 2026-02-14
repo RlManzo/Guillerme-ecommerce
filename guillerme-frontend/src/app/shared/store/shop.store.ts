@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { AuthService } from '../auth/auth.service'; // ajustá la ruta según tu proyecto
 
 export type CatKey = 'cat1' | 'cat2' | 'cat3' | 'polimero' | 'sublimable';
 
@@ -16,7 +17,7 @@ export interface Producto {
 
   categorias?: string[];
   keywords?: string[];
-  stock?: number;
+  stock?: number;   // puede venir undefined
   precio?: number;
 
   imagenes?: string[];
@@ -29,33 +30,148 @@ export interface CartItem {
 
 @Injectable({ providedIn: 'root' })
 export class ShopStore {
+  private readonly auth = inject(AuthService);
+
+  // UI: carrito modal abierto/cerrado
+  private readonly _cartOpen = signal(false);
+  readonly cartOpen = this._cartOpen.asReadonly();
+
   // carrito
   private readonly _cart = signal<CartItem[]>([]);
   readonly cart = this._cart.asReadonly();
 
   readonly cartCount = computed(() =>
-    this._cart().reduce((acc, it) => acc + it.cantidad, 0)
+    this._cart().reduce((acc, it) => acc + (Number(it.cantidad) || 0), 0)
   );
 
   // producto seleccionado para modal
   private readonly _selected = signal<Producto | null>(null);
   readonly selected = this._selected.asReadonly();
 
+  // Para detectar cambio de "guest" -> "email"
+  private readonly _currentKey = signal<string>(this.keyForEmail(this.auth.email()));
+
+  constructor() {
+    // 1) Carga inicial desde storage según usuario actual (guest o email)
+    this._cart.set(this.readCart(this._currentKey()));
+
+    // 2) Cuando cambia el usuario (email), migramos guest -> user y cargamos el cart correcto
+    effect(() => {
+      const email = this.auth.email(); // signal computed del AuthService
+      const nextKey = this.keyForEmail(email);
+      const prevKey = this._currentKey();
+
+      if (nextKey === prevKey) return;
+
+      // Caso: guest -> user (logueo)
+      if (prevKey === this.keyForEmail(null) && nextKey !== prevKey) {
+        const guest = this.readCart(prevKey);
+        const user = this.readCart(nextKey);
+
+        // Migración: si el user está vacío, copiamos todo el guest.
+        // Si no está vacío, mergeamos (sumamos cantidades por producto).
+        const merged = this.mergeCarts(user, guest);
+
+        this.writeCart(nextKey, merged);
+
+        // Opcional: borrar el guest una vez migrado
+        // localStorage.removeItem(prevKey);
+
+        this._cart.set(merged);
+      } else {
+        // Caso: user -> guest (logout) o cambio de usuario
+        const loaded = this.readCart(nextKey);
+        this._cart.set(loaded);
+      }
+
+      this._currentKey.set(nextKey);
+    });
+
+    // 3) Persistencia: cada cambio del carrito se guarda en la key actual
+    effect(() => {
+      const key = this._currentKey();
+      const cart = this._cart();
+      this.writeCart(key, cart);
+    });
+  }
+
+  // -------------------------
+  // Keys & storage helpers
+  // -------------------------
+  private keyForEmail(email: string | null): string {
+    const e = (email ?? '').trim().toLowerCase();
+    return e ? `cart:${e}` : 'cart:guest';
+  }
+
+  private readCart(key: string): CartItem[] {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeCart(key: string, cart: CartItem[]) {
+    try {
+      localStorage.setItem(key, JSON.stringify(cart ?? []));
+    } catch {
+      // no romper si falla storage
+    }
+  }
+
+  private stockLimit(p: Producto): number {
+    return p.stock == null ? Number.POSITIVE_INFINITY : Number(p.stock);
+  }
+
+  private mergeCarts(base: CartItem[], incoming: CartItem[]): CartItem[] {
+    if (!incoming?.length) return base ?? [];
+    if (!base?.length) return incoming ?? [];
+
+    const map = new Map<number, CartItem>();
+    for (const it of base) {
+      map.set(it.producto.id, { ...it, cantidad: Number(it.cantidad) || 0 });
+    }
+
+    for (const it of incoming) {
+      const id = it.producto.id;
+      const addQty = Number(it.cantidad) || 0;
+      const prev = map.get(id);
+
+      if (!prev) {
+        map.set(id, { ...it, cantidad: addQty });
+      } else {
+        // respeta stock si existe
+        const stock = this.stockLimit(prev.producto);
+        const nextQty = Math.min(stock, (Number(prev.cantidad) || 0) + addQty);
+        map.set(id, { ...prev, cantidad: nextQty });
+      }
+    }
+
+    return Array.from(map.values()).filter(x => (Number(x.cantidad) || 0) > 0);
+  }
+
+  // -------------------------
+  // Producto seleccionado
+  // -------------------------
   selectProducto(p: Producto | null) {
     this._selected.set(p);
   }
 
-  // ✅ Agrega 1 respetando stock
+  // -------------------------
+  // Carrito ops
+  // -------------------------
   addToCart(p: Producto) {
     const cart = this._cart();
     const idx = cart.findIndex((x) => x.producto.id === p.id);
 
-    const stock = p.stock ?? 0;
-    if (stock <= 0) return; // sin stock
+    const stock = this.stockLimit(p);
+    if (stock <= 0) return;
 
     if (idx >= 0) {
-      const current = cart[idx].cantidad;
-      if (current >= stock) return; // ya está en el máximo
+      const current = Number(cart[idx].cantidad) || 0;
+      if (current >= stock) return;
 
       const copy = cart.slice();
       copy[idx] = { ...copy[idx], cantidad: current + 1 };
@@ -65,44 +181,46 @@ export class ShopStore {
     }
   }
 
-  // ✅ suma qty en carrito (modal)
   incQty(productId: number) {
     const cart = this._cart();
     const idx = cart.findIndex((x) => x.producto.id === productId);
     if (idx < 0) return;
 
     const it = cart[idx];
-    const stock = it.producto.stock ?? 0;
-    if (stock <= 0 || it.cantidad >= stock) return;
+    const stock = this.stockLimit(it.producto);
+    const qty = Number(it.cantidad) || 0;
+
+    if (stock <= 0 || qty >= stock) return;
 
     const copy = cart.slice();
-    copy[idx] = { ...it, cantidad: it.cantidad + 1 };
+    copy[idx] = { ...it, cantidad: qty + 1 };
     this._cart.set(copy);
   }
 
-  // ✅ resta qty en carrito (si llega a 0, elimina)
   decQty(productId: number) {
     const cart = this._cart();
     const idx = cart.findIndex((x) => x.producto.id === productId);
     if (idx < 0) return;
 
     const it = cart[idx];
-    if (it.cantidad <= 1) {
+    const qty = Number(it.cantidad) || 0;
+
+    if (qty <= 1) {
       this._cart.set(cart.filter((x) => x.producto.id !== productId));
       return;
     }
 
     const copy = cart.slice();
-    copy[idx] = { ...it, cantidad: it.cantidad - 1 };
+    copy[idx] = { ...it, cantidad: qty - 1 };
     this._cart.set(copy);
   }
 
-  // ✅ helper para UI (deshabilitar "+")
   canInc(productId: number): boolean {
     const it = this._cart().find((x) => x.producto.id === productId);
     if (!it) return false;
-    const stock = it.producto.stock ?? 0;
-    return stock > 0 && it.cantidad < stock;
+    const stock = this.stockLimit(it.producto);
+    const qty = Number(it.cantidad) || 0;
+    return stock > 0 && qty < stock;
   }
 
   removeFromCart(productId: number) {
@@ -111,25 +229,19 @@ export class ShopStore {
 
   clearCart() {
     this._cart.set([]);
-  }
-
-  // UI: carrito modal abierto/cerrado
-  private readonly _cartOpen = signal(false);
-  readonly cartOpen = this._cartOpen.asReadonly();
-
-  openCart() {
-    this._cartOpen.set(true);
-  }
-
-  closeCart() {
-    this._cartOpen.set(false);
-  }
-
-  toggleCart() {
-    this._cartOpen.update((v) => !v);
+    try {
+      localStorage.removeItem(this._currentKey());
+    } catch {}
   }
 
   setCart(items: CartItem[]) {
     this._cart.set(items ?? []);
   }
+
+  // -------------------------
+  // UI carrito
+  // -------------------------
+  openCart() { this._cartOpen.set(true); }
+  closeCart() { this._cartOpen.set(false); }
+  toggleCart() { this._cartOpen.update(v => !v); }
 }

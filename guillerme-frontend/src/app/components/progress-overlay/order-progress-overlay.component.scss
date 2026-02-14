@@ -1,0 +1,144 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Panel sin card blanca */
+.panel {
+  width: min(520px, 92vw);
+
+  /* 👇 IMPORTANTE */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;  /* todo alineado a la izquierda */
+
+  background: transparent;
+  padding: 0;
+}
+
+/* ---------- TEXTOS ---------- */
+
+.title {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--celeste);
+  text-align: left; /* 👈 izquierda */
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  text-align: left; /* 👈 izquierda */
+}
+
+/* ---------- STEPPER ---------- */
+
+.stepper {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+
+  width: 100%; /* ocupa todo el ancho */
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 28px auto;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Rail */
+.rail {
+  display: grid;
+  justify-items: center;
+}
+
+/* Circulos */
+.circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.circle.active {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.circle.done {
+  border-color: #ffffff;
+  background: rgba(44,205,14,1) 100%;
+  color: #ffffff;
+}
+
+/* Línea vertical */
+.line {
+  width: 2px;
+  height: 28px;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.line.done {
+  background: #ffffff;
+}
+
+/* Labels */
+.text {
+  display: flex;
+  align-items: center;
+}
+
+.labelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.label.active {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.label.done {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Spinner */
+.miniSpinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

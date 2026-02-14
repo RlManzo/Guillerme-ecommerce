@@ -89,4 +89,15 @@ export class Header {
 onDocClick() {
   this.closeResults();
 }
+
+formatPrice(value?: number | null): string {
+  const n = Number(value ?? 0);
+  if (!Number.isFinite(n) || n <= 0) return 'Consultar';
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
 }

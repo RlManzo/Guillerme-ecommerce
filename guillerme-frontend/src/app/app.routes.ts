@@ -13,7 +13,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginPage },
   { path: 'register', component: RegisterPage },
  { path: 'orders', component: OrdersPage },
- {path: 'admin/products', component: AdminProductsPage},
  { path: 'admin/products', component: AdminProductsPage, canActivate: [adminGuard] },
  { path: 'admin/orders', component: AdminOrdersPage },
   { path: '**', redirectTo: '' }, // SIEMPRE al final

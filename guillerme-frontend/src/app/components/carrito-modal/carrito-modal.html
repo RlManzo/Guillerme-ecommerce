@@ -104,3 +104,8 @@
     </div>
   </div>
 </div>
+
+<app-order-progress-overlay
+  *ngIf="showProgress()"
+  [step]="progressStep()">
+</app-order-progress-overlay>

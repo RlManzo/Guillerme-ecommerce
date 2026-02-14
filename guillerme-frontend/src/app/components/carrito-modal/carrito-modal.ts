@@ -7,11 +7,12 @@ import { AuthService } from '../../shared/auth/auth.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { MatDialog } from '@angular/material/dialog';
 import { OrderSuccessDialogComponent } from './order-success-dialog';
+import { OrderProgressOverlayComponent } from '../progress-overlay/order-progress-overlay.component';
 
 @Component({
   selector: 'app-carrito-modal',
   standalone: true,
-  imports: [NgIf, NgFor, CurrencyPipe],
+  imports: [NgIf, NgFor, CurrencyPipe, OrderProgressOverlayComponent],
   templateUrl: './carrito-modal.html',
   styleUrl: './carrito-modal.scss',
 })
@@ -22,6 +23,8 @@ export class CarritoModal {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  readonly showProgress = signal(false);
+  readonly progressStep = signal(0);
 
   readonly hasItems = computed(() => this.store.cartCount() > 0);
   readonly sending = signal(false);
@@ -82,61 +85,82 @@ dec(productId: number, ev?: MouseEvent) {
 
 
   completarCompra() {
-    // si no está logueado -> login
-    if (!this.auth.isLogged()) {
-      this.toast.error('Iniciá sesión para completar la compra');
-      this.router.navigateByUrl('/login');
-      return;
-    }
-
-    // armar payload desde el carrito
-    const cart = this.store.cart();
-    if (!cart.length) return;
-
-    // ✅ Validación extra: no permitir comprar si supera stock o stock=0
-    const invalid = cart.find((it) => {
-      const stock = it.producto.stock ?? 0;
-      return stock <= 0 || it.cantidad > stock;
-    });
-
-    if (invalid) {
-      const name = invalid.producto.nombre ?? 'Producto';
-      this.toast.error(`Stock insuficiente para: ${name}`);
-      return;
-    }
-
-    const body = {
-      items: cart.map((it) => ({
-        productId: it.producto.id,
-        qty: it.cantidad,
-      })),
-      comment: null,
-    };
-
-    this.sending.set(true);
-    this.orders.checkout(body).subscribe({
-      next: (res) => {
-        this.sending.set(false);
-        this.store.clearCart();
-        this.close();
-
-        this.dialog.open(OrderSuccessDialogComponent, {
-          width: '520px',
-          maxWidth: '92vw',
-          data: {
-            message:
-              '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp para completar el pago y acordar el envío.',
-          },
-        });
-
-        this.toast.success(`Pedido #${res.orderId} enviado.`);
-      },
-      error: (e) => {
-        console.error(e);
-        this.sending.set(false);
-        this.toast.error('No se pudo completar la compra. Probá de nuevo.');
-      },
-    });
+  // si no está logueado -> login
+  if (!this.auth.isLogged()) {
+    this.toast.error('Iniciá sesión para completar la compra');
+    this.router.navigateByUrl('/login');
+    return;
   }
+
+  // armar payload desde el carrito
+  const cart = this.store.cart();
+  if (!cart.length) return;
+
+  // ✅ Validación extra: no permitir comprar si supera stock o stock=0
+  const invalid = cart.find((it) => {
+    const stock = it.producto.stock ?? 0;
+    return stock <= 0 || it.cantidad > stock;
+  });
+
+  if (invalid) {
+    const name = invalid.producto.nombre ?? 'Producto';
+    this.toast.error(`Stock insuficiente para: ${name}`);
+    return;
+  }
+
+  const body = {
+    items: cart.map((it) => ({
+      productId: it.producto.id,
+      qty: it.cantidad,
+    })),
+    comment: null,
+  };
+
+  // ✅ Overlay + stages
+  this.sending.set(true);
+
+  this.showProgress.set(true);     // <-- signal que agregaste
+  this.progressStep.set(0);        // 0: Procesando pedido
+
+  // como tu checkout es 1 request, simulamos avance visual
+  const t1 = window.setTimeout(() => this.progressStep.set(1), 600);  // 1: Confirmando stock
+  const t2 = window.setTimeout(() => this.progressStep.set(2), 1200); // 2: Aceptando pedido
+
+  this.orders.checkout(body).subscribe({
+    next: (res) => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+
+      this.showProgress.set(false);
+      this.sending.set(false);
+
+      this.store.clearCart();
+      this.close();
+
+      this.dialog.open(OrderSuccessDialogComponent, {
+        width: '520px',
+        maxWidth: '92vw',
+        data: {
+          message:
+            '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp para completar el pago y acordar el envío.',
+        },
+      });
+
+      this.toast.success(`Pedido #${res.orderId} enviado.`);
+    },
+    error: (e) => {
+      console.error(e);
+
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+
+      this.showProgress.set(false);
+      this.sending.set(false);
+
+      this.toast.error('No se pudo completar la compra. Probá de nuevo.');
+    },
+  });
+}
+
   
 }

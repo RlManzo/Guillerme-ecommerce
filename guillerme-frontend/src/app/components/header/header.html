@@ -22,53 +22,55 @@
         </i>
 
         <!-- Resultados -->
-        <div
-          class="card shadow-sm buscadorContainer"
-          *ngIf="resultsOpen"
-          (click)="$event.stopPropagation()"
-        >
-          <button type="button" class="btn-close" aria-label="Close" (click)="closeResults()"></button>
+        <!-- Resultados -->
+<div
+  class="card shadow-sm buscadorContainer"
+  *ngIf="resultsOpen"
+  (click)="$event.stopPropagation()"
+>
+  <div class="container text-center m-0 p-0 containerLi">
 
-          <div class="container text-center m-0 p-0 containerLi">
-            <div class="p-2" *ngIf="filteredProducts.length === 0 && query.length > 0">
-                Sin resultados
-                </div>
+    <div class="p-2 text-muted" *ngIf="filteredProducts.length === 0 && query.length > 0">
+      Sin resultados
+    </div>
 
-                <button
-                type="button"
-                class="btn w-100 text-start"
-                *ngFor="let p of filteredProducts"
-                (click)="openProduct(p)"
-                >
-                {{ p.nombre }}
-                </button>
-          </div>
+    <button
+      type="button"
+      class="resultItem"
+      *ngFor="let p of filteredProducts"
+      (click)="openProduct(p)"
+    >
+      <!-- miniatura -->
+      <div class="thumb">
+        <img
+          *ngIf="p.img; else noImg"
+          class="resultImg"
+          [src]="p.img"
+          [alt]="p.nombre"
+        />
+        <ng-template #noImg>
+          <div class="resultImg placeholder" aria-hidden="true">🖼️</div>
+        </ng-template>
+      </div>
+
+      <div class="resultInfo">
+        <div class="resultName">{{ p.nombre }}</div>
+        <div class="resultPrice" *ngIf="(p.precio ?? 0) > 0">
+          {{ formatPrice(p.precio) }}
         </div>
+        <div class="resultPrice muted" *ngIf="(p.precio ?? 0) <= 0">
+          Consultar
+        </div>
+      </div>
+
+    </button>
+
+  </div>
+</div>
+
       </form>
     </section>
 
-    <!-- Hero 
-    <section class="col-12 d-flex flex-column justify-content-center align-items-center
-      d-sm-flex flex-sm-column justify-content-sm-center align-items-sm-center
-      d-md-flex flex-md-row justify-content-md-center align-items-md-center
-      d-lg-flex flex-lg-row justify-content-lg-center align-items-lg-center
-      d-xl-flex flex-xl-row justify-content-xl-center align-items-xl-center
-      d-xxl-flex flex-xxl-row justify-content-xxl-center align-items-xxl-center">
-
-      <div class="container-texto d-flex flex-column justify-content-center align-items-center">
-        <img src="assets/iconoHeader.svg" alt="icono" />
-        <h1>PERSONALIZAMOS <br /> TU REGALO</h1>
-        <img class="line" src="assets/line.svg" alt="line" />
-        <h2>Merchandizing para <br /> empresas</h2>
-        <h3>LKS Style</h3>
-
-        <a href="#presupuesto">Hacer mi pedido</a>
-      </div>
-
-      <div class="container-icono d-flex justify-content-center align-items-center">
-        <img src="assets/DibujosHeader.svg" alt="dibujos" />
-      </div>
-    </section>-->
 
   </div>
 </header>

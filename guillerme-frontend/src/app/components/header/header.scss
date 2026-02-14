@@ -1,40 +1,99 @@
-.box-header-buscador {
-  /* si querés mantener el buscador prolijo dentro de navbar */
-}
-
 .form-buscador {
-  position: relative; /* CLAVE para anclar el dropdown */
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* input */
 .inputBusqueda {
   width: 100%;
-  max-width: 420px; /* ajustá a tu diseño */
-  padding-right: 46px; /* espacio para la lupita */
+  max-width: 420px;
+  padding-right: 46px;
 }
 
-.iconInput {
-  right: calc(50% - 210px + 12px); 
-  /* si preferís más simple: poné el input y el icon dentro de un wrapper */
-}
-
-/* DROPDOWN flotante */
+/* dropdown */
 .buscadorContainer {
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 420px; /* igual que el input */
-  z-index: 20000; /* arriba del navbar */
+  max-width: 420px;
+  z-index: 20000;
   overflow: hidden;
+  border-radius: 12px;
 }
 
 /* lista */
 .containerLi {
-  max-height: 280px;
+  max-height: 320px;
   overflow-y: auto;
+  padding: 6px;
+}
+
+/* item tipo fila */
+.resultItem {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px 1fr 18px;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.resultItem:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.resultImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f3f4f6;
+}
+
+/* nombre + precio */
+.resultInfo {
+  display: grid;
+  gap: 2px;
+}
+
+.resultName {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+
+  /* truncado prolijo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.resultPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.resultPrice.muted {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.resultArrow {
+  justify-self: end;
+  color: #9ca3af;
+  font-size: 18px;
+  line-height: 1;
 }

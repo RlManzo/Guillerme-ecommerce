@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   template: `
-    <h2 mat-dialog-title>Pedido enviado</h2>
+    <h2 mat-dialog-title class="admin-header">¡Pedido enviado!</h2>
 
     <div mat-dialog-content>
       <p>{{ data.message }}</p>

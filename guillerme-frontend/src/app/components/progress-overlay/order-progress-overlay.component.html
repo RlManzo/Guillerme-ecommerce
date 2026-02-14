@@ -1,0 +1,33 @@
+<div class="overlay" role="status" aria-live="polite">
+  <div class="panel">
+    <div class="title">Enviando tu pedido...</div>
+    <div class="subtitle">No cierres esta ventana</div>
+
+    <div class="stepper">
+      <div class="step" *ngFor="let label of steps; let i = index">
+        <div class="rail">
+          <div class="circle" [class.done]="isDone(i)" [class.active]="isActive(i)">
+            <span *ngIf="isDone(i)">✓</span>
+            <span *ngIf="!isDone(i)">{{ i + 1 }}</span>
+          </div>
+
+          <div
+            class="line"
+            *ngIf="i < steps.length - 1"
+            [class.done]="isDone(i + 1)"
+          ></div>
+        </div>
+
+        <div class="text">
+          <div class="labelRow">
+            <div class="label" [class.done]="isDone(i)" [class.active]="isActive(i)">
+              {{ label }}
+            </div>
+
+            <span class="miniSpinner" *ngIf="isActive(i)"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
