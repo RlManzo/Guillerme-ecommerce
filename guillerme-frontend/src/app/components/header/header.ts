@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, HostListener } from '@angular/core';
+import { Component, inject, HostListener, ElementRef, ViewChild, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { ProductsService } from '../productos/products.service'; // <-- ajustá path
-import { Product } from '../productos/product.model'; // <-- ajustá path
-import { filterProducts } from '../productos/search.util'; // <-- ajustá path
+import { ProductsService } from '../productos/products.service';
+import { Product } from '../productos/product.model';
+import { filterProducts } from '../productos/search.util';
+import { ShopStore, Producto } from '../../shared/store/shop.store';
 
-import { ShopStore, Producto } from '../../shared/store/shop.store'; // <-- ajustá path
-
-declare const bootstrap: any; // para abrir el modal (Bootstrap JS)
+declare const bootstrap: any;
 
 @Component({
   selector: 'app-header',
@@ -21,8 +20,16 @@ export class Header {
   private readonly productsService = inject(ProductsService);
   private readonly store = inject(ShopStore);
 
+  @ViewChild('qInput') qInput?: ElementRef<HTMLInputElement>;
+
   query = '';
   resultsOpen = false;
+
+  // ✅ modo navbar mobile
+  readonly searchOpen = signal(false);
+
+  // simple: por ancho de pantalla
+  readonly isMobile = computed(() => window.innerWidth <= 768);
 
   private readonly productsSig = toSignal(this.productsService.products$, {
     initialValue: [] as Product[],
@@ -30,44 +37,72 @@ export class Header {
 
   filteredProducts: Product[] = [];
 
+  toggleSearch(ev?: MouseEvent) {
+    ev?.preventDefault();
+    ev?.stopPropagation();
+
+    // si está abierto y está vacío, lo cierro
+    if (this.searchOpen() && !this.query.trim()) {
+      this.closeAll();
+      return;
+    }
+
+    this.searchOpen.set(true);
+
+    // foco al input
+    setTimeout(() => this.qInput?.nativeElement?.focus(), 0);
+
+    // si ya había texto, reabrimos resultados
+    if (this.query.trim()) this.resultsOpen = true;
+  }
+
+  closeAll() {
+    this.searchOpen.set(false);
+    this.resultsOpen = false;
+    this.query = '';
+    this.filteredProducts = [];
+  }
+
   onInput(ev: Event) {
     const value = (ev.target as HTMLInputElement).value ?? '';
     this.query = value;
-    this.resultsOpen = true;
 
     const q = value.trim();
     if (!q) {
       this.filteredProducts = [];
+      this.resultsOpen = false;
       return;
     }
 
-    // 🔎 buscar en productos reales
+    this.resultsOpen = true;
     this.filteredProducts = filterProducts(this.productsSig(), q).slice(0, 10);
   }
 
   openResults() {
   this.resultsOpen = this.query.trim().length > 0;
+
+  if (window.innerWidth <= 768) {
+    const input = document.querySelector('.inputBusqueda') as HTMLElement | null;
+    if (input) {
+      const r = input.getBoundingClientRect();
+      const top = Math.round(r.bottom + 10); // 10px de gap
+      document.documentElement.style.setProperty('--search-top', `${top}px`);
+    }
+  }
 }
 
-  closeResults() {
-    this.resultsOpen = false;
-  }
 
   openProduct(p: Product) {
-    // 1) setear el producto para que el modal lo lea
     this.store.selectProducto(this.toProducto(p));
 
-    // 2) cerrar buscador
-    this.closeResults();
+    // cerrar buscador
+    this.resultsOpen = false;
+    this.searchOpen.set(false);
     this.query = '';
     this.filteredProducts = [];
 
-    // 3) abrir modal bootstrap
     const el = document.getElementById('staticBackdrop');
-    if (el) {
-      const modal = bootstrap.Modal.getOrCreateInstance(el);
-      modal.show();
-    }
+    if (el) bootstrap.Modal.getOrCreateInstance(el).show();
   }
 
   private toProducto(p: Product): Producto {
@@ -82,22 +117,52 @@ export class Header {
       categoria2: (p.servicios?.[1] as any) ?? '',
       detalle1: p.variantes?.[0]?.label ?? '',
       detalle2: p.variantes?.[1]?.label ?? '',
+      precio: (p as any).precio ?? 0,
+      stock: (p as any).stock ?? 0,
     } as unknown as Producto;
   }
 
+  formatPrice(value?: number | null): string {
+    const n = Number(value ?? 0);
+    if (!Number.isFinite(n) || n <= 0) return 'Consultar';
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 0,
+    }).format(n);
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    // si vuelve a desktop, dejamos input visible
+    if (window.innerWidth > 768) this.searchOpen.set(true);
+    // si va a mobile, lo cerramos si no hay query
+    if (window.innerWidth <= 768 && !this.query.trim()) this.searchOpen.set(false);
+  }
+
   @HostListener('document:click')
-onDocClick() {
-  this.closeResults();
-}
+  onDocClick() {
+    // cerrar resultados siempre
+    this.resultsOpen = false;
 
-formatPrice(value?: number | null): string {
-  const n = Number(value ?? 0);
-  if (!Number.isFinite(n) || n <= 0) return 'Consultar';
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
-  }).format(n);
-}
+    // en mobile: si no hay texto, cerrar el buscador
+    if (window.innerWidth <= 768 && !this.query.trim()) {
+      this.searchOpen.set(false);
+    }
+  }
 
+  readonly mobileSearchOpen = signal(false);
+
+  closeResults() {
+  this.resultsOpen = false;
+
+  // si estás usando signal para mobile
+  if (typeof this.mobileSearchOpen === 'function') {
+    this.mobileSearchOpen.set?.(false);
+  }
+
+  // opcional: limpiar búsqueda
+  // this.query = '';
+  // this.filteredProducts = [];
+}
 }

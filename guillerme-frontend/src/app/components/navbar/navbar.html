@@ -1,4 +1,4 @@
-<nav class=" navbar-fixed">
+<nav class="navbar-fixed">
 
   <!-- TOP BAR REDES -->
   <div class="topbar">
@@ -10,7 +10,6 @@
 
       <div class="topbar-right">
         <a class="social-link" href="https://www.instagram.com/guillerme.guillerme.589" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <!-- Instagram -->
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2zm9 2h-9A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4z"/>
             <path d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
@@ -19,21 +18,18 @@
         </a>
 
         <a class="social-link" href="https://www.facebook.com/guillerme.guillerme.589" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-          <!-- Facebook -->
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M13.5 22v-8h2.6l.4-3H13.5V9.1c0-.9.3-1.6 1.6-1.6h1.6V4.8c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V11H7.5v3H10v8h3.5z"/>
           </svg>
         </a>
 
         <a class="social-link" href="https://www.tiktok.com/@guillermeguillerme?_r=1&_t=ZS-93ksEaOcq3s" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
-          <!-- TikTok (simplificado) -->
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M14 3v10.2a3.6 3.6 0 1 1-3-3.5V7.6a6.2 6.2 0 1 0 5 6.1V8.4c1.1.8 2.5 1.3 4 1.3V6.8c-2 0-3.6-1.6-3.6-3.6H14z"/>
           </svg>
         </a>
 
         <a class="social-link" href="https://wa.me/5491138617954?text=Hola!%20Quiero%20hacer%20una%20consulta" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-          <!-- WhatsApp -->
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 2a9.9 9.9 0 0 0-8.6 14.9L2 22l5.3-1.4A9.9 9.9 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3.1.8.8-3-.2-.3A8 8 0 1 1 12 20z"/>
             <path d="M16.6 13.9c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1l-.7.8c-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.3-.7-.6-1.1-1.4-1.2-1.6-.1-.2 0-.4.1-.5l.5-.6c.1-.1.1-.3.1-.4l-.1-.4c-.1-.2-.5-1.2-.7-1.6-.2-.4-.4-.3-.5-.3h-.4c-.1 0-.4.1-.6.3-.2.2-.8.8-.8 2 0 1.2.8 2.3.9 2.4.1.1 1.6 2.5 3.9 3.4.6.3 1 .4 1.4.5.6.2 1.1.2 1.5.1.5-.1 1.3-.5 1.5-1 .2-.5.2-1 .2-1.1 0-.1-.2-.2-.4-.3z"/>
@@ -45,7 +41,6 @@
 
   <div class="row">
     <div class="navbar col-12 d-flex justify-content-around align-items-center">
-      
 
       <div class="logo d-flex justify-content-center align-items-center">
         <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
@@ -57,52 +52,37 @@
         [ngClass]="{ 'open': menuOpen() }"
       >
         <a class="all sm-mini-phone all-colour" href="#servicios" (click)="closeMenu()">INICIO</a>
+
         <!-- PRODUCTOS (dropdown) -->
-            <div class="nav-item dropdown" [class.open]="productsOpen()">
-            <button
-              type="button"
-              class="all nav-link-btn"
-              (click)="toggleProductsMenu($event)"
-              aria-haspopup="true"
-              [attr.aria-expanded]="productsOpen()"
-            >
-              PRODUCTOS <span class="user-plus">▾</span>
-            </button>
+        <div class="nav-item dropdown" [class.open]="productsOpen()">
+          <button
+            type="button"
+            class="all nav-link-btn"
+            (click)="toggleProductsMenu($event)"
+            aria-haspopup="true"
+            [attr.aria-expanded]="productsOpen()"
+          >
+            PRODUCTOS <span class="user-plus">▾</span>
+          </button>
 
-            <div class="dropdown-menu-custom">
-              <a class="dropdown-item" href="#producto" (click)="goProducts('all'); $event.preventDefault()">
-                Todos los productos
-              </a>
-
-              <a class="dropdown-item" href="#producto" (click)="goProducts('libreria'); $event.preventDefault()">
-                Librería
-              </a>
-
-              <a class="dropdown-item" href="#producto" (click)="goProducts('combos'); $event.preventDefault()">
-                Combos
-              </a>
-
-              <a class="dropdown-item" href="#producto" (click)="goProducts('varios'); $event.preventDefault()">
-                Varios
-              </a>
-            </div>
-
+          <div class="dropdown-menu-custom">
+            <a class="dropdown-item" href="#producto" (click)="goProducts('all'); $event.preventDefault()">Todos los productos</a>
+            <a class="dropdown-item" href="#producto" (click)="goProducts('libreria'); $event.preventDefault()">Librería</a>
+            <a class="dropdown-item" href="#producto" (click)="goProducts('combos'); $event.preventDefault()">Combos</a>
+            <a class="dropdown-item" href="#producto" (click)="goProducts('varios'); $event.preventDefault()">Varios</a>
           </div>
-
+        </div>
 
         <a class="all" href="#nosotros" (click)="closeMenu()">NOSOTROS</a>
         <a class="all" href="#nosotros" (click)="closeMenu()">CONTACTO</a>
-        <app-header></app-header>
+
+        <!-- BUSCADOR SOLO DESKTOP (CSS lo apaga en mobile) -->
+        <div class="nav-search nav-search--desktop" (click)="$event.stopPropagation()">
+          <app-header></app-header>
+        </div>
 
         <!-- Auth -->
-        <a
-          *ngIf="!isLogged()"
-          class="all"
-          routerLink="/login"
-          (click)="closeMenu()"
-        >
-          INGRESAR
-        </a>
+        <a *ngIf="!isLogged()" class="all" routerLink="/login" (click)="closeMenu()">INGRESAR</a>
 
         <div *ngIf="isLogged()" class="user-menu" (click)="$event.stopPropagation()">
           <button
@@ -116,31 +96,32 @@
           </button>
 
           <div class="user-dropdown" *ngIf="userMenuOpen()">
-            <!-- ✅ SOLO ADMIN -->
-            <button
-              *ngIf="isAdmin()"
-              class="user-item"
-              type="button"
-              (click)="goAdminProducts()"
-            >
-              Admin productos
-            </button>
-
-            <button class="user-item" type="button" (click)="goOrders()">
-              Ver pedidos
-            </button>
-
-            <button class="user-item danger" type="button" (click)="logout()">
-              Salir
-            </button>
+            <button *ngIf="isAdmin()" class="user-item" type="button" (click)="goAdminProducts()">Admin productos</button>
+            <button class="user-item" type="button" (click)="goOrders()">Ver pedidos</button>
+            <button class="user-item danger" type="button" (click)="logout()">Salir</button>
           </div>
         </div>
       </div>
 
+      <!-- CARRITO + BOTÓN LUPA (lupa solo mobile por CSS) -->
       <div class="carrito d-flex justify-content-center align-items-center gap-3" *ngIf="!isAdmin()">
+
+        <!-- BOTÓN LUPA (solo mobile por CSS) -->
+        <button
+          class="navSearchToggle navSearchToggle--mobile"
+          type="button"
+          (click)="$event.stopPropagation(); toggleMobileSearch()"
+          aria-label="Buscar"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.146 15.3707 4.888 14.112C3.63 12.8533 3.00067 11.316 3 9.5C3 7.68333 3.62933 6.146 4.888 4.888C6.14667 3.63 7.684 3.00067 9.5 3C11.3167 3 12.854 3.62933 14.112 4.888C15.37 6.14667 15.9993 7.684 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8127 13.5623 12.688 12.687C13.5633 11.8117 14.0007 10.7493 14 9.5C14 8.25 13.5623 7.18733 12.687 6.312C11.8117 5.43667 10.7493 4.99933 9.5 5C8.25 5 7.18733 5.43767 6.312 6.313C5.43667 7.18833 4.99933 8.25067 5 9.5C5 10.75 5.43767 11.8127 6.313 12.688C7.18833 13.5633 8.25067 14.0007 9.5 14Z" fill="#EA5534"/>
+          </svg>
+        </button>
+
+        <!-- CARRITO -->
         <div class="container-cart">
           <button class="botonCarrito" type="button" (click)="$event.stopPropagation(); openCart()">
-          <svg width="57" height="57" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="57" height="57" viewBox="0 0 57 57" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9.95499 40.4516C11.0522 45.9355 11.6009 48.6763 13.5697 50.2912C15.541 51.9062 18.3364 51.9062 23.9295 51.9062H33.8142C39.4074 51.9062 42.2027 51.9062 44.1716 50.2912C46.1429 48.6763 46.6891 45.9355 47.7887 40.4516L49.2137 33.3266C50.7907 25.4416 51.5792 21.4991 49.4417 18.889C47.3042 16.2812 43.281 16.2812 35.2392 16.2812H22.5069C14.4651 16.2812 10.4419 16.2812 8.30437 18.889C6.16687 21.4968 6.95537 25.4392 8.53237 33.3266L9.95499 40.4516Z" fill="#45ACB4"/>
               <path d="M35.9961 25.7812C37.3078 25.7812 38.3711 24.7179 38.3711 23.4062C38.3711 22.0946 37.3078 21.0312 35.9961 21.0312C34.6844 21.0312 33.6211 22.0946 33.6211 23.4062C33.6211 24.7179 34.6844 25.7812 35.9961 25.7812Z" fill="#EDDA6A"/>
               <path d="M21.7461 25.7812C23.0578 25.7812 24.1211 24.7179 24.1211 23.4062C24.1211 22.0946 23.0578 21.0312 21.7461 21.0312C20.4344 21.0312 19.3711 22.0946 19.3711 23.4062C19.3711 24.7179 20.4344 25.7812 21.7461 25.7812Z" fill="#EDDA6A"/>
@@ -151,6 +132,7 @@
           <p class="numeroCarrito">{{ store.cartCount() }}</p>
         </div>
 
+        <!-- HAMBURGER -->
         <button class="hamburger hamburger--spring"
                 type="button"
                 (click)="$event.stopPropagation(); toggleMenu()">
@@ -158,8 +140,14 @@
             <span class="hamburger-inner"></span>
           </span>
         </button>
-      </div>
 
+      </div>
     </div>
   </div>
+
+  <!-- BLOQUE BUSCADOR SOLO MOBILE (empuja el contenido) -->
+  <div class="mobileSearchBlock" *ngIf="mobileSearchOpen()">
+    <app-header></app-header>
+  </div>
+
 </nav>

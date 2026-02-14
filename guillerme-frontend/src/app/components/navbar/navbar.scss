@@ -1,4 +1,8 @@
-.navbar-fixed{
+/* =========================
+   NAVBAR (BASE)
+========================= */
+
+.navbar-fixed {
   position: sticky !important;
   top: 0;
   left: 0;
@@ -6,6 +10,39 @@
   z-index: 999;
 }
 
+.navbar {
+  background: var(--crema);
+  position: relative;
+}
+
+.logo {
+  flex: 0 0 auto;
+}
+
+.logo img.logo-img {
+  height: 120px; // desktop
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.menu-items {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 18px;
+}
+
+.menu-items .all:hover {
+  color: var(--ladrillo);
+}
+
+.all-colour {
+  color: var(--ladrillo) !important;
+}
+
+/* =========================
+   USER MENU
+========================= */
 
 .user-menu {
   position: relative;
@@ -51,7 +88,7 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 170px;
-  background: #0f2335; // acorde a tu navbar
+  background: #0f2335;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   overflow: hidden;
@@ -82,124 +119,10 @@
   }
 }
 
-.logo img.logo-img {
-  height: 120px;      // ajustá
-  width: auto;
-  display: block;
-  object-fit: contain;
-}
+/* =========================
+   TOPBAR
+========================= */
 
-.navbar{
-  background: var(--crema);
-}
-
-.menu-items .all:hover{
-  color: var(--ladrillo);
-}
-
-.all-colour{
-  color: var(--ladrillo) !important;
-}
-
-
-.navbar {
-  background: var(--crema);
-  position: relative;
-}
-
-.logo {
-  flex: 0 0 auto;
-}
-
-.menu-items {
-  flex: 1 1 auto;
-}
-
-/* Desktop default */
-.menu-items {
-  display: flex;
-  gap: 18px;
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-
-  /* baja altura del logo en mobile */
-  .logo img.logo-img {
-    height: 52px;   /* clave: 120px en mobile rompe */
-  }
-
-  /* el contenedor principal que hoy tiene p-4 te agranda todo */
-  .navbar.col-12 {
-    padding: 12px !important; /* pisa el p-4 */
-  }
-
-  /* Por defecto oculto */
-  .menu-items {
-    display: none;
-  }
-
-  /* Cuando abrís el menú: overlay */
-  .menu-items.open {
-    display: flex;
-    position: fixed;
-    top: 72px;            /* ajustá según la altura real de tu navbar */
-    left: 0;
-    right: 0;
-
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
-    gap: 20px;
-    padding: 22px 16px;
-
-    background: #0f2335;  /* el azul de tu screenshot */
-    z-index: 10000;
-
-    /* importante para que no se pase de alto */
-    max-height: calc(100vh - 72px);
-    overflow-y: auto;
-  }
-
-  /* Links más “clickeables” */
-  .menu-items.open a.all {
-    color: #45ACB4;
-    font-size: 18px;
-    padding: 10px 0;
-  }
-
-  /* Header / user menu: a veces se desordena si queda inline */
-  .menu-items.open app-header {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-}
-
-
-
-@media (max-width: 768px) {
-  .menu-items { display: none !important; }         // gana a .d-flex
-  .menu-items.open { display: flex !important; }    // y al abrir también
-
-
-  .user-dropdown {
-    right: 50%;
-    transform: translateX(50%);
-    min-width: 220px;
-  }
-
-  .user-email {
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-
-/* TOPBAR */
 .topbar {
   width: 100%;
   background: var(--crema);
@@ -234,7 +157,6 @@
   gap: 10px;
 }
 
-/* ÍCONOS */
 .social-link {
   width: 30px;
   height: 30px;
@@ -261,8 +183,151 @@
   border-color: rgba(0, 0, 0, 0.18);
 }
 
-/* Mobile: compacta la topbar */
+/* =========================
+   DROPDOWN PRODUCTOS
+========================= */
+
+.nav-item.dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-link-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0;
+  min-width: 230px;
+  background: var(--crema);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  z-index: 20000;
+  display: none;
+}
+
+.dropdown-menu-custom::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  height: 10px;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--celeste);
+  font-weight: 400;
+  font-size: 1rem;
+  font-family: "Inter", sans-serif;
+  letter-spacing: inherit;
+}
+
+.dropdown-item:hover {
+  background: rgba(69, 172, 180, 0.12);
+  color: var(--ladrillo);
+}
+
+/* desktop: hover abre */
+@media (min-width: 769px) {
+  .nav-item.dropdown:hover .dropdown-menu-custom {
+    display: block;
+  }
+}
+
+/* =========================
+   SEARCH: DESKTOP vs MOBILE
+   (clave para que NO empuje el carrito en desktop)
+========================= */
+
+/* Buscador desktop visible / bloque mobile oculto */
+.nav-search--desktop { display: flex; }
+.mobileSearchBlock { display: none; }
+
+/* Botón lupa: oculto por defecto (desktop) */
+.navSearchToggle--mobile { display: none; }
+
+/* =========================
+   MOBILE
+========================= */
+
 @media (max-width: 768px) {
+  /* logo más chico */
+  .logo img.logo-img {
+    height: 52px;
+  }
+
+  /* pisa el p-4 */
+  .navbar.col-12 {
+    padding: 12px !important;
+  }
+
+  /* menú oculto */
+  .menu-items {
+    display: none !important;
+  }
+
+  /* overlay del menú */
+  .menu-items.open {
+    display: flex !important;
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 20px;
+    padding: 22px 16px;
+
+    background: #0f2335;
+    z-index: 10000;
+
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+  }
+
+  .menu-items.open a.all {
+    color: #45ACB4;
+    font-size: 18px;
+    padding: 10px 0;
+  }
+
+  .menu-items.open app-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* dropdown usuario centrado */
+  .user-dropdown {
+    right: 50%;
+    transform: translateX(50%);
+    min-width: 220px;
+  }
+
+  .user-email {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* topbar compacta */
   .topbar-inner {
     padding: 8px 12px;
   }
@@ -277,82 +342,11 @@
     height: 15px;
   }
 
-  /* si querés ocultar el lado izquierdo en mobile */
   .topbar-left {
     display: none;
   }
-}
 
-
-.nav-item.dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Botón "PRODUCTOS" */
-.nav-link-btn {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-}
-
-/* Menú */
-.dropdown-menu-custom {
-  position: absolute;
-  top: 100%;            /* pegado al item */
-  left: 0;
-  margin-top: 0;        /* evita gap */
-  min-width: 230px;
-  background: var(--crema);
-  border: 1px solid rgba(0,0,0,0.12);
-
-  border-radius: 0;     /* ✅ cuadrado */
-  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-  z-index: 20000;
-
-  display: none;        /* oculto por defecto */
-}
-
-/* “Puente” invisible para que no se corte el hover
-   (cubre 10px entre botón y menú si por layout hubiera separación) */
-.dropdown-menu-custom::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -10px;
-  height: 10px;
-}
-
-/* Ítems */
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 10px 14px;
-  text-decoration: none;
-  color: var(--celeste);
-  font-weight: 400;
-  font-size: 1rem;        /* ✅ misma fuente que .all */
-  font-family: "Inter", sans-serif;      /* ✅ */
-  letter-spacing: inherit;   /* ✅ si tu menu usa tracking */
-}
-
-.dropdown-item:hover {
-  background: rgba(69, 172, 180, 0.12);
-  color: var(--ladrillo);
-}
-
-/* ✅ Desktop: hover abre estable */
-@media (min-width: 769px) {
-  .nav-item.dropdown:hover .dropdown-menu-custom {
-    display: block;
-  }
-}
-
-/* ✅ Mobile: abre por click (productsOpen) dentro del overlay */
-@media (max-width: 768px) {
+  /* dropdown productos dentro del overlay (click) */
   .dropdown-menu-custom {
     position: static;
     display: none;
@@ -360,8 +354,8 @@
     min-width: unset;
     box-shadow: none;
     border-radius: 0;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
     margin-top: 10px;
   }
 
@@ -375,8 +369,168 @@
   }
 
   .dropdown-item:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* 🔥 IMPORTANTE:
+     en mobile NO se ve el buscador de la navbar (desktop) */
+  .nav-search--desktop { display: none; }
+
+  /* 🔥 en mobile SÍ se ve el botón lupa */
+  .navSearchToggle--mobile { display: grid; }
+
+  /* botón lupa */
+  .navSearchToggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.6);
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .navSearchToggle:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  /* bloque buscador debajo de la navbar (empuja el contenido) */
+  .mobileSearchBlock {
+    display: block;
+    width: 100%;
+    background: #fff;
+    padding: 10px 12px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* si tu app-header tiene margins grandes, los anulamos solo acá */
+  .mobileSearchBlock app-header .box-header-buscador {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
+/* ===== MOBILE FIX: layout en 3 columnas + tamaños ===== */
+@media (max-width: 768px) {
 
+  /* 1) La fila principal NO puede usar justify-content-around en mobile */
+  .navbar.col-12 {
+    padding: 12px 12px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px;
+  }
+
+  /* 2) Logo: más grande y con ancho reservado */
+  .logo {
+    flex: 0 0 auto;
+    min-width: 64px;     /* reserva para que no lo aplasten */
+  }
+
+  .logo img.logo-img {
+    height: 64px;        /* subimos tamaño */
+    width: auto;
+  }
+
+  /* 3) Menú (links) sigue oculto */
+  .menu-items {
+    display: none !important;
+  }
+
+  /* 4) Acciones (lupa+carrito+hamburger) como bloque a la derecha */
+  .carrito {
+    flex: 0 0 auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    min-width: 150px;    /* evita que se superpongan */
+  }
+
+  /* 5) Botón lupa mobile: tamaño consistente */
+  .navSearchToggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: rgba(255,255,255,0.6);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+
+  /* 6) Carrito: NO se achica */
+  .container-cart {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* tu SVG es 57x57, lo mantenemos */
+  .botonCarrito svg {
+    width: 54px;
+    height: 54px;
+  }
+
+  .numeroCarrito {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    background: var(--ladrillo);
+    color: #fff;
+    padding: 0 6px;
+  }
+
+  /* 7) Hamburger fijo */
+  .hamburger {
+    flex: 0 0 auto;
+  }
+
+  /* 8) Buscador: SIEMPRE abajo (bloque) y a ancho completo */
+  .mobileSearchBlock {
+    display: block;
+    width: 100%;
+    background: #fff;
+    padding: 10px 12px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+
+  /* IMPORTANTÍSIMO: que el buscador adentro ocupe 100% */
+  .mobileSearchBlock app-header,
+  .mobileSearchBlock app-header .box-header-buscador,
+  .mobileSearchBlock app-header form.form-buscador,
+  .mobileSearchBlock app-header .inputWrap {
+    width: 100% !important;
+  }
+
+  .mobileSearchBlock app-header .box-header-buscador {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* input full width */
+  .mobileSearchBlock app-header .inputBusqueda {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* resultados en mobile como BLOQUE debajo del input (empuja carrusel) */
+  .mobileSearchBlock app-header .buscadorContainer {
+    position: static !important;  /* clave: deja de flotar */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 8px;
+  }
+}
+@media (max-width: 768px) {
+  .nav-search--desktop { display: none !important; }
+}
