@@ -1,0 +1,38 @@
+<section class="col-12 ps-0 pe-0 d-flex flex-column justify-content-center align-items-center faq" id="faq">
+  <!-- Título con icono (mismo estilo que contacto) -->
+  <div class="box-title-contact text-center d-flex justify-content-center align-items-center">
+    <h4 data-aos="fade-up">{{ title }}</h4>
+    <img src="assets/logo-textos.png" alt="icono" data-aos="zoom-in" />
+  </div>
+
+  <div class="box-p-contact text-center d-flex justify-content-center align-items-center">
+    <p>{{ intro }}</p>
+  </div>
+
+  <!-- Acordeón -->
+  <div class="faqBox col-12 mt-4">
+    <div class="faqItem" *ngFor="let item of faqs; let i = index" data-aos="zoom-in">
+      <button
+        type="button"
+        class="faqQ"
+        (click)="toggle(i)"
+        [attr.aria-expanded]="isOpen(i)"
+        [attr.aria-controls]="'faq-a-' + i"
+      >
+        <span class="qText">{{ item.q }}</span>
+        <span class="chev" [class.open]="isOpen(i)">+</span>
+      </button>
+
+      <div
+        class="faqA"
+        [class.open]="isOpen(i)"
+        [id]="'faq-a-' + i"
+        role="region"
+      >
+        <div class="faqAInner">
+          {{ item.a }}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

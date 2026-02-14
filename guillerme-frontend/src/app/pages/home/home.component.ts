@@ -7,6 +7,7 @@ import { ProductoModal } from '../../components/producto-modal/producto-modal';
 import { CarritoModal } from '../../components/carrito-modal/carrito-modal';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BrandsCarouselComponent } from '../../components/brands-carousel/brands-carousel.component';
+import { FaqComponent } from '../../components/faq/faq.component';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +20,7 @@ import { BrandsCarouselComponent } from '../../components/brands-carousel/brands
     ProductoModal,
     CarritoModal,
     BrandsCarouselComponent,
+    FaqComponent,
     FooterComponent
   ],
   templateUrl: './home.component.html',
