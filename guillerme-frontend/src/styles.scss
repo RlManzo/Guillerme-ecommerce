@@ -3189,3 +3189,19 @@ footer{
 .whatsapp-float {
   animation: pulse 2.5s infinite;
 }
+
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 16px;
+  background-color: var(--crema) !important;
+}

@@ -9,6 +9,7 @@ import { AuthService } from '../../shared/auth/auth.service';
   selector: 'app-login-page',
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.page.html',
+  styleUrl: './login.page.scss',
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);

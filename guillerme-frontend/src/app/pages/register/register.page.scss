@@ -1,0 +1,166 @@
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 640px;
+  background: #fff7ea;
+  border-radius: 18px;
+  padding: 40px 40px 18px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.08);
+  position: relative;
+  overflow: hidden;
+
+  /* detalle suave */
+  &::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(255, 140, 105, 0.18);
+  }
+}
+
+.auth-brand img {
+  height: 34px;
+  opacity: 0.95;
+}
+
+.auth-title {
+  margin: 10px 0 4px;
+  font-size: 34px;
+  font-weight: 800;
+  color: #17324b;
+}
+
+.auth-sub {
+  margin: 0 0 14px;
+  color: #5b7286;
+}
+
+.req {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+/* botón acorde a tu estética (naranja) */
+.auth-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(90deg, #ff7d5a, #ff9a6a);
+}
+
+.auth-foot {
+  margin-top: 12px;
+  color: #37566e;
+
+  a {
+    font-weight: 700;
+    text-decoration: none;
+  }
+}
+
+/* fila teléfono */
+.phone-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px;
+}
+
+/* ✅ Hacer que el select “parezca” desplegable */
+.select-wrap {
+  position: relative;
+
+  select.form-control {
+    appearance: none;
+    padding-right: 38px; /* espacio para la flecha */
+    cursor: pointer;
+  }
+
+  &::after {
+    content: "▾";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #365e78;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+}
+
+/* invalid feedback bootstrap ya anda, esto solo mejora consistencia */
+.form-control.is-invalid {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 0.15rem rgba(231, 76, 60, 0.15);
+}
+
+
+.pass-wrap {
+  position: relative;
+
+  .form-control {
+    padding-right: 46px; // espacio para el botón 👁
+  }
+}
+
+.pass-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  padding: 6px 8px;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.pass-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.eye-icon {
+  width: 22px;
+  height: 22px;
+  color: #2c3e50; // podés usar tu color corporativo
+}
+
+.auth-input {
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(19, 50, 74, 0.18);
+
+  &:focus {
+    border-color: rgba(255, 122, 52, 0.7);
+    box-shadow: 0 0 0 4px rgba(255, 122, 52, 0.18);
+  }
+}

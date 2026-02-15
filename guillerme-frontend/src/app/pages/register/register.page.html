@@ -1,48 +1,235 @@
-<div class="container" style="max-width: 620px; margin-top: 40px;">
-  <h2>Registro</h2>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="assets/logo-textos.png" alt="Guillerme" />
+    </div>
 
-  <div class="alert alert-danger mt-3" *ngIf="error()">{{ error() }}</div>
+    <h1 class="auth-title">Crear cuenta</h1>
+    <p class="auth-sub">Completá tus datos para registrarte</p>
 
-  <form class="mt-3" (submit)="$event.preventDefault(); submit()">
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label class="form-label">Nombre</label>
-        <input class="form-control" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre" required />
+    <div class="alert alert-danger mt-3" *ngIf="error()">{{ error() }}</div>
+
+    <form class="mt-3" (submit)="$event.preventDefault(); submit()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nombre <span class="req">*</span></label>
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vNombre()) }"
+            [ngModel]="nombre()"
+            (ngModelChange)="nombre.set($event)"
+            name="nombre"
+            autocomplete="given-name"
+          />
+          <div class="invalid-feedback" *ngIf="showErr(vNombre())">
+            Solo letras (sin números).
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Apellido <span class="req">*</span></label>
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vApellido()) }"
+            [ngModel]="apellido()"
+            (ngModelChange)="apellido.set($event)"
+            name="apellido"
+            autocomplete="family-name"
+          />
+          <div class="invalid-feedback" *ngIf="showErr(vApellido())">
+            Solo letras (sin números).
+          </div>
+        </div>
       </div>
 
-      <div class="col-md-6 mb-3">
-        <label class="form-label">Apellido</label>
-        <input class="form-control" [ngModel]="apellido()" (ngModelChange)="apellido.set($event)" name="apellido" required />
+      <div class="mb-3">
+        <label class="form-label">Teléfono <span class="req">*</span></label>
+
+        <div class="phone-row">
+          <div class="select-wrap">
+            <select
+              class="form-control auth-input"
+              [ngModel]="areaCode()"
+              (ngModelChange)="areaCode.set($event)"
+              name="areaCode"
+              aria-label="Código de área"
+            >
+              <option *ngFor="let c of areaCodes" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vTelefono()) }"
+            [ngModel]="telefonoNumero()"
+            (ngModelChange)="onTelefonoNumeroChange($event)"
+            name="telefonoNumero"
+            inputmode="numeric"
+            autocomplete="tel"
+          />
+        </div>
+
+        <div class="invalid-feedback d-block" *ngIf="showErr(vTelefono())">
+          Ingresá un teléfono válido (solo números, 6 a 15 dígitos).
+        </div>
       </div>
-    </div>
 
-    <div class="mb-3">
-      <label class="form-label">Teléfono</label>
-      <input class="form-control" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono" required />
-    </div>
+      
 
-    <div class="mb-3">
-      <label class="form-label">Dirección</label>
-      <input class="form-control" [ngModel]="direccion()" (ngModelChange)="direccion.set($event)" name="direccion" required />
-    </div>
+      <div class="mb-3">
+        <label class="form-label">Dirección <span class="req">*</span></label>
+        <input
+          class="form-control auth-input"
+          [ngClass]="{ 'is-invalid': showErr(vDireccion()) }"
+          [ngModel]="direccionLinea()"
+          (ngModelChange)="direccionLinea.set($event)"
+          name="direccion"
+          autocomplete="street-address"
+        />
+        <div class="invalid-feedback" *ngIf="showErr(vDireccion())">
+          Completá una dirección válida.
+        </div>
+      </div>
 
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input class="form-control" type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" required />
-    </div>
+      <div class="mb-3">
+        <label class="form-label">Provincia <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vProvincia()) }"
+            [ngModel]="provincia()"
+            (ngModelChange)="provincia.set($event)"
+            name="provincia"
+          >
+            <option value="" disabled>Seleccionar provincia</option>
+            <option *ngFor="let p of provincias" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="showErr(vProvincia())">
+          Seleccioná una provincia.
+        </div>
+      </div>
 
-    <div class="mb-3">
-      <label class="form-label">Contraseña</label>
-      <input class="form-control" type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password" required minlength="6" />
-    </div>
+      <div class="mb-3">
+        <label class="form-label">Email <span class="req">*</span></label>
+        <input
+          class="form-control auth-input"
+          type="email"
+          [ngClass]="{ 'is-invalid': showErr(vEmail()) }"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          autocomplete="email"
+          placeholder="Ej: nombre@dominio.com"
+        />
+        <div class="invalid-feedback" *ngIf="showErr(vEmail())">
+          Ingresá un email válido (ej: nombre@dominio.com).
+        </div>
+      </div>
 
-    <button class="btn btn-success w-100" [disabled]="loading()">
-      {{ loading() ? 'Creando...' : 'Crear cuenta' }}
-    </button>
-  </form>
+      <div class="mb-3">
+        <label class="form-label">Contraseña <span class="req">*</span></label>
 
-  <p class="mt-3">
-    ¿Ya tenés cuenta?
-    <a [routerLink]="['/login']">Ingresá</a>
-  </p>
+        <div class="pass-wrap">
+          <input
+            class="form-control auth-input"
+            [type]="showPassword() ? 'text' : 'password'"
+            [ngClass]="{ 'is-invalid': showErr(vPassword()) }"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            name="password"
+            autocomplete="new-password"
+            placeholder="Mín. 8 caracteres, 1 mayúscula, 1 letra y 1 número"
+          />
+          <button
+            type="button"
+            class="pass-toggle"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <ng-container *ngIf="!showPassword(); else eyeOff">
+              <!-- OJO ABIERTO -->
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path
+                  d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"
+                  fill="currentColor"
+                />
+                <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+              </svg>
+            </ng-container>
+
+            <ng-template #eyeOff>
+              <!-- OJO TACHADO -->
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path
+                  d="M12 5C6 5 2 12 2 12a19.3 19.3 0 0 0 4.2 4.9L3 20l1.4 1.4 18-18L21 2l-2.8 2.8C16.5 3.9 14.4 3 12 3zM12 17a5 5 0 0 1-4.9-4.1l1.6-1.6A3 3 0 0 0 12 15a3 3 0 0 0 3-3c0-.4-.1-.8-.2-1.1l1.6-1.6A5 5 0 0 1 12 17z"
+                  fill="currentColor"
+                />
+              </svg>
+            </ng-template>
+          </button>
+        </div>
+
+        <div class="invalid-feedback d-block" *ngIf="showErr(vPassword())">
+          Debe tener 8+ caracteres, 1 mayúscula, 1 minúscula y 1 número.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Confirmar contraseña <span class="req">*</span></label>
+
+        <div class="pass-wrap">
+          <input
+            class="form-control auth-input"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            [ngClass]="{ 'is-invalid': showErr(vConfirmPassword()) }"
+            [ngModel]="confirmPassword()"
+            (ngModelChange)="confirmPassword.set($event)"
+            name="confirmPassword"
+            autocomplete="new-password"
+          />
+          <button
+          type="button"
+          class="pass-toggle"
+          (click)="showConfirmPassword.set(!showConfirmPassword())"
+          [attr.aria-label]="showConfirmPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        >
+          <ng-container *ngIf="!showConfirmPassword(); else eyeOffConfirm">
+            <!-- OJO ABIERTO -->
+            <svg viewBox="0 0 24 24" class="eye-icon">
+              <path
+                d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"
+                fill="currentColor"
+              />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+            </svg>
+          </ng-container>
+
+          <ng-template #eyeOffConfirm>
+            <!-- OJO TACHADO -->
+            <svg viewBox="0 0 24 24" class="eye-icon">
+              <path
+                d="M12 5C6 5 2 12 2 12a19.3 19.3 0 0 0 4.2 4.9L3 20l1.4 1.4 18-18L21 2l-2.8 2.8C16.5 3.9 14.4 3 12 3zM12 17a5 5 0 0 1-4.9-4.1l1.6-1.6A3 3 0 0 0 12 15a3 3 0 0 0 3-3c0-.4-.1-.8-.2-1.1l1.6-1.6A5 5 0 0 1 12 17z"
+                fill="currentColor"
+              />
+            </svg>
+          </ng-template>
+        </button>
+        </div>
+
+        <div class="invalid-feedback d-block" *ngIf="showErr(vConfirmPassword())">
+          Las contraseñas no coinciden.
+        </div>
+      </div>
+
+      <button class="btn btn-success w-100 auth-btn" [disabled]="loading()">
+        {{ loading() ? 'Creando...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="auth-foot">
+      ¿Ya tenés cuenta?
+      <a [routerLink]="['/login']">Ingresá</a>
+    </p>
+  </div>
 </div>

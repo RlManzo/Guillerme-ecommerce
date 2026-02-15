@@ -1,41 +1,51 @@
-<div class="container" style="max-width: 520px; margin-top: 40px;">
-  <h2>Iniciar sesión</h2>
-
-  <div class="alert alert-danger mt-3" *ngIf="error()">{{ error() }}</div>
-
-  <form class="mt-3" (submit)="$event.preventDefault(); submit()">
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input
-        class="form-control"
-        type="email"
-        [ngModel]="email()"
-        (ngModelChange)="email.set($event)"
-        name="email"
-        required
-      />
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="assets/sinfondo-guillerme.png" alt="Guillerme" class="auth-logo" />
+      <div>
+        <h1 class="auth-title">Iniciar sesión</h1>
+        <p class="auth-subtitle">Accedé a tu cuenta para continuar</p>
+      </div>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label">Contraseña</label>
-      <input
-        class="form-control"
-        type="password"
-        [ngModel]="password()"
-        (ngModelChange)="password.set($event)"
-        name="password"
-        required
-        minlength="6"
-      />
-    </div>
+    <div class="alert alert-danger mt-3" *ngIf="error()">{{ error() }}</div>
 
-    <button class="btn btn-primary w-100" [disabled]="loading()">
-      {{ loading() ? 'Ingresando...' : 'Ingresar' }}
-    </button>
-  </form>
+    <form class="mt-3" (submit)="$event.preventDefault(); submit()">
+      <div class="mb-3">
+        <label class="form-label auth-label">Email</label>
+        <input
+          class="form-control auth-input"
+          type="email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          placeholder="admin@guillerme.com"
+          required
+        />
+      </div>
 
-  <p class="mt-3">
-    ¿No tenés cuenta?
-    <a [routerLink]="['/register']">Registrate</a>
-  </p>
+      <div class="mb-3">
+        <label class="form-label auth-label">Contraseña</label>
+        <input
+          class="form-control auth-input"
+          type="password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          placeholder="••••••••"
+          required
+          minlength="6"
+        />
+      </div>
+
+      <button class="auth-btn" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+
+      <div class="auth-footer">
+        <span>¿No tenés cuenta?</span>
+        <a class="auth-link" [routerLink]="['/register']">Registrate</a>
+      </div>
+    </form>
+  </div>
 </div>
