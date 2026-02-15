@@ -23,6 +23,7 @@ export interface Product {
    imgUrl: string;     // o img: string según estés usando
   imgUrl2?: string;
   imgUrl3?: string;
+  estado?: boolean;
 }
 
 

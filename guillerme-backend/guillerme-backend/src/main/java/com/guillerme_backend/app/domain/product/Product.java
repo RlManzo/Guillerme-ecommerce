@@ -51,6 +51,12 @@ public class Product {
     @Column(name = "img_url_3", columnDefinition = "text")
     private String imgUrl3;
 
+    @Column(nullable = false)
+    private boolean estado = true;
+
+    public boolean isEstado() { return estado; }
+    public void setEstado(boolean estado) { this.estado = estado; }
+
     public String getImgUrl2() { return imgUrl2; }
     public void setImgUrl2(String imgUrl2) { this.imgUrl2 = imgUrl2; }
 

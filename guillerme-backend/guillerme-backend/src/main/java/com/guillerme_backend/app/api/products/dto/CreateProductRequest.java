@@ -34,5 +34,6 @@ public class CreateProductRequest {
     @DecimalMin("0.00")
     public BigDecimal precio;
 
+    public Boolean estado;
 
 }

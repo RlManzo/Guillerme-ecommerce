@@ -119,6 +119,24 @@
               <td>${{ (p.precio ?? 0) | number:'1.2-2' }}</td>
 
               <td style="display:flex; justify-content:space-between; gap:8px;">
+                <td style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+                  <!-- Toggle -->
+                  <label class="switch">
+                    <input
+                      type="checkbox"
+                      [checked]="isEstadoOn(p)"
+                      (change)="toggleEstado(p)"
+                    />
+                    <span class="slider"></span>
+                  </label>
+
+                  <div style="font-size: 12px; line-height: 1; margin-left: -2px;">
+                    <span [style.color]="isEstadoOn(p) ? 'green' : '#888'">
+                      {{ isEstadoOn(p) ? 'Activo' : 'Desactivado' }}
+                    </span>
+                  </div>
+
+
                 <button (click)="toggleEdit(p)" class="btn btn-primary">
                   {{ isEditing(p.id) ? 'Cerrar' : 'Modificar' }}
                 </button>

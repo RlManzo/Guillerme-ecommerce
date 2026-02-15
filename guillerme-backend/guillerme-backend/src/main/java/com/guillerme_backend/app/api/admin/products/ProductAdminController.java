@@ -1,9 +1,6 @@
 package com.guillerme_backend.app.api.admin.products;
 
-import com.guillerme_backend.app.api.products.dto.BulkProductCreateRequest;
-import com.guillerme_backend.app.api.products.dto.BulkProductCreateResponse;
-import com.guillerme_backend.app.api.products.dto.CreateProductRequest;
-import com.guillerme_backend.app.api.products.dto.ProductResponse;
+import com.guillerme_backend.app.api.products.dto.*;
 import com.guillerme_backend.app.service.AdminOrderShippingService;
 import com.guillerme_backend.app.service.AdminProductService;
 import com.guillerme_backend.app.service.ProductService;
@@ -57,6 +54,11 @@ public class ProductAdminController {
         adminProductService.delete(id);
     }
 
+    @PatchMapping("/{id}/estado")
+    public void updateEstado(@PathVariable Long id,
+                             @RequestBody @Valid UpdateProductEstadoRequest req) {
+        adminProductService.setEstado(id, req.estado);
+    }
 
 }
 

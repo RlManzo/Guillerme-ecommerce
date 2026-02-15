@@ -41,6 +41,7 @@ public class AdminProductService {
             p.setKeywords(it.keywords);
             p.setActivo(it.activo == null ? true : it.activo);
             p.setPrecio(it.precio);
+            p.setEstado(it.estado == null ? p.isEstado() : it.estado);
 
             Product saved = productRepository.save(p);
             ids.add(saved.getId());
@@ -90,6 +91,7 @@ public class AdminProductService {
         p.setKeywords(it.keywords);
         p.setActivo(it.activo == null ? p.isActivo() : it.activo);
         p.setPrecio(it.precio == null ? p.getPrecio() : it.precio);
+        p.setEstado(it.estado == null ? p.isEstado() : it.estado);
 
         Product saved = productRepository.save(p);
 
@@ -115,5 +117,14 @@ public class AdminProductService {
         // stockRepository.deleteById(id);
         // productRepository.deleteById(id);
     }
+
+    @Transactional
+    public void setEstado(Long id, boolean estado) {
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado id=" + id));
+        p.setEstado(estado);
+        productRepository.save(p);
+    }
+
 
 }

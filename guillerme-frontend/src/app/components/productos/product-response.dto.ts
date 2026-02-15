@@ -13,4 +13,5 @@ export interface ProductResponseDto {
   activo: boolean;
   stock: number;
   precio: number;
+  estado?: boolean;
 }

@@ -15,10 +15,10 @@ function toAbsoluteImgUrl(path?: string | null): string {
   return s;
 }
 
-export function mapProductFromApi(p: Product): Product {
+export function mapProductFromApi(p: any): Product {
   const img1 = toAbsoluteImgUrl(p.imgUrl);
-  const img2 = toAbsoluteImgUrl((p as any).imgUrl2);
-  const img3 = toAbsoluteImgUrl((p as any).imgUrl3);
+  const img2 = toAbsoluteImgUrl(p.imgUrl2);
+  const img3 = toAbsoluteImgUrl(p.imgUrl3);
 
   const imagenes = [img1, img2, img3].filter(Boolean);
 
@@ -28,13 +28,9 @@ export function mapProductFromApi(p: Product): Product {
     descripcionCorta: p.descripcionCorta ?? '',
     infoModal: p.infoModal ?? p.descripcionCorta ?? '',
 
-    // ✅ principal
     img: img1 || imagenes[0] || '',
-
-    // ✅ thumbs reales
     imagenes,
 
-    // ✅ si querés mantenerlos también (opcional)
     imgUrl: img1,
     imgUrl2: img2 || undefined,
     imgUrl3: img3 || undefined,
@@ -45,8 +41,12 @@ export function mapProductFromApi(p: Product): Product {
     stock: p.stock,
     precio: Number(p.precio ?? 0),
 
+    // ✅ CLAVE
+    estado: p.estado ?? true,
+
     colores: [],
     variantes: [],
   } as Product;
 }
+
 

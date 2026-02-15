@@ -65,6 +65,7 @@ export function mapProductFromApi(p: ProductResponseDto): Product {
 
     stock: p.stock,
     precio: Number(p.precio ?? 0),
+     estado: (p as any).estado ?? true,
 
     colores: [],
     variantes: [],

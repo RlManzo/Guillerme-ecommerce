@@ -30,6 +30,7 @@ export type ProductResponse = {
   activo: boolean;
   stock: number;
   precio: number;
+  estado?: boolean;
 };
 
 export type BulkProductCreateRequest = { items: CreateProductRequest[] };
@@ -63,4 +64,9 @@ export class AdminProductsApi {
       fd
     );
   }
+
+  updateEstado(id: number, estado: boolean) {
+  return this.http.patch<void>(`/api/admin/products/${id}/estado`, { estado });
+}
+
 }

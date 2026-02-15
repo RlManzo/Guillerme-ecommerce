@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -30,6 +30,16 @@ export class AdminProductsPage implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly toast = inject(ToastService);
 
+
+  constructor() {
+    effect(() => {
+      const list = this.productsSig();
+      console.log(
+        'ESTADOS:',
+        list.map(p => ({ id: p.id, estado: (p as any).estado }))
+      );
+    });
+  }
   // tabs
   tab = signal<'single' | 'bulk'>('single');
 
@@ -58,16 +68,14 @@ export class AdminProductsPage implements OnInit {
 
   // ✅ Lista de keywords disponibles (editá cuando quieras)
   readonly keywordsOpts = [
-    'taza',
-    'regalo',
-    'cumpleaños',
-    'escolar',
-    'libreria',
-    'juguete',
-    'bazar',
-    'promo',
-    'combo',
-    'personalizado',
+    'Filgo',
+    'Skycolor',
+    'Olami',
+    'C-B-X',
+    'FW',
+    'Keyroad',
+    'Wero',
+
   ] as const;
 
   // =========================
@@ -698,4 +706,33 @@ export class AdminProductsPage implements OnInit {
       if (slot === 3) this.setEditField('imgUrl3', url as any);
     });
   }
+
+
+// helper: lee estado sin romper tipos
+isEstadoOn(p: Product): boolean {
+  const v = (p as any)?.estado;
+  if (v === null || v === undefined) return true;
+  if (typeof v === 'number') return v === 1;
+  if (typeof v === 'string') return v === '1' || v.toLowerCase() === 'true';
+  return !!v;
+}
+
+
+toggleEstado(p: Product) {
+  const next = !this.isEstadoOn(p);
+
+  this.adminApi.updateEstado(p.id, next).subscribe({
+    next: () => {
+      this.toast.success(`Producto ${next ? 'activado' : 'desactivado'}`);
+      this.productsService.refresh().subscribe();
+    },
+    error: (e) => {
+      console.error(e);
+      this.toast.error('No se pudo cambiar el estado');
+    }
+  });
+}
+
+
+
 }

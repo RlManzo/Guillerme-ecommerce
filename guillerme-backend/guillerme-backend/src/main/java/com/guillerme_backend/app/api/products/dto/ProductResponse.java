@@ -17,6 +17,7 @@ public class ProductResponse {
     public boolean activo;
     public int stock;
     public BigDecimal precio;
+    public Boolean estado;
 
     public static ProductResponse of(
             com.guillerme_backend.app.domain.product.Product p,
@@ -36,6 +37,7 @@ public class ProductResponse {
         r.activo = p.isActivo();
         r.stock = stock;
         r.precio = p.getPrecio();
+        r.estado = p.isEstado();
 
         return r;
     }

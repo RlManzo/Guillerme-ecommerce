@@ -190,36 +190,40 @@ priceOpen = false;
   // Filtro final (tabs + texto + rango + sort)
   // -------------------------
   readonly productosFiltrados = computed(() => {
-    const all = this.productsSig();
-    const f = this.filtro();
-    const q = this.q();
-    const s = this.sortBy();
-    const minP = this.minPrice();
-    const maxP = this.maxPrice();
+  const all = this.productsSig();
+  const f = this.filtro();
+  const q = this.q();
+  const s = this.sortBy();
+  const minP = this.minPrice();
+  const maxP = this.maxPrice();
 
-    // 1) tab
-    const byTab = all.filter(this.tabFilter[f]);
+  // ✅ 0) SOLO ACTIVOS POR ESTADO (default true si viene undefined/null)
+  const activos = all.filter(p => (p.estado ?? true) === true);
 
-    // 2) texto (tu util)
-    const byText = filterProducts(byTab, q);
+  // 1) tab
+  const byTab = activos.filter(this.tabFilter[f]);
 
-    // 3) rango precio
-    const byPrice = byText.filter((p) => {
-      const price = this.priceOf(p);
-      const okMin = minP == null || price >= minP;
-      const okMax = maxP == null || price <= maxP;
-      return okMin && okMax;
-    });
+  // 2) texto
+  const byText = filterProducts(byTab, q);
 
-    // 4) ordenar
-    const sorted = this.sortProducts(byPrice, s);
-
-    // clamp page si quedó fuera
-    const tp = Math.max(1, Math.ceil(sorted.length / this.pageSize()));
-    if (this.page() > tp - 1) this.page.set(0);
-
-    return sorted;
+  // 3) rango precio
+  const byPrice = byText.filter((p) => {
+    const price = this.priceOf(p);
+    const okMin = minP == null || price >= minP;
+    const okMax = maxP == null || price <= maxP;
+    return okMin && okMax;
   });
+
+  // 4) ordenar
+  const sorted = this.sortProducts(byPrice, s);
+
+  // clamp page
+  const tp = Math.max(1, Math.ceil(sorted.length / this.pageSize()));
+  if (this.page() > tp - 1) this.page.set(0);
+
+  return sorted;
+});
+
 
   // -------------------------
   // Paginación (slice local)
