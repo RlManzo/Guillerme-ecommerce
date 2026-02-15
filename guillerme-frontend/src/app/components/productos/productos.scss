@@ -9,12 +9,11 @@
 
 /* ===== GRID PRODUCTOS (similar a la imagen) ===== */
 .divProductos{
-  width: min(1200px, 92vw);
-  margin: 0 auto 36px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 26px;
-  justify-items: center;
+   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px; // ajustá a tu gusto
+  justify-items: stretch;
+  align-items: stretch;
 }
 
 /* ===== CARD TIPO FILGO ===== */
