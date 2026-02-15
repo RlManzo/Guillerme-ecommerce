@@ -164,3 +164,28 @@
     box-shadow: 0 0 0 4px rgba(255, 122, 52, 0.18);
   }
 }
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 520px;
+}
+
+.auth-back {
+  margin-bottom: 12px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0d2b45;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.back-link:hover {
+  color: #ff6a3d;
+  transform: translateX(-3px);
+}
