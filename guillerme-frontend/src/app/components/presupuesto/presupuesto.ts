@@ -52,9 +52,7 @@ ${mensaje || '-'}
     `.trim();
 
     const phone = '543513721017'; // ← número del cliente
-    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
-      texto
-    )}`;
+    const url = ``;
 
     window.open(url, '_blank');
   }

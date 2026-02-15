@@ -142,7 +142,7 @@ dec(productId: number, ev?: MouseEvent) {
         maxWidth: '92vw',
         data: {
           message:
-            '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp para completar el pago y acordar el envío.',
+            '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp desde +54 11 38617954 para completar el pago y acordar el envío.',
         },
       });
 

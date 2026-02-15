@@ -22,11 +22,11 @@ export class FaqComponent {
     {
       q: '¿Cómo compro?',
       a: `Elegí los productos que te interesan y agregalos al carrito. 
-Luego hacé clic en “Completar compra”. Si no tenés sesión iniciada, el sistema te va a pedir que te loguees para finalizar el pedido.`,
+Luego hacé clic en “Completar compra”. Si no tenés sesión iniciada, el sistema te va a pedir que te loguees para finalizar el pedido. Una vez completado el pedido nos pondremos en contacto para coordinar el pago y envio.`,
     },
     {
       q: '¿Métodos de envío?',
-      a: `Realizamos envíos a domicilio y/o puntos de entrega (según tu zona). 
+      a: `Realizamos envíos con la empresa Via Cargo a puntos de entrega (según tu zona) a cargo del comprador y a domicilio segun disponibilidad. 
 Al finalizar la compra coordinamos el envío por WhatsApp y te confirmamos costo y opción disponible.`,
     },
     {

@@ -29,8 +29,10 @@ import { FaqComponent } from '../../components/faq/faq.component';
 export class HomeComponent {
   brands = [
     { name: 'Filgo', logoUrl: 'assets/carousel/filgo-logo-circular.png' },
-    { name: 'Bic', logoUrl: 'assets/carousel/sharpie-logo.jpg' },
-    { name: 'Sharpie', logoUrl: 'assets/brands/sharpie.jpg' },
-    { name: 'Faber-Castell', logoUrl: 'assets/brands/faber.jpg' },
+    { name: 'Ibi Craft', logoUrl: 'assets/carousel/ibicraft-logo-2.png' },
+    { name: 'Mundo FW', logoUrl: 'assets/carousel/fw-logo.png' },
+    { name: 'keyroad', logoUrl: 'assets/carousel/keyroad-logo.png' },
+    { name: 'C-B-X', logoUrl: 'assets/carousel/cbx-logo.png' },
+    { name: 'Olami', logoUrl: 'assets/carousel/olami-logo.png' },
   ];
 }
