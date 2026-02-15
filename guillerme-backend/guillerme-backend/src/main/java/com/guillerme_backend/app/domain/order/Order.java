@@ -43,6 +43,20 @@ public class Order {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
+    // =========================
+    // NUEVO: Envío / seguimiento
+    // =========================
+
+    @Column(name = "shipment_tracking", length = 120)
+    private String shipmentTracking;
+
+    // guardamos SOLO metadata (igual que imágenes de productos)
+    @Column(name = "shipment_file_name", length = 260)
+    private String shipmentFileName; // ej: uuid.pdf
+
+    @Column(name = "shipment_file_url", length = 400)
+    private String shipmentFileUrl;  // ej: /uploads/uuid.pdf
+
     // --- getters/setters ---
     public Long getId() { return id; }
 
@@ -72,4 +86,14 @@ public class Order {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    // --- envío ---
+    public String getShipmentTracking() { return shipmentTracking; }
+    public void setShipmentTracking(String shipmentTracking) { this.shipmentTracking = shipmentTracking; }
+
+    public String getShipmentFileName() { return shipmentFileName; }
+    public void setShipmentFileName(String shipmentFileName) { this.shipmentFileName = shipmentFileName; }
+
+    public String getShipmentFileUrl() { return shipmentFileUrl; }
+    public void setShipmentFileUrl(String shipmentFileUrl) { this.shipmentFileUrl = shipmentFileUrl; }
 }

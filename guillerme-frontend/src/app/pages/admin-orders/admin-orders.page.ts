@@ -12,6 +12,7 @@ import {
 } from '../../shared/admin/admin-orders.api';
 
 import { downloadPaidOrderPdf } from '../../shared/pdf/order-receipt.pdf';
+import { ToastService } from '../../shared/service/toast.service';
 
 @Component({
   standalone: true,
@@ -24,12 +25,13 @@ export class AdminOrdersPage {
   private readonly api = inject(AdminOrdersApi);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   loading = signal(false);
   error = signal<string | null>(null);
 
   fromDate = signal<string>(''); // YYYY-MM-DD
-  toDate = signal<string>('');   // YYYY-MM-DD
+  toDate = signal<string>(''); // YYYY-MM-DD
 
   rows = signal<AdminOrderSummaryDto[]>([]);
   selected = signal<AdminOrderDetailDto | null>(null);
@@ -80,6 +82,15 @@ export class AdminOrdersPage {
     PAGADO: 'PAGADO',
     ENVIADO: 'ENVIADO',
   };
+
+  // ✅ bloque envío (para poder cerrarlo después de guardar)
+  shipmentOpen = signal(false);
+
+  // ✅ data envío
+  shipmentTracking = signal<string>('');
+  shipmentFile = signal<File | null>(null);
+  shipmentFileName = signal<string>('');
+  shipmentError = signal<string | null>(null);
 
   ngOnInit() {
     if (!this.auth.isLogged()) {
@@ -182,6 +193,10 @@ export class AdminOrdersPage {
       next: (d) => {
         this.selected.set(d);
         this.statusEdit.set(d.status);
+
+        // si ya estaba enviado, no abras el bloque
+        this.shipmentOpen.set(d.status === 'ENVIADO' ? false : this.shipmentOpen());
+        this.clearShipmentInputs();
       },
       error: (e) => {
         console.error(e);
@@ -192,6 +207,8 @@ export class AdminOrdersPage {
 
   closeDetail() {
     this.selected.set(null);
+    this.shipmentOpen.set(false);
+    this.clearShipmentInputs();
   }
 
   saveStatus() {
@@ -202,6 +219,48 @@ export class AdminOrdersPage {
     if (!next) return;
 
     this.savingStatus.set(true);
+    this.error.set(null);
+
+    if (next === 'ENVIADO') {
+      const file = this.shipmentFile();
+      if (!file) {
+        this.savingStatus.set(false);
+        this.shipmentError.set('Tenés que adjuntar un PDF/JPG/PNG.');
+        return;
+      }
+
+      const tracking = (this.shipmentTracking() ?? '').trim();
+
+      this.api.markShipped(sel.id, { tracking, file }).subscribe({
+        next: () => {
+          this.savingStatus.set(false);
+
+          // 1) actualizo detalle local
+          this.selected.update((v) => (v ? { ...v, status: next } : v));
+
+          // 2) actualizo listado
+          this.rows.update((arr) =>
+            arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
+          );
+
+          // 3) limpio + cierro bloque
+          this.clearShipmentInputs();
+          this.shipmentOpen.set(false);
+
+          // 4) toast
+          this.toast.success('Pedido actualizado');
+        },
+        error: (e) => {
+          console.error(e);
+          this.savingStatus.set(false);
+          this.toast.error('No se pudo marcar como ENVIADO');
+        },
+      });
+
+      return;
+    }
+
+    // resto de estados
     this.api.updateStatus(sel.id, next).subscribe({
       next: () => {
         this.savingStatus.set(false);
@@ -214,16 +273,17 @@ export class AdminOrdersPage {
           arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
         );
 
-        // 3) si queda PAGADO, descargar automáticamente
-        if (next === 'PAGADO') {
-          const updated = { ...(this.selected() as any), status: next };
-          downloadPaidOrderPdf(updated);
-        }
+        // 3) si no es ENVIADO, cerrá bloque y limpiá
+        this.shipmentOpen.set(false);
+        this.clearShipmentInputs();
+
+        // 4) toast
+        this.toast.success('Pedido actualizado');
       },
       error: (e) => {
         console.error(e);
         this.savingStatus.set(false);
-        this.error.set('No se pudo actualizar el estado');
+        this.toast.error('No se pudo actualizar el estado');
       },
     });
   }
@@ -232,5 +292,61 @@ export class AdminOrdersPage {
     const sel = this.selected();
     if (!sel) return;
     downloadPaidOrderPdf(sel);
+  }
+
+  onShipmentFileChange(ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    const f = input.files?.[0] ?? null;
+
+    if (!f) {
+      this.shipmentFile.set(null);
+      this.shipmentFileName.set('');
+      return;
+    }
+
+    const okTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!okTypes.includes(f.type)) {
+      this.shipmentError.set('Solo PDF/JPG/PNG.');
+      this.shipmentFile.set(null);
+      this.shipmentFileName.set('');
+      input.value = '';
+      return;
+    }
+
+    this.shipmentError.set(null);
+    this.shipmentFile.set(f);
+    this.shipmentFileName.set(f.name);
+  }
+
+  onStatusChange(next: OrderStatus) {
+    this.statusEdit.set(next);
+
+    if (next === 'ENVIADO') {
+      // abrir bloque para cargar tracking/archivo
+      this.shipmentOpen.set(true);
+      return;
+    }
+
+    // si cambiás a algo distinto de ENVIADO, limpio y cierro
+    this.shipmentOpen.set(false);
+    this.clearShipmentInputs();
+  }
+
+  canSaveShipment() {
+    // si es ENVIADO, exigimos archivo válido
+    if (this.statusEdit() !== 'ENVIADO') return true;
+
+    const f = this.shipmentFile();
+    if (!f) return false;
+
+    const okTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    return okTypes.includes(f.type);
+  }
+
+  private clearShipmentInputs() {
+    this.shipmentError.set(null);
+    this.shipmentTracking.set('');
+    this.shipmentFile.set(null);
+    this.shipmentFileName.set('');
   }
 }

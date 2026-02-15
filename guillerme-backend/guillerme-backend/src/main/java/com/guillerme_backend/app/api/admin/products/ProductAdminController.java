@@ -4,11 +4,15 @@ import com.guillerme_backend.app.api.products.dto.BulkProductCreateRequest;
 import com.guillerme_backend.app.api.products.dto.BulkProductCreateResponse;
 import com.guillerme_backend.app.api.products.dto.CreateProductRequest;
 import com.guillerme_backend.app.api.products.dto.ProductResponse;
+import com.guillerme_backend.app.service.AdminOrderShippingService;
 import com.guillerme_backend.app.service.AdminProductService;
 import com.guillerme_backend.app.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,7 +23,7 @@ public class ProductAdminController {
     private final ProductService productService;
     private final AdminProductService adminProductService;
 
-    public ProductAdminController(ProductService productService, AdminProductService adminProductService) {
+    public ProductAdminController(ProductService productService, AdminProductService adminProductService, AdminOrderShippingService adminOrderShippingService) {
         this.productService = productService;
         this.adminProductService = adminProductService;
     }
@@ -52,5 +56,7 @@ public class ProductAdminController {
     public void delete(@PathVariable Long id) {
         adminProductService.delete(id);
     }
+
+
 }
 

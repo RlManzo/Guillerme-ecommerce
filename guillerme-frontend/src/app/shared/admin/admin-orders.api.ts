@@ -1,23 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
-
 export type OrderStatus =
   | 'NUEVO'
   | 'PENDIENTE_DE_PAGO'
   | 'PAGADO'
-  | 'ENVIADO';  
+  | 'ENVIADO';
 
 export interface AdminOrderSummaryDto {
   id: number;
-  createdAt: string; // ISO
+  createdAt: string;
   status: OrderStatus;
   totalItems: number;
-
-  // ✅ según tu error, vos tenés userEmail
   customerEmail: string;
-
-  // ✅ y estos te faltan para el HTML (sumalos)
   customerNombre: string;
   customerApellido: string;
 }
@@ -36,7 +31,6 @@ export interface AdminOrderDetailDto {
   status: OrderStatus;
 
   customerEmail: string;
-
   customerNombre: string;
   customerApellido: string;
   customerTelefono?: string | null;
@@ -46,12 +40,11 @@ export interface AdminOrderDetailDto {
   items: AdminOrderItemDto[];
 }
 
-// ✅ Page wrapper (Spring Page)
 export interface PageDto<T> {
   content: T[];
   totalPages: number;
   totalElements: number;
-  number: number; // page index
+  number: number;
   size: number;
 }
 
@@ -62,16 +55,18 @@ export class AdminOrdersApi {
   list(params?: {
     q?: string;
     status?: string;
-    from?: string; // YYYY-MM-DD
-     to?: string;   // YYYY-MM-DD
+    from?: string;
+    to?: string;
     page?: number;
     size?: number;
-    sort?: string; // "createdAt,desc"
+    sort?: string;
   }) {
     let p = new HttpParams();
 
     if (params?.q) p = p.set('q', params.q);
     if (params?.status) p = p.set('status', params.status);
+    if (params?.from) p = p.set('from', params.from);
+    if (params?.to) p = p.set('to', params.to);
     if (params?.page != null) p = p.set('page', String(params.page));
     if (params?.size != null) p = p.set('size', String(params.size));
     if (params?.sort) p = p.set('sort', params.sort);
@@ -86,6 +81,21 @@ export class AdminOrdersApi {
   }
 
   updateStatus(id: number, status: OrderStatus) {
-  return this.http.patch<void>(`/api/admin/orders/${id}/status`, { status });
-}
+    return this.http.patch<void>(`/api/admin/orders/${id}/status`, { status });
+  }
+
+  /** ✅ ENVIADO + tracking + archivo (pdf/jpg/png) */
+  markShipped(
+    id: number,
+    payload: { tracking?: string | null; file: File }
+  ) {
+    const fd = new FormData();
+
+    const tracking = (payload.tracking ?? '').trim();
+    if (tracking) fd.append('tracking', tracking);
+
+    fd.append('file', payload.file);
+
+    return this.http.post<void>(`/api/admin/orders/${id}/shipped`, fd);
+  }
 }

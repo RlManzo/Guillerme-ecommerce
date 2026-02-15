@@ -163,38 +163,77 @@
           </div>
 
           <!-- Cambiar estado -->
-          <div class="d-flex gap-2 align-items-end mb-3">
-            <div style="min-width: 220px;">
-              <label class="form-label mb-1">Estado</label>
-              <select
-                class="form-select"
-                [ngModel]="statusEdit()"
-                (ngModelChange)="statusEdit.set($event)"
-              >
-                <option *ngFor="let s of statusOptions" [ngValue]="s">
-                  {{ statusLabel[s] }}
-                </option>
-              </select>
+        <div class="d-flex gap-2 align-items-end mb-3 flex-wrap">
+          <div style="min-width: 220px;">
+            <label class="form-label mb-1">Estado</label>
+            <select
+              class="form-select"
+              [ngModel]="statusEdit()"
+              (ngModelChange)="onStatusChange($event)"
+            >
+              <option *ngFor="let s of statusOptions" [ngValue]="s">
+                {{ statusLabel[s] }}
+              </option>
+            </select>
+          </div>
+
+          <button
+            class="btn btn-success"
+            type="button"
+            (click)="saveStatus()"
+            [disabled]="savingStatus() || (statusEdit() === 'ENVIADO' && !canSaveShipment())"
+          >
+            {{ savingStatus() ? 'Guardando...' : 'Guardar estado' }}
+          </button>
+
+          <button
+            class="btn btn-secondary"
+            type="button"
+            (click)="downloadPdf()"
+            [disabled]="!selected()"
+          >
+            Descargar PDF
+          </button>
+        </div>
+
+        <!-- ✅ SOLO SI ENVIADO: tracking + adjunto -->
+        <div *ngIf="statusEdit() === 'ENVIADO' && shipmentOpen()" class="card mb-3">
+          <div class="card-body card-seguimiento">
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-6">
+                <label class="form-label mb-1">Código de seguimiento (opcional)</label>
+                <input
+                  class="form-control"
+                  placeholder="Ej: OCA 123456789 / Andreani XXXXX"
+                  [ngModel]="shipmentTracking()"
+                  (ngModelChange)="shipmentTracking.set($event)"
+                />
+                <div class="form-text">
+                  Si lo completás, lo incluimos en el mail al cliente.
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label mb-1">Adjuntar comprobante/etiqueta (PDF/JPG/PNG)</label>
+                <input
+                  type="file"
+                  class="form-control btn btn-warning"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  (change)="onShipmentFileChange($event)"
+                />
+                <div class="form-text" *ngIf="shipmentFileName()">
+                  Archivo: <strong>{{ shipmentFileName() }}</strong>
+                </div>
+              </div>
             </div>
 
-            <button
-              class="btn btn-success"
-              type="button"
-              (click)="saveStatus()"
-              [disabled]="savingStatus()"
-            >
-              {{ savingStatus() ? 'Guardando...' : 'Guardar estado' }}
-            </button>
-
-            <button
-              class="btn btn-secondary"
-              type="button"
-              (click)="downloadPdf()"
-              [disabled]="!selected()"
-            >
-              Descargar PDF
-            </button>
+            <div class="alert alert-danger mt-3 mb-0" *ngIf="shipmentError()">
+              {{ shipmentError() }}
+            </div>
           </div>
+        </div>
+
+
 
           <div class="mb-3">
             <div class="fw-semibold">Cliente</div>
