@@ -37,30 +37,67 @@
         </a>
 
         <!-- ✅ USER SOLO MOBILE (en topbar) -->
-        <div class="user-menu user-menu--mobileTop" (click)="$event.stopPropagation()">
-          <a *ngIf="!isLogged()" class="userTopLink" routerLink="/login" aria-label="Ingresar">
-            <span class="userIcon" aria-hidden="true">👤</span>
-          </a>
+          <div class="user-menu user-menu--mobileTop" (click)="$event.stopPropagation()">
 
-          <ng-container *ngIf="isLogged()">
-            <button
-              type="button"
-              class="user-trigger user-trigger--top"
-              (click)="toggleUserMenu()"
-              aria-label="Abrir menú de usuario"
-              [attr.aria-expanded]="userMenuOpen()"
-            >
-              <span class="userIcon" aria-hidden="true">👤</span>
-              <span class="user-plus">▾</span>
-            </button>
+            <!-- 🔓 NO LOGUEADO -->
+            <ng-container *ngIf="!isLogged()">
+              <a class="userTopLink" routerLink="/login" aria-label="Ingresar">
+                
+                <span class="userIcon" aria-hidden="true">
+                  <svg class="userIconSvg" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="12"></circle>
+                    <circle cx="12" cy="9" r="4"></circle>
+                    <path d="M4.5 20.2c1.9-3.6 4.6-5.2 7.5-5.2s5.6 1.6 7.5 5.2"></path>
+                  </svg>
+                </span>
 
-            <div class="user-dropdown user-dropdown--top" *ngIf="userMenuOpen()">
-              <button *ngIf="isAdmin()" class="user-item" type="button" (click)="goAdminProducts()">Admin productos</button>
-              <button class="user-item" type="button" (click)="goOrders()">Ver pedidos</button>
-              <button class="user-item danger" type="button" (click)="logout()">Salir</button>
-            </div>
-          </ng-container>
-        </div>
+                <span class="userTopText">Ingresar</span>
+
+              </a>
+            </ng-container>
+
+            <!-- 🔐 LOGUEADO -->
+            <ng-container *ngIf="isLogged()">
+              <button
+                type="button"
+                class="user-trigger user-trigger--top"
+                (click)="toggleUserMenu()"
+                aria-label="Abrir menú de usuario"
+                [attr.aria-expanded]="userMenuOpen()"
+              >
+                <span class="userIcon" aria-hidden="true">
+                  <svg class="userIconSvg" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="12"></circle>
+                    <circle cx="12" cy="9" r="4"></circle>
+                    <path d="M4.5 20.2c1.9-3.6 4.6-5.2 7.5-5.2s5.6 1.6 7.5 5.2"></path>
+                  </svg>
+                </span>
+              </button>
+
+              <div class="user-dropdown user-dropdown--top" *ngIf="userMenuOpen()">
+
+                <div class="user-dropdown-head user-dropdown-head--top">
+                  <div class="user-name">{{ email() }}</div>
+                </div>
+
+                <div class="user-dropdown-sep"></div>
+
+                <button *ngIf="isAdmin()" class="user-item" type="button" (click)="goAdminProducts()">
+                  Admin productos
+                </button>
+
+                <button class="user-item" type="button" (click)="goOrders()">
+                  Ver pedidos
+                </button>
+
+                <button class="user-item danger" type="button" (click)="logout()">
+                  Salir
+                </button>
+              </div>
+            </ng-container>
+
+          </div>
+
       </div>
     </div>
   </div>

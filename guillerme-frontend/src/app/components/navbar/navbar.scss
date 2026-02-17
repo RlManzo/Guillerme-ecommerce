@@ -436,8 +436,6 @@
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    background: rgba(255, 255, 255, 0.6);
   }
 
   .user-trigger--top {
@@ -570,3 +568,99 @@
     color: #45ACB4 !important;
   }
 }
+
+
+.userIconSvg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* círculo azul */
+.userIconSvg circle:first-child {
+  fill: #3FA9F5; /* azul parecido al de tu imagen */
+}
+
+/* silueta blanca */
+.userIconSvg circle:nth-child(2),
+.userIconSvg path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* para que la cabeza sea rellena blanca (si la querés rellena) */
+.userIconSvg circle:nth-child(2) {
+  fill: #fff;
+  stroke: none;
+}
+
+/* el cuerpo lo hacemos relleno blanco */
+.userIconSvg path {
+  stroke: none;
+  fill: #fff;
+}
+
+/* Header del dropdown (nombre/email arriba) */
+.user-dropdown--top .user-dropdown-head--top{
+  padding: 10px 12px 8px;
+}
+
+.user-dropdown--top .user-name{
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.95;
+
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Separador */
+.user-dropdown--top .user-dropdown-sep{
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin: 0 8px 6px;
+}
+
+/* Contenedor user mobile */
+.user-menu--mobileTop{
+  display: flex;
+  align-items: center;
+}
+
+/* Link cuando NO está logueado */
+.userTopLink{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+/* Texto "Ingresar" */
+.userTopText{
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ladrillo);
+}
+
+/* Icono circular */
+.userIcon{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userIconSvg{
+  width: 28px;
+  height: 28px;
+  fill: #45ACB4;
+}
+
