@@ -60,10 +60,9 @@
   cursor: pointer;
   padding: 6px 8px;
   border-radius: 8px;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
+}
+.user-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .user-email {
@@ -105,18 +104,16 @@
   padding: 10px 12px;
   cursor: pointer;
   font-size: 13px;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
+}
+.user-item:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .user-item.danger {
   color: #ffb4a6;
-
-  &:hover {
-    background: rgba(234, 85, 52, 0.18);
-  }
+}
+.user-item.danger:hover {
+  background: rgba(234, 85, 52, 0.18);
 }
 
 /* =========================
@@ -258,14 +255,20 @@
 /* Botón lupa: oculto por defecto (desktop) */
 .navSearchToggle--mobile { display: none; }
 
-/* =========================
-   MOBILE (LIMPIO Y ESTABLE)
-========================= */
+/* =========================================================
+   MOBILE: LAYOUT HEADER (logo | acciones)
+   (sin overlay acá, overlay va en “MENU MOBILE FINAL”)
+========================================================= */
 
 @media (max-width: 768px) {
 
-  /* Navbar principal: 2 bloques (logo | acciones) */
-  .navbar.col-12 {
+  /* Bootstrap row a veces mete margen y “separa” cosas */
+  nav.navbar-fixed.navbar-mobile .row {
+    margin: 0 !important;
+  }
+
+  /* Barra principal: logo + acciones */
+  nav.navbar-fixed.navbar-mobile .navbar.col-12 {
     padding: 10px 14px !important;
     display: flex !important;
     align-items: center !important;
@@ -273,131 +276,39 @@
   }
 
   /* Logo más grande */
-  .logo {
-    flex: 0 0 auto;
+  nav.navbar-fixed.navbar-mobile .logo img.logo-img {
+    height: 72px !important;
+    width: auto !important;
   }
 
-  .logo img.logo-img {
-    height: 72px; /* 🔥 más grande */
-    width: auto;
-  }
-
-  /* Menú oculto (solo aparece como overlay) */
-  .menu-items {
+  /* Menú oculto hasta abrir */
+  nav.navbar-fixed.navbar-mobile .menu-items {
     display: none !important;
   }
 
-  /* Overlay del menú */
-  .menu-items.open {
-    display: flex !important;
-    position: fixed;
-    top: 72px;
-    left: 0;
-    right: 0;
-
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
-    gap: 20px;
-    padding: 22px 16px;
-
-    background: #0f2335;
-    z-index: 10000;
-
-    max-height: calc(100vh - 72px);
-    overflow-y: auto;
-  }
-
-  .menu-items.open a.all {
-    color: #45ACB4;
-    font-size: 18px;
-    padding: 10px 0;
-  }
-
-  .menu-items.open app-header {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  /* dropdown usuario centrado */
-  .user-dropdown {
-    right: 50%;
-    transform: translateX(50%);
-    min-width: 220px;
-  }
-
-  .user-email {
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Topbar compacta */
-  .topbar-inner {
-    padding: 8px 12px;
-  }
-
-  .social-link {
-    width: 28px;
-    height: 28px;
-  }
-
-  .social-link svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .topbar-left {
-    display: none;
-  }
-
-  /* Dropdown productos dentro del overlay (click) */
-  .dropdown-menu-custom {
-    position: static;
-    display: none;
-    width: 100%;
-    min-width: unset;
-    box-shadow: none;
-    border-radius: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.06);
-    margin-top: 10px;
-  }
-
-  .nav-item.dropdown.open .dropdown-menu-custom {
-    display: block;
-  }
-
-  .dropdown-item {
-    text-align: center;
-    color: #45ACB4;
-  }
-
-  .dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
   /* En mobile NO se ve el buscador desktop */
-  .nav-search--desktop { display: none !important; }
+  nav.navbar-fixed.navbar-mobile .nav-search--desktop { 
+    display: none !important; 
+  }
 
-  /* En mobile SÍ se ve el botón lupa */
-  .navSearchToggle--mobile { display: grid; }
+  /* En mobile SÍ se ve la lupa */
+  nav.navbar-fixed.navbar-mobile .navSearchToggle--mobile { 
+    display: grid !important; 
+  }
 
-  /* Acciones (lupa + carrito + hamburger) */
-  .carrito {
+  /* Acciones derecha */
+  nav.navbar-fixed.navbar-mobile .carrito {
     flex: 0 0 auto;
     display: flex !important;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 14px; /* 🔥 más separación */
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 14px !important;
+    width: auto !important;
   }
 
   /* Botón lupa */
-  .navSearchToggle {
-    width: 42px; /* 🔥 un poco más compacto */
+  nav.navbar-fixed.navbar-mobile .navSearchToggle {
+    width: 42px;
     height: 42px;
     border-radius: 999px;
     border: 1px solid rgba(0, 0, 0, 0.12);
@@ -406,27 +317,26 @@
     cursor: pointer;
     display: grid;
   }
-
-  .navSearchToggle:hover {
+  nav.navbar-fixed.navbar-mobile .navSearchToggle:hover {
     background: rgba(255, 255, 255, 0.95);
   }
 
-  /* Carrito más chico (ganás aire) */
-  .container-cart {
+  /* Carrito */
+  nav.navbar-fixed.navbar-mobile .container-cart {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
+    right: auto !important; /* neutraliza legacy */
   }
 
-  .botonCarrito svg {
-    width: 48px; /* 🔥 antes 54 */
+  nav.navbar-fixed.navbar-mobile .botonCarrito svg {
+    width: 48px;
     height: 48px;
   }
 
-  /* Badge del carrito */
-  .numeroCarrito {
+  nav.navbar-fixed.navbar-mobile .numeroCarrito {
     position: absolute;
     top: -6px;
     right: -8px;
@@ -442,8 +352,26 @@
     padding: 0 6px;
   }
 
-  /* Bloque buscador debajo de la navbar */
-  .mobileSearchBlock {
+  /* Topbar compacta */
+  nav.navbar-fixed.navbar-mobile .topbar-inner {
+    padding: 8px 12px;
+  }
+
+  nav.navbar-fixed.navbar-mobile .topbar-left {
+    display: none;
+  }
+
+  nav.navbar-fixed.navbar-mobile .social-link {
+    width: 28px;
+    height: 28px;
+  }
+  nav.navbar-fixed.navbar-mobile .social-link svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Bloque buscador debajo de navbar (si abrís la lupa) */
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock {
     display: block;
     width: 100%;
     background: #fff;
@@ -451,43 +379,49 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  /* Si tu app-header tiene margins grandes, los anulamos solo acá */
-  .mobileSearchBlock app-header .box-header-buscador {
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .box-header-buscador {
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* IMPORTANTÍSIMO: que el buscador adentro ocupe 100% */
-  .mobileSearchBlock app-header,
-  .mobileSearchBlock app-header .box-header-buscador,
-  .mobileSearchBlock app-header form.form-buscador,
-  .mobileSearchBlock app-header .inputWrap {
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .box-header-buscador,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header form.form-buscador,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .inputWrap {
     width: 100% !important;
   }
 
-  /* Input full width */
-  .mobileSearchBlock app-header .inputBusqueda {
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .inputBusqueda {
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  /* Resultados en mobile como BLOQUE debajo del input */
-  .mobileSearchBlock app-header .buscadorContainer {
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .buscadorContainer {
     position: static !important;
     width: 100% !important;
     max-width: 100% !important;
     margin-top: 8px;
   }
+
+  /* Dropdown usuario centrado en mobile */
+  nav.navbar-fixed.navbar-mobile .user-dropdown {
+    right: 50%;
+    transform: translateX(50%);
+    min-width: 220px;
+  }
+
+  nav.navbar-fixed.navbar-mobile .user-email {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-/* =========================
-   OVERRIDES SOLO PARA MOBILE
-   (NO toca desktop)
-========================= */
-
+/* =========================================================
+   OVERRIDES LEGACY SOLO MOBILE (para que NO rompa desktop)
+========================================================= */
 @media (max-width: 768px) {
-
-  /* Neutraliza el CSS legacy SOLO en mobile y SOLO en tu nav nueva */
   nav.navbar-fixed.navbar-mobile {
     height: auto !important; /* pisa nav{height:127px} */
   }
@@ -497,108 +431,75 @@
     background: var(--crema) !important;  /* pisa azul legacy */
   }
 
-  /* Evita que widths viejos rompan el layout */
+  /* Evitar que widths viejos rompan el layout */
   nav.navbar-fixed.navbar-mobile .logo,
   nav.navbar-fixed.navbar-mobile .menu-items,
   nav.navbar-fixed.navbar-mobile .carrito {
     width: auto !important;
   }
-
-  /* El container-cart viejo empuja y descalza */
-  nav.navbar-fixed.navbar-mobile .container-cart {
-    right: auto !important;
-  }
-
-  /* =========================
-     LAYOUT MOBILE CONTROLADO
-  ========================= */
-
- 
-
-  nav.navbar-fixed.navbar-mobile .navbar.col-12 {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0 !important;
-  }
-
-  /* LOGO */
-  nav.navbar-fixed.navbar-mobile .logo {
-    flex: 0 0 auto !important;
-  }
-
-  nav.navbar-fixed.navbar-mobile .logo img,
-  nav.navbar-fixed.navbar-mobile .logo svg {
-    height: 70px !important;
-    width: auto !important;
-  }
-
-  /* ACCIONES derecha */
-  nav.navbar-fixed.navbar-mobile .carrito {
-    display: flex !important;
-    align-items: center !important;
-    gap: 30px !important;
-  }
-
-  nav.navbar-fixed.navbar-mobile .botonCarrito svg {
-    width: 46px !important;
-    height: 46px !important;
-  }
-
-  nav.navbar-fixed.navbar-mobile .numeroCarrito {
-    top: -6px !important;
-    right: -6px !important;
-  }
-
-  nav.navbar-fixed.navbar-mobile .hamburger {
-    display: inline-block !important;
-  }
 }
 
-/* =========================
-   MENU MOBILE: PEGADO + COMPACTO + ACORDEÓN
-========================= */
+/* =========================================================
+   MENU MOBILE FINAL (ÚNICO OVERLAY)
+   - Pegado al nav (no se separa topbar/navbar)
+   - Items compactos
+   - Scroll interno si hace falta
+   - Productos como acordeón inline
+========================================================= */
 @media (max-width: 768px) {
 
-  /* 1) El overlay debe empezar justo debajo del header completo (topbar + navbar).
-        Como es sticky, lo más simple es: pegalo al nav. */
+  /* nav como contenedor del overlay */
   nav.navbar-fixed.navbar-mobile {
     position: sticky !important;
-    top: 0;
+    top: 0 !important;
+    z-index: 999 !important;
   }
 
-  /* 2) Overlay: NO fixed con top hardcodeado.
-        Lo hacemos absolute dentro del nav para que quede pegado
-        y no dependa de 72/100px. */
+  /* header arriba de todo */
+  nav.navbar-fixed.navbar-mobile .topbar,
+  nav.navbar-fixed.navbar-mobile .navbar {
+    position: relative !important;
+    z-index: 10001 !important;
+  }
+
+  /* ✅ OVERLAY pegado al nav */
   nav.navbar-fixed.navbar-mobile .menu-items.open {
+    display: flex !important;
+
     position: absolute !important;
-    top: 100% !important;      /* 🔥 pegado al final del nav */
+    top: 100% !important;
     left: 0 !important;
     right: 0 !important;
 
-    /* altura */
-    max-height: calc(100vh - 115px) !important; /* ajustable */
-    overflow-y: auto !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 
-    /* look */
     background: #0f2335 !important;
-    padding: 14px 16px !important;
+    z-index: 10000 !important;
+
+    /* ✅ altura automática: el resto de la pantalla */
+    max-height: calc(100dvh - 120px) !important; /* ajustá si hace falta */
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 
     /* compacto */
-    gap: 10px !important;
+    padding: 14px 16px 18px !important;
+    gap: 40px !important;
   }
 
-  /* 3) Los links más juntos y sin “aire” exagerado */
+  /* ✅ links más juntos */
   nav.navbar-fixed.navbar-mobile .menu-items.open a.all,
-  nav.navbar-fixed.navbar-mobile .menu-items.open button.all {
+  nav.navbar-fixed.navbar-mobile .menu-items.open button.all,
+  nav.navbar-fixed.navbar-mobile .menu-items.open .nav-link-btn {
+    color: #45ACB4 !important;
     font-size: 16px !important;
     padding: 8px 0 !important;
     line-height: 1.1 !important;
+    margin: 0 !important;
   }
 
-  /* 4) PRODUCTOS como acordeón inline:
-        El dropdown ya en mobile lo tenías position: static, perfecto.
-        Solo lo compactamos y lo hacemos “entre PRODUCTOS y NOSOTROS”. */
+  /* Acordeón Productos */
   nav.navbar-fixed.navbar-mobile .menu-items.open .nav-item.dropdown {
     width: 100% !important;
     display: flex !important;
@@ -606,47 +507,29 @@
     align-items: center !important;
   }
 
-  /* Botón PRODUCTOS como item del menú */
-  nav.navbar-fixed.navbar-mobile .menu-items.open .nav-link-btn {
-    color: #45ACB4 !important;
-    font-size: 16px !important;
-    padding: 8px 0 !important;
-  }
-
-  /* Acordeón: se abre justo debajo de PRODUCTOS */
-  nav.navbar-fixed.navbar-mobile .menu-items.open .dropdown-menu-custom {
+  nav.navbar-fixed.navbar-mobile .dropdown-menu-custom {
+    position: static !important;
+    display: none;
     width: 100% !important;
-    margin: 6px 0 6px 0 !important;
+    min-width: unset !important;
+
+    margin: 6px 0 !important;
     padding: 6px 0 !important;
 
+    box-shadow: none !important;
     border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    background: rgba(255,255,255,0.06) !important;
   }
 
-  /* Items del acordeón más compactos */
+  nav.navbar-fixed.navbar-mobile .nav-item.dropdown.open .dropdown-menu-custom {
+    display: block !important;
+  }
+
   nav.navbar-fixed.navbar-mobile .menu-items.open .dropdown-item {
     padding: 10px 12px !important;
     font-size: 15px !important;
     text-align: center !important;
     color: #45ACB4 !important;
   }
-
-  /* 5) Evita que el topbar “se meta” raro cuando abre el menú */
-  nav.navbar-fixed.navbar-mobile .topbar {
-    position: relative;
-    z-index: 10001; /* arriba del overlay si hace falta */
-  }
-
-  nav.navbar-fixed.navbar-mobile .navbar {
-    position: relative;
-    z-index: 10001;
-  }
-
-  /* Overlay por debajo del header */
-  nav.navbar-fixed.navbar-mobile .menu-items.open {
-    z-index: 10000 !important;
-  }
 }
-
-
