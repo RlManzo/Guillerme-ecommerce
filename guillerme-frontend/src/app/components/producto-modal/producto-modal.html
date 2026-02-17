@@ -1,4 +1,4 @@
-<ng-container *ngIf="producto(); else sinProducto">
+<ng-container *ngIf="producto();">
   <div class="lks-detail">
     <!-- izquierda -->
     <div class="lks-left">
@@ -117,11 +117,7 @@
         </button>
       </div>
     </div>
+
   </div>
 </ng-container>
 
-<ng-template #sinProducto>
-  <div class="text-center p-4">
-    <p class="m-0">No hay producto seleccionado.</p>
-  </div>
-</ng-template>

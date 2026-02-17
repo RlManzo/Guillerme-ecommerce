@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 
 export type Brand = {
   name: string;
@@ -24,11 +31,11 @@ export class BrandsCarouselComponent implements OnInit, OnDestroy {
   /** pausa cuando el mouse está encima */
   @Input() pauseOnHover = true;
 
-  // cuántas marcas se ven a la vez
-@Input() perView = 3;
+  // Defaults desktop
+  @Input() perView = 3;
 
-// cuánto avanza por transición (1 = suave, 3 = por página)
-@Input() step = 1;
+  // cuánto avanza por transición (1 = suave, 3 = por página)
+  @Input() step = 1;
 
   readonly index = signal(0);
   readonly paused = signal(false);
@@ -38,28 +45,60 @@ export class BrandsCarouselComponent implements OnInit, OnDestroy {
   readonly safeBrands = computed(() => this.brands ?? []);
   readonly count = computed(() => this.safeBrands().length);
 
+  /** ===== responsive (2 en mobile, 3 en desktop) ===== */
+  private mql?: MediaQueryList;
+  private readonly onMqlChange = () => {
+    // 2 items en <=700px, 3 items en desktop
+    const isMobile = this.mql?.matches ?? false;
+    this.perView = isMobile ? 2 : 3;
+
+    // Opcional: si querés que en mobile avance “por página”
+    // this.step = isMobile ? 2 : 1;
+  };
+
   visible = computed(() => {
-  const list = this.safeBrands();
-  const n = list.length;
-  if (!n) return [];
+    const list = this.safeBrands();
+    const n = list.length;
+    if (!n) return [];
 
-  const start = this.index() % n;
-  const k = Math.min(this.perView, n);
+    const start = this.index() % n;
+    const k = Math.min(this.perView, n);
 
-  const out = [];
-  for (let j = 0; j < k; j++) {
-    out.push(list[(start + j) % n]);
-  }
-  return out;
-});
-
+    const out: Brand[] = [];
+    for (let j = 0; j < k; j++) {
+      out.push(list[(start + j) % n]);
+    }
+    return out;
+  });
 
   ngOnInit() {
+    // MatchMedia para controlar perView en tiempo real
+    this.mql = window.matchMedia('(max-width: 700px)');
+    this.onMqlChange();
+
+    // Safari viejo usa addListener/removeListener
+    if ('addEventListener' in this.mql) {
+      this.mql.addEventListener('change', this.onMqlChange);
+    } else {
+      // @ts-ignore
+      this.mql.addListener(this.onMqlChange);
+    }
+
     this.startAutoplay();
   }
 
   ngOnDestroy() {
     this.stopAutoplay();
+
+    // Limpia listener
+    if (this.mql) {
+      if ('removeEventListener' in this.mql) {
+        this.mql.removeEventListener('change', this.onMqlChange);
+      } else {
+        // @ts-ignore
+        this.mql.removeListener(this.onMqlChange);
+      }
+    }
   }
 
   startAutoplay() {
@@ -90,18 +129,18 @@ export class BrandsCarouselComponent implements OnInit, OnDestroy {
   }
 
   prev() {
-  const n = this.count();
-  if (!n) return;
-  const s = Math.min(this.step, n);
-  this.index.update((i) => (i - s + n) % n);
-}
+    const n = this.count();
+    if (!n) return;
+    const s = Math.min(this.step, n);
+    this.index.update((i) => (i - s + n) % n);
+  }
 
   next() {
-  const n = this.count();
-  if (!n) return;
-  const s = Math.min(this.step, n);
-  this.index.update((i) => (i + s) % n);
-}
+    const n = this.count();
+    if (!n) return;
+    const s = Math.min(this.step, n);
+    this.index.update((i) => (i + s) % n);
+  }
 
   goTo(i: number) {
     const n = this.count();
