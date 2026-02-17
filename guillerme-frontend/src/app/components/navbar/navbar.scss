@@ -91,7 +91,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   overflow: hidden;
-  z-index: 999;
+  z-index: 99999 !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -248,21 +248,28 @@
    SEARCH: DESKTOP vs MOBILE
 ========================= */
 
-/* Buscador desktop visible / bloque mobile oculto */
 .nav-search--desktop { display: flex; }
 .mobileSearchBlock { display: none; }
 
 /* Botón lupa: oculto por defecto (desktop) */
 .navSearchToggle--mobile { display: none; }
 
+/* =========================
+   USER: desktop vs mobile
+========================= */
+
+/* Por defecto: desktop visible, mobileTop oculto */
+.user-menu--mobileTop { display: none; }
+.user-menu--desktop { display: inline-flex; }
+.nav-login--desktop { display: inline-flex; }
+
 /* =========================================================
    MOBILE: LAYOUT HEADER (logo | acciones)
-   (sin overlay acá, overlay va en “MENU MOBILE FINAL”)
 ========================================================= */
 
 @media (max-width: 768px) {
 
-  /* Bootstrap row a veces mete margen y “separa” cosas */
+  /* Bootstrap row a veces mete margen */
   nav.navbar-fixed.navbar-mobile .row {
     margin: 0 !important;
   }
@@ -275,7 +282,7 @@
     justify-content: space-between !important;
   }
 
-  /* Logo más grande */
+  /* Logo mobile */
   nav.navbar-fixed.navbar-mobile .logo img.logo-img {
     height: 72px !important;
     width: auto !important;
@@ -287,13 +294,13 @@
   }
 
   /* En mobile NO se ve el buscador desktop */
-  nav.navbar-fixed.navbar-mobile .nav-search--desktop { 
-    display: none !important; 
+  nav.navbar-fixed.navbar-mobile .nav-search--desktop {
+    display: none !important;
   }
 
   /* En mobile SÍ se ve la lupa */
-  nav.navbar-fixed.navbar-mobile .navSearchToggle--mobile { 
-    display: grid !important; 
+  nav.navbar-fixed.navbar-mobile .navSearchToggle--mobile {
+    display: grid !important;
   }
 
   /* Acciones derecha */
@@ -370,7 +377,7 @@
     height: 15px;
   }
 
-  /* Bloque buscador debajo de navbar (si abrís la lupa) */
+  /* Bloque buscador debajo */
   nav.navbar-fixed.navbar-mobile .mobileSearchBlock {
     display: block;
     width: 100%;
@@ -403,35 +410,68 @@
     margin-top: 8px;
   }
 
-  /* Dropdown usuario centrado en mobile */
-  nav.navbar-fixed.navbar-mobile .user-dropdown {
-    right: 50%;
-    transform: translateX(50%);
-    min-width: 220px;
+  /* ✅ USER SOLO MOBILE: aparece en topbar */
+  .user-menu--mobileTop {
+    display: inline-flex !important;
+    align-items: center;
+    left: 134px !important;
   }
 
-  nav.navbar-fixed.navbar-mobile .user-email {
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  /* ✅ USER SOLO DESKTOP: oculto en mobile */
+  .user-menu--desktop {
+    display: none !important;
+  }
+
+  /* ✅ Login desktop oculto en mobile (lo reemplaza el user icon) */
+  .nav-login--desktop {
+    display: none !important;
+  }
+
+  .userTopLink,
+  .user-trigger--top {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  .user-trigger--top {
+    padding: 0;
+    gap: 0;
+    cursor: pointer;
+  }
+
+  .userIcon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  /* Dropdown desde topbar (derecha) */
+  nav.navbar-fixed.navbar-mobile .user-dropdown--top {
+    right: 0;
+    top: calc(100% + 10px);
+    min-width: 220px;
   }
 }
 
 /* =========================================================
-   OVERRIDES LEGACY SOLO MOBILE (para que NO rompa desktop)
+   OVERRIDES LEGACY SOLO MOBILE
 ========================================================= */
 @media (max-width: 768px) {
   nav.navbar-fixed.navbar-mobile {
-    height: auto !important; /* pisa nav{height:127px} */
+    height: auto !important;
   }
 
   nav.navbar-fixed.navbar-mobile .navbar {
-    height: auto !important;              /* pisa .navbar{height:127px} */
-    background: var(--crema) !important;  /* pisa azul legacy */
+    height: auto !important;
+    background: var(--crema) !important;
   }
 
-  /* Evitar que widths viejos rompan el layout */
   nav.navbar-fixed.navbar-mobile .logo,
   nav.navbar-fixed.navbar-mobile .menu-items,
   nav.navbar-fixed.navbar-mobile .carrito {
@@ -440,29 +480,26 @@
 }
 
 /* =========================================================
-   MENU MOBILE FINAL (ÚNICO OVERLAY)
-   - Pegado al nav (no se separa topbar/navbar)
-   - Items compactos
-   - Scroll interno si hace falta
-   - Productos como acordeón inline
+   MENU MOBILE FINAL (overlay único)
+   - pegado al nav
+   - items compactos
+   - scroll interno
+   - productos acordeón
 ========================================================= */
 @media (max-width: 768px) {
 
-  /* nav como contenedor del overlay */
   nav.navbar-fixed.navbar-mobile {
     position: sticky !important;
     top: 0 !important;
     z-index: 999 !important;
   }
 
-  /* header arriba de todo */
   nav.navbar-fixed.navbar-mobile .topbar,
   nav.navbar-fixed.navbar-mobile .navbar {
     position: relative !important;
-    z-index: 10001 !important;
   }
 
-  /* ✅ OVERLAY pegado al nav */
+  /* ✅ OVERLAY pegado debajo del nav */
   nav.navbar-fixed.navbar-mobile .menu-items.open {
     display: flex !important;
 
@@ -478,14 +515,14 @@
     background: #0f2335 !important;
     z-index: 10000 !important;
 
-    /* ✅ altura automática: el resto de la pantalla */
-    max-height: calc(100dvh - 120px) !important; /* ajustá si hace falta */
+    /* ✅ altura automática del viewport */
+    max-height: calc(100dvh - 120px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
 
-    /* compacto */
+    /* ✅ compacto (antes tenías gap enorme) */
     padding: 14px 16px 18px !important;
-    gap: 50px !important;
+    gap: 12px !important;
   }
 
   /* ✅ links más juntos */
