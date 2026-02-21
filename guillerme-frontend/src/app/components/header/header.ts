@@ -79,15 +79,19 @@ export class Header {
   }
 
   openResults() {
+  // solo abrimos si hay texto
   this.resultsOpen = this.query.trim().length > 0;
 
+  // SOLO ajustamos overlay en mobile
   if (window.innerWidth <= 768) {
-    const input = document.querySelector('.inputBusqueda') as HTMLElement | null;
-    if (input) {
-      const r = input.getBoundingClientRect();
-      const top = Math.round(r.bottom + 10); // 10px de gap
-      document.documentElement.style.setProperty('--search-top', `${top}px`);
-    }
+    const inputEl = this.qInput?.nativeElement;
+    if (!inputEl) return;
+
+    const r = inputEl.getBoundingClientRect();
+    const top = Math.round(r.bottom + 8); // 8px de separación
+
+    // este var(--search-top) lo usa el CSS mobile del overlay
+    document.documentElement.style.setProperty('--search-top', `${top}px`);
   }
 }
 
@@ -164,5 +168,13 @@ export class Header {
   // opcional: limpiar búsqueda
   // this.query = '';
   // this.filteredProducts = [];
+}
+
+toggleResults() {
+  if (this.resultsOpen) {
+    this.closeResults();
+  } else {
+    this.openResults();
+  }
 }
 }

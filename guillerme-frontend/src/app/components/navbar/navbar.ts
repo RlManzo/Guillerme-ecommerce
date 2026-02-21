@@ -107,7 +107,6 @@ export class Navbar {
     this.productsOpen.set(false);
     this.userMenuOpen.set(false);
     this.menuOpen.set(false);
-    this.mobileSearchOpen.set(false);
   }
 
   // ✅ NUEVO: ir a productos filtrados desde el dropdown
@@ -136,20 +135,5 @@ export class Navbar {
     this.closeUserMenu();
   }
 
-  readonly mobileSearchOpen = signal(false);
-
-toggleMobileSearch() {
-  // solo mobile
-  if (window.innerWidth > 768) return;
-  this.mobileSearchOpen.update(v => !v);
-
-  // opcional: cerrar menú hamburguesa si está abierto
-  this.menuOpen.set(false);
-  this.productsOpen.set(false);
-}
-
-closeMobileSearch() {
-  this.mobileSearchOpen.set(false);
-}
-
+  
 }

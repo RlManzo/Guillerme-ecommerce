@@ -309,7 +309,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 14px !important;
+    gap: 30px !important;
     width: auto !important;
   }
 
@@ -578,7 +578,7 @@
 
 /* círculo azul */
 .userIconSvg circle:first-child {
-  fill: #3FA9F5; /* azul parecido al de tu imagen */
+  fill: #EA5534; /* azul parecido al de tu imagen */
 }
 
 /* silueta blanca */
@@ -629,7 +629,6 @@
 
 /* Contenedor user mobile */
 .user-menu--mobileTop{
-  display: flex;
   align-items: center;
 }
 

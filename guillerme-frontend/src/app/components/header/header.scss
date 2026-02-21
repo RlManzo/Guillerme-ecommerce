@@ -17,7 +17,7 @@
   border-radius: 30px;
   border: 1px solid #cfd9de;
   outline: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .iconInside {
@@ -67,12 +67,18 @@
   grid-template-columns: 40px 1fr;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 10px 12px;
   border: 0;
   background: transparent;
   text-align: left;
-  border-radius: 10px;
   cursor: pointer;
+
+  /* línea punteada tipo carrito */
+  border-bottom: 1px dashed #d6dde5;
+}
+
+.resultItem:last-child {
+  border-bottom: none; /* el último sin línea */
 }
 
 .resultItem:hover {
@@ -125,11 +131,11 @@
   color: #6b7280;
 }
 
-/* ====== MOBILE: BLOQUE NORMAL (empuja el carrusel) ====== */
+/* ====== MOBILE: overlay tipo app ====== */
 @media (max-width: 768px) {
-  /* el form ocupa el ancho y NO se achica */
+
   .form-buscador {
-    position: static;        /* importante: no ancla dropdown */
+    position: static;
     display: block;
     width: 100%;
   }
@@ -144,24 +150,80 @@
     box-sizing: border-box;
   }
 
-  /* RESULTADOS: en flujo normal */
+  /* PANEL BLANCO flotante */
   .buscadorContainer {
-    position: static;         /* CLAVE: empuja el carrusel */
-    top: auto;
-    left: auto;
-    transform: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 160px; /* lo setea el TS */
+    bottom: 80px;                  /* deja aire para el botón de WhatsApp */
+    margin: 0 auto;
 
-    width: 100%;
-    max-width: 100%;
-    margin-top: 10px;
+    width: 100vw;
+    max-width: 85vw;
 
-    z-index: auto;            /* no flota */
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-    border-radius: 14px;
+    background: #ffffff;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.25);
+    border: 0;
+
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
   }
 
+  /* LISTA INTERNA con scroll */
   .containerLi {
-    max-height: 240px;        /* scroll dentro del bloque */
+    flex: 1 1 auto;
+    padding: 12px;
     overflow-y: auto;
+    max-height: 100%;          /* que use todo el alto disponible del panel */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .resultItem {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 60px 1fr; /* un poco más grande la miniatura en mobile */
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    border-radius: 10px;
+    cursor: pointer;
+    /* línea punteada tipo carrito */
+    border-bottom: 1px dashed #d6dde5;
+  }
+
+  .thumb {
+    width: 60px;
+    height: 60px;
+  }
+
+  .resultImg {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #f3f4f6;
+  }
+
+  .resultInfo {
+    display: grid;
+    gap: 4px;
+  }
+
+  .resultName {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .resultPrice {
+    font-size: 13px;
+    font-weight: 700;
   }
 }
