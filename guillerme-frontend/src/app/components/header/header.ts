@@ -145,15 +145,13 @@ export class Header {
   }
 
   @HostListener('document:click')
-  onDocClick() {
-    // cerrar resultados siempre
-    this.resultsOpen = false;
+    onDocClick() {
+      // 🔵 En mobile NO se cierra al tocar fuera
+      if (window.innerWidth <= 768) return;
 
-    // en mobile: si no hay texto, cerrar el buscador
-    if (window.innerWidth <= 768 && !this.query.trim()) {
-      this.searchOpen.set(false);
+      // 🔵 En desktop sí
+      this.resultsOpen = false;
     }
-  }
 
   readonly mobileSearchOpen = signal(false);
 
