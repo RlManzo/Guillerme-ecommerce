@@ -16,12 +16,6 @@
   margin-bottom: 18px;
 }
 
-/* usamos el .section-title global que ya definimos */
-.section-title {
-  /* si necesitás sobrescribir algo muy puntual,
-     hacelo acá, pero en principio alcanza con el global */
-}
-
 .insta-username {
   font-size: 14px;
   font-weight: 600;
@@ -39,22 +33,38 @@
   margin: 0 auto;
 }
 
-/* truco 16:9 / cuadrado para que el iframe sea responsive */
+/* Contenedor del iframe */
 .insta-widget-ratio {
-  position: relative;
   width: 100%;
-  padding-bottom: 60%; // ajustá según el widget (50–80%)
-  overflow: hidden;
   border-radius: 18px;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
   background: #fff;
+  overflow: hidden; /* por si LightWidget agrega algo raro */
 }
 
-/* el iframe se estira al contenedor */
+/* Iframe ocupando todo el ancho */
 .insta-iframe {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
   border: 0;
+}
+
+/* 🔧 Fuerza la altura para que entren las 3 filas de posts */
+.lightwidget-widget {
+  width: 100% !important;
+  height: 720px !important;   /* ajustá este valor si querés más o menos alto */
+  border: 0 !important;
+}
+
+/* Un poco más bajo en pantallas pequeñas */
+@media (max-width: 992px) {
+  .lightwidget-widget {
+    height: 580px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .lightwidget-widget {
+    height: 480px !important;
+  }
 }
