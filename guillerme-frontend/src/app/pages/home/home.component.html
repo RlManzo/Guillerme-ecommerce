@@ -1,16 +1,32 @@
 <app-carrito-modal></app-carrito-modal>
-<app-producto-modal></app-producto-modal>
+<!-- ✅ Modal global de producto -->
+<div class="modal fade" id="staticBackdrop" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <button
+        type="button"
+        class="btn-close lks-modal-close"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+      ></button>
+      <div class="modal-body">
+        <app-producto-modal></app-producto-modal>
+      </div>
+    </div>
+  </div>
+</div>
 
 <main class="container-fluid">
   <app-carousel-servicios></app-carousel-servicios>
-  <app-productos></app-productos>
-    <app-brands-carousel
+    <app-productos-preview></app-productos-preview>
+  <!--<app-nosotros></app-nosotros>--> 
+  <app-instagram-feed></app-instagram-feed>
+ <!--<app-presupuesto></app-presupuesto>--> 
+  <app-faq></app-faq>
+   <app-brands-carousel
     [title]="'Nuestras marcas.'"
     [brands]="brands">
   </app-brands-carousel>
-  <app-nosotros></app-nosotros>
-  <app-presupuesto></app-presupuesto>
-  <app-faq></app-faq>
 </main>
 <a
   class="whatsapp-float"

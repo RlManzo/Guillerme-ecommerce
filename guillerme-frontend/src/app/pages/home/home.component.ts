@@ -8,6 +8,8 @@ import { CarritoModal } from '../../components/carrito-modal/carrito-modal';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BrandsCarouselComponent } from '../../components/brands-carousel/brands-carousel.component';
 import { FaqComponent } from '../../components/faq/faq.component';
+import { ProductosPreview } from '../../components/productos/productos-preview'; 
+import { InstagramFeed } from '../../components/instagram-feed/instagram-feed';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +23,9 @@ import { FaqComponent } from '../../components/faq/faq.component';
     CarritoModal,
     BrandsCarouselComponent,
     FaqComponent,
-    FooterComponent
+    FooterComponent,
+    ProductosPreview,
+    InstagramFeed
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'], 

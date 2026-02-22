@@ -1,0 +1,202 @@
+/* =========================================
+   HOME – PRODUCTOS DESTACADOS (preview)
+========================================= */
+
+.home-featured {
+  width: 100%;
+  padding: 30px 12px 40px;
+}
+
+.home-featured-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.home-featured-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #12233d;
+  margin: 0;
+}
+
+.home-featured-link {
+  border: 0;
+  background: transparent;
+  color: var(--celeste);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* =========================
+   CARRUSEL
+========================= */
+
+.home-featured-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Track que scrolla horizontalmente */
+.home-featured-track {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding-bottom: 8px;
+}
+
+/* Scrollbar suave (opcional) */
+.home-featured-track::-webkit-scrollbar {
+  height: 6px;
+}
+.home-featured-track::-webkit-scrollbar-track {
+  background: transparent;
+}
+.home-featured-track::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+
+/* Flechas izquierda / derecha */
+.home-arrow {
+  border: 0;
+  background: #ffffff;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  color: #12233d;
+  flex: 0 0 auto;
+}
+
+.home-arrow:hover {
+  background: #f3f4f6;
+}
+
+.home-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+
+/* =========================
+   CARD (igual que antes)
+========================= */
+
+.home-product-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px 10px 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  /* tamaño equivalente al minmax(160px,1fr) que usabas */
+  flex: 0 0 160px;
+  scroll-snap-align: start;
+}
+
+.home-product-media {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.home-product-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.home-product-img--placeholder {
+  display: grid;
+  place-items: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+  font-size: 20px;
+}
+
+.home-product-body {
+  display: grid;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.home-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  min-height: 40px;
+}
+
+.home-product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.home-product-price {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ladrillo);
+}
+
+.home-product-add {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--celeste);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.home-product-add:hover {
+  filter: brightness(1.05);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (min-width: 768px) {
+  .home-featured {
+    padding-inline: 40px;
+  }
+
+  .home-featured-title {
+    font-size: 24px;
+  }
+}
+
+.h4{
+    font-size: 35px;
+    font-family: "Calistoga", cursive;
+    font-weight: 400;
+    line-height: 106.3%;
+    color: var(--azul);
+    margin: 0 15px 0 0;
+}

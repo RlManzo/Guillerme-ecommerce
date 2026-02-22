@@ -1,13 +1,12 @@
 import { Component, inject, signal, HostListener } from '@angular/core';
-
 import { CommonModule, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+
 import { Header } from '../header/header';
 
 import { ShopStore } from '../../shared/store/shop.store';
 import { AuthService } from '../../shared/auth/auth.service';
 
-// ✅ NUEVO
 import {
   ProductsFilterStateService,
   ProductsCategory,
@@ -25,24 +24,26 @@ export class Navbar {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  // ✅ NUEVO
   private readonly productsFilterState = inject(ProductsFilterStateService);
 
   readonly menuOpen = signal(false);
   readonly userMenuOpen = signal(false);
+  readonly productsOpen = signal(false);
 
   // signals del AuthService
   isLogged = this.auth.isLogged;
   email = this.auth.email;
-
-  // ✅ nuevo: solo admin
   isAdmin = this.auth.isAdmin;
 
-  readonly productsOpen = signal(false);
+  // =======================
+  // NAV & MENÚ PRINCIPAL
+  // =======================
 
   toggleMenu() {
-    this.menuOpen.update((v) => !v);
-    if (!this.menuOpen()) this.productsOpen.set(false);
+    this.menuOpen.update(v => !v);
+    if (!this.menuOpen()) {
+      this.productsOpen.set(false);
+    }
   }
 
   closeMenu() {
@@ -54,8 +55,12 @@ export class Navbar {
     this.store.openCart();
   }
 
+  // =======================
+  // MENÚ USUARIO
+  // =======================
+
   toggleUserMenu() {
-    this.userMenuOpen.update((v) => !v);
+    this.userMenuOpen.update(v => !v);
   }
 
   closeUserMenu() {
@@ -85,13 +90,21 @@ export class Navbar {
     this.router.navigateByUrl('/admin/products');
   }
 
+  // =======================
+  // DROPDOWN PRODUCTOS
+  // =======================
+
   openProductsMenu() {
     // Solo hover en desktop
-    if (window.innerWidth > 768) this.productsOpen.set(true);
+    if (window.innerWidth > 768) {
+      this.productsOpen.set(true);
+    }
   }
 
   closeProductsMenu() {
-    if (window.innerWidth > 768) this.productsOpen.set(false);
+    if (window.innerWidth > 768) {
+      this.productsOpen.set(false);
+    }
   }
 
   toggleProductsMenu(ev: MouseEvent) {
@@ -100,7 +113,7 @@ export class Navbar {
 
     ev.preventDefault();
     ev.stopPropagation();
-    this.productsOpen.update((v) => !v);
+    this.productsOpen.update(v => !v);
   }
 
   closeAllMenus() {
@@ -109,18 +122,12 @@ export class Navbar {
     this.menuOpen.set(false);
   }
 
-  // ✅ NUEVO: ir a productos filtrados desde el dropdown
-  goProducts(cat: ProductsCategory) {
-    // 1) seteo filtro global
-    this.productsFilterState.setCategory(cat);
+  // =======================
+  // NAVEGAR A PRODUCTOS
+  // =======================
 
-    // 2) cierro menús
-    this.closeAllMenus();
-
-    // 3) si estás en otra ruta (ej /login), te llevo a /#producto
-    //    si ya estás en /, igual te scrollea
+  private goToProductsSection() {
     this.router.navigateByUrl('/#producto').then(() => {
-      // 4) scroll suave por si el navegador no lo hace
       setTimeout(() => {
         document
           .getElementById('producto')
@@ -129,11 +136,32 @@ export class Navbar {
     });
   }
 
+  // categoría (TODOS / LIBRERÍA / COMBOS / VARIOS)
+  goProducts(cat: ProductsCategory) {
+    // 1) seteo filtro global de categoría
+    this.productsFilterState.setCategory(cat);
+
+    // 2) cierro menús
+    this.closeAllMenus();
+
+    // 3) voy a la sección productos
+    this.goToProductsSection();
+  }
+
+  // si quisieras un “limpiar filtros” global desde el menú:
+  resetProductsFilters() {
+    this.productsFilterState.reset(); // vuelve a 'all'
+    this.closeAllMenus();
+    this.goToProductsSection();
+  }
+
+  // =======================
+  // CLIC FUERA DEL NAV
+  // =======================
+
   @HostListener('document:click')
   onDocClick() {
     this.productsOpen.set(false);
     this.closeUserMenu();
   }
-
-  
 }

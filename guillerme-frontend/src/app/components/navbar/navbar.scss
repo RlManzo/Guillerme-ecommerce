@@ -663,3 +663,41 @@
   fill: #45ACB4;
 }
 
+/* Por defecto (desktop): no se muestran */
+.dropdown-filters-mobile {
+  display: none;
+}
+
+/* MOBILE: filtros como sección dentro del submenú PRODUCTOS */
+@media (max-width: 768px) {
+  .dropdown-filters-mobile {
+    display: block;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.25);
+  }
+
+  .dropdown-filters-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 6px 0 2px;
+  }
+
+  .dropdown-item--filter {
+    font-size: 14px;
+    padding: 8px 10px;
+    text-align: left !important;
+    color: #e5f9fb !important;
+  }
+
+  .dropdown-item--filter.dropdown-item--clear {
+    color: #ffb4a6 !important;
+  }
+
+  .dropdown-item--filter.dropdown-item--clear:hover {
+    background: rgba(234, 85, 52, 0.16) !important;
+  }
+}

@@ -1,0 +1,94 @@
+<!-- src/app/components/productos-preview/productos-preview.html -->
+
+<section class="home-featured" *ngIf="destacados().length">
+  <div class="home-featured-header">
+    <h2 class="section-title">Productos destacados</h2>
+
+    <button type="button" class="home-featured-link" (click)="goVerMas()">
+      Ver más
+    </button>
+  </div>
+
+  <div class="home-featured-carousel">
+    <!-- Flecha izquierda -->
+    <button
+      type="button"
+      class="home-arrow home-arrow--left"
+      (click)="scroll(-1)"
+      [disabled]="!canScrollLeft()"
+      aria-label="Ver anteriores"
+    >
+      ‹
+    </button>
+
+    <!-- Track -->
+    <div
+      #track
+      class="home-featured-track"
+      (scroll)="onTrackScroll()"
+    >
+      <article
+        class="home-product-card"
+        *ngFor="let p of destacados()"
+      >
+        <!-- Media -->
+        <button
+          type="button"
+          class="home-product-media"
+          (click)="openDetalle(p)"
+          data-bs-toggle="modal"
+          data-bs-target="#staticBackdrop"
+          aria-label="Ver detalle"
+        >
+          <ng-container *ngIf="p.img; else noImg">
+            <img
+              class="home-product-img"
+              [src]="p.img"
+              [alt]="p.nombre"
+              loading="lazy"
+            />
+          </ng-container>
+          <ng-template #noImg>
+            <div class="home-product-img home-product-img--placeholder">
+              🖼️
+            </div>
+          </ng-template>
+        </button>
+
+        <!-- Texto -->
+        <div class="home-product-body" (click)="openDetalle(p)"
+             data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+          <h3 class="home-product-name">
+            {{ p.nombre }}
+          </h3>
+        </div>
+
+        <!-- Footer -->
+        <div class="home-product-footer">
+          <div class="home-product-price">
+            {{ formatPrice(p.precio) }}
+          </div>
+
+          <button
+            type="button"
+            class="home-product-add"
+            (click)="add(p)"
+          >
+            AGREGAR
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <!-- Flecha derecha -->
+    <button
+      type="button"
+      class="home-arrow home-arrow--right"
+      (click)="scroll(1)"
+      [disabled]="!canScrollRight()"
+      aria-label="Ver siguientes"
+    >
+      ›
+    </button>
+  </div>
+</section>

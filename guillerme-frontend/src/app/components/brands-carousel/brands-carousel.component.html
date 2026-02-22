@@ -1,9 +1,8 @@
 <section class="brandsWrap" *ngIf="safeBrands().length > 0"
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()">
-  <div class="box-title-contact text-center d-flex justify-content-center align-items-center">
-    <h4 class="title h4">{{ title }}</h4>
-    <img src="assets/logo-textos.png" alt="icono" data-aos="zoom-in" class="title-logo-guillerme"/>
+  <div class="text-center d-flex justify-content-center align-items-center">
+    <h2 class="section-title">{{ title }}</h2>
   </div>
 
   <br>
@@ -29,9 +28,6 @@
         </a>
       </div>
 
-      <div class="names">
-        <div class="name" *ngFor="let b of visible()">{{ b.name }}</div>
-      </div>
     </div>
 
     <button class="navBtn right" type="button" (click)="next()" aria-label="Siguiente">
