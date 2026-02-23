@@ -1,0 +1,67 @@
+.home-categories {
+  padding: 3rem 4vw;
+  background-color: #ffffff;
+}
+
+.home-categories-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2rem;
+}
+
+.category-card {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-card__image img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.category-card__body {
+  padding: 1.6rem 1.8rem 2rem;
+  text-align: center;
+}
+
+.category-card__body h3 {
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.category-card__body p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1.4rem;
+}
+
+/* Botón estilo Teorema */
+.btn-outline-red {
+  display: inline-block;
+  padding: 0.55rem 1.8rem;
+  border-radius: 999px;
+  border: 2px solid #e30613; /* rojo */
+  color: #e30613;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease,
+              box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.btn-outline-red:hover {
+  background-color: #e30613;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(227, 6, 19, 0.35);
+  transform: translateY(-1px);
+}

@@ -143,7 +143,7 @@
         <ng-content></ng-content>
       </div>
 
-      <!-- ITEMS MENÚ -->
+      <!-- ITEMS MENÚ (principalmente para mobile) -->
       <div
         class="menu-items d-flex justify-content-around align-items-center"
         [ngClass]="{ 'open': menuOpen() }"
@@ -152,7 +152,7 @@
           INICIO
         </a>
 
-        <!-- PRODUCTOS (dropdown) -->
+        <!-- PRODUCTOS (dropdown mobile) -->
         <div
           class="nav-item dropdown"
           [class.open]="productsOpen()"
@@ -322,9 +322,45 @@
     </div>
   </div>
 
+  <!-- SUBNAV (INICIO / PRODUCTOS / NOSOTROS / CONTACTO + FAQs) SOLO DESKTOP / NO ADMIN -->
+  <div class="subnav" *ngIf="!isAdmin()">
+    <div class="subnav-inner">
+
+
+      <!-- DERECHA: links a FAQs (otra pestaña) -->
+      <div class="subnav-right">
+        <a
+          class="subnav-link subnav-link--ghost"
+          href="/faqs#como-compro"
+          target="_blank"
+          rel="noopener"
+        >
+          ¿Cómo compro?
+        </a>
+
+        <a
+          class="subnav-link subnav-link--ghost"
+          href="/faqs#metodos-envio"
+          target="_blank"
+          rel="noopener"
+        >
+          Métodos de envío
+        </a>
+
+        <a
+          class="subnav-link subnav-link--ghost"
+          href="/faqs"
+          target="_blank"
+          rel="noopener"
+        >
+          Todas las preguntas frecuentes
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- BLOQUE BUSCADOR SOLO MOBILE (siempre visible) -->
   <div class="mobileSearchBlock">
     <app-header></app-header>
   </div>
-
 </nav>

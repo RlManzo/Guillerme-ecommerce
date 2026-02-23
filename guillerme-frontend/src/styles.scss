@@ -3221,11 +3221,10 @@ footer{
   position: relative;
   text-align: center;
   font-family: "Calistoga", cursive;
-  font-size: 35px;
+  font-size: 30px;
   font-weight: 400;
   line-height: 1.06;
   color: var(--azul);
-  margin: 0 auto 30px;
   display: inline-block;
   padding-bottom: 14px;
 }
@@ -3237,7 +3236,7 @@ footer{
   left: 50%;
   transform: translateX(-50%);
   bottom: 0;
-  width: 80%;
-  max-width: 500px;
+  width: 100%;
+  max-width: 800px;
   border-bottom: 2px dashed #3aa7b3; /* mismo tono que el de marcas */
 }

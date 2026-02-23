@@ -10,6 +10,8 @@ import { BrandsCarouselComponent } from '../../components/brands-carousel/brands
 import { FaqComponent } from '../../components/faq/faq.component';
 import { ProductosPreview } from '../../components/productos/productos-preview'; 
 import { InstagramFeed } from '../../components/instagram-feed/instagram-feed';
+import { CategoriasComponent } from '../../components/categorias-productos/categorias.component';
+import { HomeBeneficiosComponent } from '../../components/beneficios/home-beneficios.component';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +27,9 @@ import { InstagramFeed } from '../../components/instagram-feed/instagram-feed';
     FaqComponent,
     FooterComponent,
     ProductosPreview,
-    InstagramFeed
+    InstagramFeed,
+    CategoriasComponent,
+    HomeBeneficiosComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'], 
