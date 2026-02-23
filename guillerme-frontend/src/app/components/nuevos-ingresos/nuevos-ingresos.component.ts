@@ -26,7 +26,6 @@ export class NuevosIngresosComponent implements OnInit {
   productos: Product[] = [];
 
   ngOnInit(): void {
-    // aseguramos que los productos estén cargados
     this.productsService.load().subscribe({
       error: () => {
         this.error = true;
@@ -34,14 +33,16 @@ export class NuevosIngresosComponent implements OnInit {
       },
     });
 
-    // tomamos los últimos 3 productos activos por id
     this.productsService.products$.subscribe({
       next: (all) => {
         const activos = all.filter(p => (p as any).estado ?? true);
+
         const ordenados = [...activos].sort(
           (a, b) => (b.id ?? 0) - (a.id ?? 0)
         );
-        this.productos = ordenados.slice(0, 3);
+
+        // 👉 ahora tomamos hasta 6 productos, no 3
+        this.productos = ordenados.slice(0, 6);
         this.loading = false;
       },
       error: () => {

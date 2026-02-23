@@ -170,38 +170,38 @@
           </button>
 
           <div class="dropdown-menu-custom">
-            <a
+            <button
+              type="button"
               class="dropdown-item"
-              href="#producto"
-              (click)="goProducts('all'); $event.preventDefault()"
+              (click)="goProducts('all')"
             >
               Todos los productos
-            </a>
+            </button>
 
-            <a
+            <button
+              type="button"
               class="dropdown-item"
-              href="#producto"
-              (click)="goProducts('libreria'); $event.preventDefault()"
+              (click)="goProducts('libreria')"
             >
               Librería
-            </a>
+            </button>
 
-            <a
+            <button
+              type="button"
               class="dropdown-item"
-              href="#producto"
-              (click)="goProducts('combos'); $event.preventDefault()"
+              (click)="goProducts('combos')"
             >
               Combos
-            </a>
+            </button>
 
-            <a
+            <button
+              type="button"
               class="dropdown-item"
-              href="#producto"
-              (click)="goProducts('varios'); $event.preventDefault()"
+              (click)="goProducts('varios')"
             >
               Varios
-            </a>
-          </div>
+            </button>
+</div>
         </div>
 
         <a class="all" href="#nosotros" (click)="closeMenu()">NOSOTROS</a>

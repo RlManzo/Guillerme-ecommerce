@@ -123,20 +123,18 @@ export class Navbar {
   }
 
   // =======================
-  // NAVEGAR A PRODUCTOS
+  // NAVEGAR A /productos
   // =======================
 
-  private goToProductsSection() {
-    this.router.navigateByUrl('/#producto').then(() => {
-      setTimeout(() => {
-        document
-          .getElementById('producto')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
+  /** Ir a la pantalla de productos */
+  private goToProductsRoute() {
+    this.router.navigate(['/productos']).then(() => {
+      // por las dudas, scrolleo arriba
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
-  // categoría (TODOS / LIBRERÍA / COMBOS / VARIOS)
+  /** categoría (TODOS / LIBRERÍA / COMBOS / VARIOS) */
   goProducts(cat: ProductsCategory) {
     // 1) seteo filtro global de categoría
     this.productsFilterState.setCategory(cat);
@@ -144,15 +142,15 @@ export class Navbar {
     // 2) cierro menús
     this.closeAllMenus();
 
-    // 3) voy a la sección productos
-    this.goToProductsSection();
+    // 3) voy a la ruta /productos
+    this.goToProductsRoute();
   }
 
-  // si quisieras un “limpiar filtros” global desde el menú:
+  /** botón tipo "Ver todos" desde el menú */
   resetProductsFilters() {
     this.productsFilterState.reset(); // vuelve a 'all'
     this.closeAllMenus();
-    this.goToProductsSection();
+    this.goToProductsRoute();
   }
 
   // =======================
