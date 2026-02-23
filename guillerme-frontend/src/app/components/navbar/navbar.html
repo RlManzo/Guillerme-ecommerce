@@ -203,14 +203,9 @@
             </button>
 </div>
         </div>
-
-        <a class="all" href="#nosotros" (click)="closeMenu()">NOSOTROS</a>
         <a class="all" href="#nosotros" (click)="closeMenu()">CONTACTO</a>
 
-        <!-- BUSCADOR SOLO DESKTOP -->
-        <div class="nav-search nav-search--desktop" (click)="$event.stopPropagation()">
-          <app-header></app-header>
-        </div>
+       
 
         <!-- LOGIN SOLO DESKTOP -->
         <a
@@ -221,6 +216,11 @@
         >
           INGRESAR
         </a>
+
+         <!-- BUSCADOR SOLO DESKTOP -->
+        <div class="nav-search nav-search--desktop" (click)="$event.stopPropagation()">
+          <app-header></app-header>
+        </div>
 
         <!-- USER SOLO DESKTOP -->
         <div
