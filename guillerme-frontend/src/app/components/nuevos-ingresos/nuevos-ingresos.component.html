@@ -1,0 +1,62 @@
+<section class="home-nuevos" style="background-color: #f7f9fa;">
+  <div class="home-nuevos-inner">
+
+    <!-- Columna de texto izquierda -->
+    <aside class="home-nuevos-left">
+      <p class="home-nuevos-eyebrow">NUEVOS</p>
+      <h2 class="section-title">INGRESOS</h2>
+    </aside>
+
+    <!-- Contenido derecha -->
+    <div class="home-nuevos-content">
+      <ng-container *ngIf="!loading && !error; else estado">
+        <div class="home-nuevos-grid">
+          <article
+            class="nuevo-product-card"
+            *ngFor="let p of productos"
+          >
+            <div
+              class="nuevo-product-card__image"
+              (click)="openDetalle(p)"
+              style="cursor: pointer"
+            >
+              <img
+                [src]="getImagen(p)"
+                [alt]="p.nombre"
+              />
+            </div>
+
+            <div class="nuevo-product-card__body">
+              <h3
+                class="nuevo-product-card__name"
+                (click)="openDetalle(p)"
+                style="cursor: pointer"
+              >
+                {{ p.nombre }}
+              </h3>
+
+              <p class="nuevo-product-card__price" *ngIf="getPrecio(p)">
+                {{ getPrecio(p) }}
+              </p>
+
+
+              <button
+                type="button"
+                class="btn-nuevo-comprar"
+                (click)="add(p)"
+              >
+                Agregar
+              </button>
+            </div>
+          </article>
+        </div>
+      </ng-container>
+
+      <ng-template #estado>
+        <p *ngIf="loading">Cargando nuevos ingresos...</p>
+        <p *ngIf="error">No pudimos cargar los nuevos ingresos.</p>
+      </ng-template>
+    </div>
+
+  </div>
+</section>

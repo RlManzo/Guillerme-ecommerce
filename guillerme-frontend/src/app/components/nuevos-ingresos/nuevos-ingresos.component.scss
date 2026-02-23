@@ -1,0 +1,126 @@
+.home-nuevos {
+  padding: 3.5rem 4vw;
+  background-color: #ffffff;
+}
+
+.home-nuevos-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  column-gap: 2.5rem;
+  align-items: flex-start;
+}
+
+/* Columna izquierda */
+.home-nuevos-left {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.home-nuevos-eyebrow {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.home-nuevos-title {
+  font-size: 1.8rem;
+  margin: 0.2rem 0 0;
+}
+
+/* Grid de productos (hasta 3) */
+.home-nuevos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card de producto */
+.nuevo-product-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.nuevo-product-card__image img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.nuevo-product-card__body {
+  padding: 1rem 1.2rem 1.4rem;
+}
+
+.nuevo-product-card__name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 0.6rem;
+  line-height: 1.4;
+}
+
+.nuevo-product-card__price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e30613;
+  margin: 0 0 0.2rem;
+}
+
+.nuevo-product-card__installments {
+  font-size: 0.85rem;
+  color: #777;
+  margin: 0 0 0.9rem;
+}
+
+/* Botón comprar */
+.btn-nuevo-comprar {
+  display: inline-block;
+  padding: 0.45rem 1.6rem;
+  border-radius: 999px;
+  border: 2px solid #e30613;
+  color: #e30613;
+  background-color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease,
+    box-shadow 0.16s ease, transform 0.08s ease;
+}
+
+.btn-nuevo-comprar:hover {
+  background-color: #e30613;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(227, 6, 19, 0.35);
+  transform: translateY(-1px);
+}
+
+/* 📱 Mobile */
+@media (max-width: 767.98px) {
+  .home-nuevos-inner {
+    grid-template-columns: 1fr;
+    row-gap: 1.5rem;
+  }
+
+  .home-nuevos-left {
+    text-align: left;
+  }
+
+  .home-nuevos-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 70%;
+    overflow-x: auto;
+    padding-bottom: 0.8rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nuevo-product-card {
+    min-width: 0;
+  }
+}

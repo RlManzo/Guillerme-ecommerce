@@ -12,6 +12,7 @@ import { ProductosPreview } from '../../components/productos/productos-preview';
 import { InstagramFeed } from '../../components/instagram-feed/instagram-feed';
 import { CategoriasComponent } from '../../components/categorias-productos/categorias.component';
 import { HomeBeneficiosComponent } from '../../components/beneficios/home-beneficios.component';
+import { NuevosIngresosComponent } from '../../components/nuevos-ingresos/nuevos-ingresos.component';
 
 @Component({
   selector: 'app-home',
@@ -29,7 +30,8 @@ import { HomeBeneficiosComponent } from '../../components/beneficios/home-benefi
     ProductosPreview,
     InstagramFeed,
     CategoriasComponent,
-    HomeBeneficiosComponent
+    HomeBeneficiosComponent,
+    NuevosIngresosComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'], 
