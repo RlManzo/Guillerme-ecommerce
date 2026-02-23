@@ -32,7 +32,7 @@ export class BrandsCarouselComponent implements OnInit, OnDestroy {
   @Input() pauseOnHover = true;
 
   // Defaults desktop
-  @Input() perView = 3;
+  @Input() perView = 4;
 
   // cuánto avanza por transición (1 = suave, 3 = por página)
   @Input() step = 1;
@@ -50,7 +50,7 @@ export class BrandsCarouselComponent implements OnInit, OnDestroy {
   private readonly onMqlChange = () => {
     // 2 items en <=700px, 3 items en desktop
     const isMobile = this.mql?.matches ?? false;
-    this.perView = isMobile ? 2 : 3;
+    this.perView = isMobile ? 2 : 4;
 
     // Opcional: si querés que en mobile avance “por página”
     // this.step = isMobile ? 2 : 1;

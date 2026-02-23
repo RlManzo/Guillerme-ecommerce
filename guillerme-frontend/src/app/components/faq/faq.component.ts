@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
 
 type FaqItem = {
   q: string;
@@ -13,7 +15,7 @@ type FaqItem = {
   templateUrl: './faq.component.html',
   styleUrl: './faq.component.scss',
 })
-export class FaqComponent {
+export class FaqComponent implements OnInit{
   title = 'Preguntas frecuentes';
   intro =
     'Te dejamos respuestas rápidas a las consultas más comunes. Si necesitás ayuda, escribinos y te asesoramos.';
@@ -40,6 +42,48 @@ En general, la preparación demora 24/48 hs hábiles y luego el envío varía se
 También podés dejarnos tu consulta en el formulario de contacto y te respondemos a la brevedad.`,
     },
   ];
+
+    private readonly route = inject(ActivatedRoute);
+
+      ngOnInit(): void {
+    // cuando cambia el parámetro "faq", abrimos la pregunta correspondiente
+    this.route.queryParamMap.subscribe(params => {
+      const key = params.get('faq');
+      this.openByKey(key);
+    });
+  }
+
+  private openByKey(key: string | null) {
+    if (!key) return;
+
+    let index = -1;
+
+    switch (key) {
+      case 'como-compro':
+        index = this.faqs.findIndex(f => f.q.includes('¿Cómo compro?'));
+        break;
+
+      case 'metodos-envio':
+        index = this.faqs.findIndex(f => f.q.includes('¿Métodos de envío?'));
+        break;
+
+      // acá podés seguir sumando más códigos si agregás FAQs nuevas
+      // case 'demora-pedido':
+      //   index = this.faqs.findIndex(f => f.q.includes('¿Cuánto demora en llegar mi pedido?'));
+      //   break;
+    }
+
+    if (index >= 0) {
+      this.openIndex.set(index);
+
+      // aseguramos hacer scroll suave al bloque de FAQs
+      setTimeout(() => {
+        document
+          .getElementById('faq')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+  }
 
   // -1 = ninguno abierto
   openIndex = signal<number>(0);

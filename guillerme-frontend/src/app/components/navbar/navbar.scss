@@ -786,3 +786,53 @@
     display: block;
   }
 }
+
+/* Subnav: FAQs con iconos */
+.subnav-right {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+/* botón tipo “pastilla” */
+.subnav-link--faq {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* cuadrito del icono */
+.subnav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* svg adentro del cuadrito */
+.subnav-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: #ffffff;
+}
+
+/* texto */
+.subnav-text {
+  white-space: nowrap;
+}
+
+
+
+.subnav-link--faq:hover .subnav-text {
+  text-decoration: underline;
+}

@@ -162,4 +162,19 @@ export class Navbar {
     this.productsOpen.set(false);
     this.closeUserMenu();
   }
+
+  // =======================
+// FAQ DESDE LA NAVBAR
+// =======================
+
+goFaq(code: 'como-compro' | 'metodos-envio') {
+  this.closeAllMenus();
+
+  this.router.navigate(['/'], {
+    fragment: 'faq',
+    queryParams: { faq: code },
+    // opcional si ya usás otros params:
+    // queryParamsHandling: 'merge'
+  });
+}
 }

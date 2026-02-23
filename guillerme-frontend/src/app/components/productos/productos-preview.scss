@@ -200,3 +200,30 @@
     color: var(--azul);
     margin: 0 15px 0 0;
 }
+
+/* En Productos destacados el título NO lleva la línea inferior */
+.home-featured .section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.home-featured .section-title::after {
+  content: none;
+}
+
+.home-featured-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+  width: 100%;          /* importante para que la línea use todo el ancho */
+}
+
+/* Línea punteada a la derecha de "Ver más" */
+.home-featured-header::after {
+  content: '';
+  flex: 1;                                  /* ocupa todo el espacio que queda */
+  border-bottom: 2px dotted var(--ladrillo);
+  opacity: 0.6;
+  margin-left: 12px;                        /* pequeño espacio después del botón */
+}

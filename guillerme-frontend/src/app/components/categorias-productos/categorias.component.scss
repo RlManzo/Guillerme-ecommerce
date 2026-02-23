@@ -51,7 +51,7 @@
   padding: 0.55rem 1.8rem;
   border-radius: 999px;
   border: 2px solid #e30613; /* rojo */
-  color: #e30613;
+  color: var(--ladrillo);
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
@@ -64,4 +64,66 @@
   color: #fff;
   box-shadow: 0 6px 16px rgba(227, 6, 19, 0.35);
   transform: translateY(-1px);
+}
+
+.btnAdd{
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ladrillo);
+  background: var(--ladrillo);
+  color: var(--blanco);
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: .3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btnAdd:hover{
+  background: var(--celeste);
+  border-color: var(--celeste);
+}
+
+
+/* Dentro de home-categories el title NO lleva la línea de abajo */
+.home-categories .section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Si tu .section-title usa ::after para el punteado global, lo anulamos acá */
+.home-categories .section-title::after {
+  content: none;
+}
+
+.home-categories .text-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 2rem; // separa el título de las cards
+}
+
+/* Líneas punteadas a izquierda y derecha */
+.home-categories .text-center::before,
+.home-categories .text-center::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px dotted var(--ladrillo); // o el color que uses
+  opacity: 0.6;
+}
+
+.home-categories .text-center::before,
+.home-categories .text-center::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px dotted var(--ladrillo);
+  opacity: 0.6;
+  margin: 0 24px;
 }

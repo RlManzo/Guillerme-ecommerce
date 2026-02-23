@@ -322,42 +322,50 @@
     </div>
   </div>
 
-  <!-- SUBNAV (INICIO / PRODUCTOS / NOSOTROS / CONTACTO + FAQs) SOLO DESKTOP / NO ADMIN -->
-  <div class="subnav" *ngIf="!isAdmin()">
-    <div class="subnav-inner">
+<!-- SUBNAV (INICIO / PRODUCTOS / NOSOTROS / CONTACTO + FAQs) SOLO DESKTOP / NO ADMIN -->
+<div class="subnav" *ngIf="!isAdmin()">
+  <div class="subnav-inner">
 
-
-      <!-- DERECHA: links a FAQs (otra pestaña) -->
-      <div class="subnav-right">
-        <a
-          class="subnav-link subnav-link--ghost"
-          href="/faqs#como-compro"
-          target="_blank"
-          rel="noopener"
-        >
+    <!-- DERECHA: links a FAQs con iconos -->
+    <div class="subnav-right">
+      <button
+        type="button"
+        class="subnav-link subnav-link--ghost subnav-link--faq"
+        (click)="goFaq('como-compro')"
+      >
+        <span class="subnav-icon">
+          <!-- ícono “bolsa / carrito” -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M7 9V7a5 5 0 0 1 10 0v2h2a1 1 0 0 1 .99 1.14l-1.5 10A2 2 0 0 1 15.51 22h-7a2 2 0 0 1-1.98-1.86l-1.5-10A1 1 0 0 1 5 9h2zm2 0h6V7a3 3 0 0 0-6 0v2z"
+            />
+          </svg>
+        </span>
+        <span class="subnav-text">
           ¿Cómo compro?
-        </a>
+        </span>
+      </button>
 
-        <a
-          class="subnav-link subnav-link--ghost"
-          href="/faqs#metodos-envio"
-          target="_blank"
-          rel="noopener"
-        >
+      <button
+        type="button"
+        class="subnav-link subnav-link--ghost subnav-link--faq"
+        (click)="goFaq('metodos-envio')"
+      >
+        <span class="subnav-icon">
+          <!-- ícono “camión / envío” -->
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 6a1 1 0 0 1 1-1h9v9H3V6zm11 0h3.5a1 1 0 0 1 .8.4l2.7 3.6a1 1 0 0 1 .2.6V14h-7V6zm-8 9a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm10 0a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"
+            />
+          </svg>
+        </span>
+        <span class="subnav-text">
           Métodos de envío
-        </a>
-
-        <a
-          class="subnav-link subnav-link--ghost"
-          href="/faqs"
-          target="_blank"
-          rel="noopener"
-        >
-          Todas las preguntas frecuentes
-        </a>
-      </div>
+        </span>
+      </button>
     </div>
   </div>
+</div>
 
   <!-- BLOQUE BUSCADOR SOLO MOBILE (siempre visible) -->
   <div class="mobileSearchBlock">

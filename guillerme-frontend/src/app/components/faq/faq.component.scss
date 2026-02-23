@@ -86,3 +86,34 @@
   line-height: 1.45;
   opacity: 0.92;
 }
+
+
+/* Quitar underline inferior de este título */
+.faq .section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.faq .section-title::after {
+  content: none;
+}
+
+/* Contenedor del título con líneas punteadas a los lados */
+.faq .text-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 1.5rem; // separa título del texto intro
+}
+
+/* Líneas punteadas laterales */
+.faq .text-center::before,
+.faq .text-center::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px dotted var(--ladrillo);
+  opacity: 0.6;
+  margin: 0 24px; // achica un poquito para que no vaya de borde a borde
+}

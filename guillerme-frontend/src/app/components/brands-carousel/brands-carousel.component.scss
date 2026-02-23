@@ -143,3 +143,33 @@
     color: var(--azul);
     margin: 0 15px 0 0;
 }
+
+/* Quitar underline inferior de este título */
+.brandsWrap .section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.brandsWrap .section-title::after {
+  content: none;
+}
+
+/* Contenedor del título con líneas punteadas laterales */
+.brandsWrap .text-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 1.5rem; // espacio antes del carrusel
+}
+
+/* Líneas punteadas laterales */
+.brandsWrap .text-center::before,
+.brandsWrap .text-center::after {
+  content: '';
+  flex: 1;
+
+  opacity: 0.6;
+  margin: 0 24px;
+}
