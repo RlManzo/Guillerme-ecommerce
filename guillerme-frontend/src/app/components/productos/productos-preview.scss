@@ -5,6 +5,9 @@
 .home-featured {
   width: 100%;
   padding: 30px 12px 40px;
+  position: relative;
+  top: 90px;
+  overflow-x: hidden; /* evita desborde visual del bloque */
 }
 
 .home-featured-header {
@@ -12,6 +15,7 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 18px;
+  width: 100%;
 }
 
 .home-featured-title {
@@ -29,6 +33,16 @@
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
+  padding: 0;
+}
+
+/* Línea punteada a la derecha de "Ver más" */
+.home-featured-header::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px dotted var(--ladrillo);
+  opacity: 0.6;
+  margin-left: 12px;
 }
 
 /* =========================
@@ -40,21 +54,25 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0; /* importante para evitar overflow raro */
 }
 
 /* Track que scrolla horizontalmente */
 .home-featured-track {
   flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   gap: 14px;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scroll-behavior: smooth;
   padding-bottom: 8px;
+  padding-right: 6px; /* deja ver “media card” sin romper layout */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Scrollbar suave (opcional) */
+/* Scrollbar suave */
 .home-featured-track::-webkit-scrollbar {
   height: 6px;
 }
@@ -94,7 +112,7 @@
 }
 
 /* =========================
-   CARD (igual que antes)
+   CARD
 ========================= */
 
 .home-product-card {
@@ -105,10 +123,9 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-
-  /* tamaño equivalente al minmax(160px,1fr) que usabas */
   flex: 0 0 160px;
   scroll-snap-align: start;
+  min-width: 0;
 }
 
 .home-product-media {
@@ -123,8 +140,9 @@
 .home-product-img {
   width: 100%;
   height: 150px;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  background: #fff;
 }
 
 .home-product-img--placeholder {
@@ -133,6 +151,7 @@
   background: #f3f4f6;
   color: #9ca3af;
   font-size: 20px;
+  height: 150px;
 }
 
 .home-product-body {
@@ -146,6 +165,7 @@
   font-weight: 600;
   margin: 0;
   min-height: 40px;
+  color: #12233d;
 }
 
 .home-product-footer {
@@ -153,7 +173,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .home-product-price {
@@ -178,8 +198,28 @@
   filter: brightness(1.05);
 }
 
+/* Título actual */
+.home-featured .section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+  margin: 0;
+}
+
+.home-featured .section-title::after {
+  content: none;
+}
+
+.h4 {
+  font-size: 35px;
+  font-family: "Calistoga", cursive;
+  font-weight: 400;
+  line-height: 106.3%;
+  color: var(--azul);
+  margin: 0 15px 0 0;
+}
+
 /* =========================
-   RESPONSIVE
+   DESKTOP / TABLET
 ========================= */
 
 @media (min-width: 768px) {
@@ -192,38 +232,115 @@
   }
 }
 
-.h4{
-    font-size: 35px;
-    font-family: "Calistoga", cursive;
-    font-weight: 400;
-    line-height: 106.3%;
-    color: var(--azul);
-    margin: 0 15px 0 0;
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .home-featured {
+    top: 0 !important;
+    padding: 24px 0 30px; /* sin padding lateral para que el track mande */
+    overflow-x: hidden;
+  }
+
+  .home-featured-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 0 20px;
+  }
+
+  .home-featured-header::after {
+    display: none;
+  }
+
+  .home-featured .section-title {
+    font-size: 28px;
+     line-height: 1.1;
+      white-space: nowrap;
+      max-width: none;
+      text-align: left !important;
+  }
+
+  /* "Ver más" abajo del título */
+  .home-featured-link {
+    order: 2;
+    justify-self: left;
+    font-size: 14px;
+    line-height: 1.1;
+    text-align: right;
+  }
+
+  .home-featured-carousel {
+    gap: 0;
+  }
+
+  /* ocultamos flechas en mobile */
+  .home-arrow {
+    display: none;
+  }
+
+  /* track full ancho sin desbordar el layout */
+  .home-featured-track {
+  gap: 14px;
+  padding-left: 18px;
+  padding-right: 0;
+  padding-bottom: 6px;
+  scroll-padding-left: 18px;
+  scroll-padding-right: 0;
 }
 
-/* En Productos destacados el título NO lleva la línea inferior */
-.home-featured .section-title {
-  padding-bottom: 0;
-  border-bottom: none;
+/* 2 cards grandes + asoma la tercera */
+.home-product-card {
+  flex: 0 0 calc((100% - 18px - 14px) / 2.2);
+  border-radius: 16px;
+  padding: 10px 10px 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
 }
 
-.home-featured .section-title::after {
-  content: none;
+  .home-product-media {
+    border-radius: 12px;
+    margin-bottom: 6px;
+  }
+
+  .home-product-img,
+.home-product-img--placeholder {
+  height: 125px;
 }
 
-.home-featured-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 18px;
-  width: 100%;          /* importante para que la línea use todo el ancho */
+  .home-product-name {
+  font-size: 13px;
+  line-height: 1.25;
+  min-height: 48px;
 }
 
-/* Línea punteada a la derecha de "Ver más" */
-.home-featured-header::after {
-  content: '';
-  flex: 1;                                  /* ocupa todo el espacio que queda */
-  border-bottom: 2px dotted var(--ladrillo);
-  opacity: 0.6;
-  margin-left: 12px;                        /* pequeño espacio después del botón */
+  .home-product-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .home-product-price {
+  font-size: 14px;
+}
+
+.home-product-add {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+}
+
+@media (max-width: 768px) {
+
+  .home-featured {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
 }

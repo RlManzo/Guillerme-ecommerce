@@ -138,10 +138,15 @@
     <div class="navbar col-12 d-flex justify-content-around align-items-center mobile">
 
       <!-- LOGO -->
-      <div class="logo d-flex justify-content-center align-items-center mobile">
+      <a
+        class="logo d-flex justify-content-center align-items-center mobile logo-link"
+        routerLink="/"
+        (click)="closeAllMenus()"
+        aria-label="Ir al inicio"
+      >
         <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
-        <ng-content></ng-content>
-      </div>
+      </a>
+      <ng-content></ng-content>
 
       <!-- ITEMS MENÚ (principalmente para mobile) -->
       <div
