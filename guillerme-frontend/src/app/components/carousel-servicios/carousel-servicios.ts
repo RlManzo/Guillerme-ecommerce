@@ -53,6 +53,10 @@ export class CarouselServicios implements OnInit, OnDestroy {
   activeIndex = 0;
   private intervalId: any;
 
+  private touchStartX = 0;
+private touchEndX = 0;
+private minSwipeDistance = 50;
+
   ngOnInit(): void {
     this.startCarousel();
   }
@@ -103,4 +107,24 @@ export class CarouselServicios implements OnInit, OnDestroy {
   onMouseLeave(): void {
     this.startCarousel();
   }
+
+  onTouchStart(event: TouchEvent) {
+  this.touchStartX = event.changedTouches[0].screenX;
+}
+
+onTouchMove(event: TouchEvent) {
+  this.touchEndX = event.changedTouches[0].screenX;
+}
+
+onTouchEnd() {
+  const distance = this.touchStartX - this.touchEndX;
+
+  if (Math.abs(distance) < this.minSwipeDistance) return;
+
+  if (distance > 0) {
+    this.next();   // swipe izquierda
+  } else {
+    this.prev();   // swipe derecha
+  }
+}
 }
