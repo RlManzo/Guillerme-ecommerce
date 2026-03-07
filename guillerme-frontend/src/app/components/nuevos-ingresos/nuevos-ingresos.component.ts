@@ -42,7 +42,8 @@ export class NuevosIngresosComponent implements OnInit {
           (a: any, b: any) => (Number(b?.id) || 0) - (Number(a?.id) || 0)
         );
 
-        this.productos = ordenados.slice(0, 6);
+        const maxItems = window.innerWidth <= 767 ? 8 : 6;
+        this.productos = ordenados.slice(0, maxItems);
         this.error = false;
       } catch (e) {
         console.error('Error procesando nuevos ingresos:', e);
