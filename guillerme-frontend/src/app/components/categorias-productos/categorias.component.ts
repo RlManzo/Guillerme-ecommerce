@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { inject,Component } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-categorias',
@@ -7,6 +8,7 @@ import { Component } from '@angular/core';
 })
 export class CategoriasComponent {
 
+   private readonly router = inject(Router);
   categories = [
     {
       id: 'escolar',
@@ -37,5 +39,13 @@ export class CategoriasComponent {
       link: '/mayorista'
     }
   ];
+
+  /** Ir a la pantalla de productos */
+  goToProductsRoute() {
+    this.router.navigate(['/productos']).then(() => {
+      // por las dudas, scrolleo arriba
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
 }

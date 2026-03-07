@@ -16,7 +16,7 @@ export class HomeBeneficiosComponent {
       id: 'envios',
       title: 'ENVÍOS',
       text: 'A domicilio y a todas las Sucursales de Correo Argentino del país.',
-      icon: 'assets/envios-icono.jpg'      // 👈 sin barra inicial mejor
+      icon: 'assets/envios-icono.jpg'     
     },
     {
       id: 'pagos',

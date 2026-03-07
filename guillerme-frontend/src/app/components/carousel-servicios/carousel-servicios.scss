@@ -1,3 +1,8 @@
+.carousel-wrap {
+  position: relative;
+  top: 90px;
+}
+
 .carousel {
   position: relative;
   width: 100%;
@@ -19,39 +24,37 @@
 
   img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     user-select: none;
+    object-fit: cover;
+    object-position: center;
   }
 }
 
-/* Para que el contenedor tenga altura: usamos el primer slide como "medidor" */
+/* Altura desktop */
 .carousel::before {
   content: "";
   display: block;
-  padding-top: 38%; /* ajustá: 38%~45% según el alto de tus banners */
+  padding-top: 38%;
 }
 
-/* Flechas laterales tipo Filgo */
+/* Flechas */
 .nav-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
-
   border: 0;
   background: rgba(0, 0, 0, 0.65);
   color: #fff;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 34px;
   line-height: 1;
   cursor: pointer;
-
   z-index: 5;
 }
 
@@ -63,16 +66,15 @@
   right: 0;
 }
 
-/* Hover suave */
 .nav-arrow:hover {
   background: rgba(0, 0, 0, 0.8);
 }
 
-/* Bolitas */
+/* Dots */
 .dots {
   position: absolute;
   left: 50%;
-  bottom: 10px;
+  bottom: 12px;
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
@@ -89,18 +91,43 @@
 }
 
 .dot.active {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.75);
 }
 
-/* Mobile: flechas un poco más chicas */
+/* =========================
+   MOBILE
+========================= */
+
 @media (max-width: 768px) {
-  .nav-arrow {
-    width: 38px;
-    height: 38px;
-    font-size: 30px;
+
+  /* eliminar offset del navbar */
+  .carousel-wrap {
+    top: 0 !important;
   }
 
+  /* carrusel más alto tipo Teorema */
+  .carousel::before {
+    padding-top: 115%;
+  }
+
+  /* ocultar flechas */
+  .nav-arrow {
+    display: none;
+  }
+
+  /* dots más visibles */
   .dots {
-    bottom: 8px;
+    bottom: 14px;
+    gap: 7px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.6);
+  }
+
+  .dot.active {
+    background: #000;
   }
 }

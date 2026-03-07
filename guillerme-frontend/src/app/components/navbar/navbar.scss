@@ -774,13 +774,6 @@
   text-transform: none;
 }
 
-/* MOBILE: ocultamos la subnav para no recargar */
-@media (max-width: 768px) {
-  .subnav {
-    display: none;
-  }
-}
-
 @media (min-width: 769px) {
   .nav-item.dropdown:hover .dropdown-menu-custom {
     display: block;
@@ -835,4 +828,155 @@
 
 .subnav-link--faq:hover .subnav-text {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  nav.navbar-fixed.navbar-mobile {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    background: var(--crema);
+  }
+
+  /* topbar más compacta */
+  nav.navbar-fixed.navbar-mobile .topbar {
+    border-bottom: 0 !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .topbar-inner {
+    padding: 8px 12px 6px !important;
+  }
+
+  /* fila principal */
+  nav.navbar-fixed.navbar-mobile .navbar.col-12 {
+    padding: 8px 12px !important;
+    min-height: auto !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .logo img.logo-img {
+    height: 54px !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .carrito {
+    gap: 14px !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .botonCarrito svg {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  /* buscador mobile */
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock {
+    display: block !important;
+    width: 100%;
+    background: var(--crema);
+    padding: 8px 12px 10px !important;
+    border-bottom: 0 !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .box-header-buscador,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header form.form-buscador,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .inputWrap {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .box-header-buscador {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .inputBusqueda {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock app-header .buscadorContainer {
+    position: static !important;
+    margin-top: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* subnav mobile tipo referencia */
+  nav.navbar-fixed.navbar-mobile .subnav {
+    display: block !important;
+    width: 100%;
+    background: #0f2335;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-inner {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-right {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 !important;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-link--faq {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    justify-content: flex-start;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-link--faq:last-child {
+    border-right: 0;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-link--faq::after {
+    display: none !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 0 !important;
+    flex: 0 0 auto;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-icon svg {
+    width: 15px !important;
+    height: 15px !important;
+    fill: #fff !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.05;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-kicker {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+    letter-spacing: 0.03em;
+  }
+
+  nav.navbar-fixed.navbar-mobile .subnav-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    white-space: nowrap;
+  }
 }
