@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, catchError, finalize, of, tap } from 'rxjs';
+import { BehaviorSubject, catchError, finalize, map, of, tap, timeout } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { Product } from './product.model';
@@ -11,28 +11,29 @@ export class ProductsService {
   private readonly http = inject(HttpClient);
 
   private readonly _products$ = new BehaviorSubject<Product[]>([]);
-  products$ = this._products$.asObservable();
+  readonly products$ = this._products$.asObservable();
 
   private readonly _loading$ = new BehaviorSubject<boolean>(false);
-  loading$ = this._loading$.asObservable();
+  readonly loading$ = this._loading$.asObservable();
 
   private readonly _error$ = new BehaviorSubject<string | null>(null);
-  error$ = this._error$.asObservable();
+  readonly error$ = this._error$.asObservable();
 
   load() {
     this._loading$.next(true);
     this._error$.next(null);
 
     return this.http.get<ProductResponseDto[]>('/api/products').pipe(
-      tap((rows) => {
-        const mapped = (rows ?? []).map(mapProductFromApi);
+      timeout(8000),
+      map((rows) => (rows ?? []).map(mapProductFromApi)),
+      tap((mapped) => {
         this._products$.next(mapped);
       }),
       catchError((err) => {
         console.error('ProductsService.load error', err);
         this._error$.next('No se pudieron cargar los productos');
         this._products$.next([]);
-        return of([]);
+        return of([] as Product[]);
       }),
       finalize(() => this._loading$.next(false))
     );

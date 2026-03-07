@@ -7,56 +7,61 @@
       <h2 class="section-title" style="color: #fff;">INGRESOS</h2>
     </aside>
 
-    <!-- Contenido derecha -->
     <div class="home-nuevos-content">
-      <ng-container *ngIf="!loading && !error; else estado">
-        <div class="home-nuevos-grid">
-          <article
-            class="nuevo-product-card"
-            *ngFor="let p of productos"
-          >
-            <div
-              class="nuevo-product-card__image"
-              (click)="openDetalle(p)"
-              style="cursor: pointer"
-            >
-              <img
-                [src]="getImagen(p)"
-                [alt]="p.nombre"
-              />
-            </div>
+  <ng-container *ngIf="loading">
+    <p class="home-nuevos-status">Cargando nuevos ingresos...</p>
+  </ng-container>
 
-            <div class="nuevo-product-card__body">
-              <h3
-                class="nuevo-product-card__name"
-                (click)="openDetalle(p)"
-                style="cursor: pointer"
-              >
-                {{ p.nombre }}
-              </h3>
+  <ng-container *ngIf="!loading && error">
+    <p class="home-nuevos-status">No pudimos cargar los nuevos ingresos.</p>
+  </ng-container>
 
-              <p class="nuevo-product-card__price" *ngIf="getPrecio(p)">
-                {{ getPrecio(p) }}
-              </p>
-
-
-              <button
-                type="button"
-                class="btn-nuevo-comprar"
-                (click)="add(p)"
-              >
-                Agregar
-              </button>
-            </div>
-          </article>
+  <ng-container *ngIf="!loading && !error && productos.length > 0">
+    <div class="home-nuevos-grid">
+      <article
+        class="nuevo-product-card"
+        *ngFor="let p of productos"
+      >
+        <div
+          class="nuevo-product-card__image"
+          (click)="openDetalle(p)"
+          style="cursor: pointer"
+        >
+          <img
+            [src]="getImagen(p)"
+            [alt]="p.nombre"
+          />
         </div>
-      </ng-container>
 
-      <ng-template #estado>
-        <p *ngIf="loading">Cargando nuevos ingresos...</p>
-        <p *ngIf="error">No pudimos cargar los nuevos ingresos.</p>
-      </ng-template>
+        <div class="nuevo-product-card__body">
+          <h3
+            class="nuevo-product-card__name"
+            (click)="openDetalle(p)"
+            style="cursor: pointer"
+          >
+            {{ p.nombre }}
+          </h3>
+
+          <p class="nuevo-product-card__price" *ngIf="getPrecio(p)">
+            {{ getPrecio(p) }}
+          </p>
+
+          <button
+            type="button"
+            class="btn-nuevo-comprar"
+            (click)="add(p)"
+          >
+            Agregar
+          </button>
+        </div>
+      </article>
     </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !error && productos.length === 0">
+    <p class="home-nuevos-status">No hay nuevos ingresos para mostrar.</p>
+  </ng-container>
+</div>
 
   </div>
 </section>

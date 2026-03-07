@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { take } from 'rxjs';
 
 import { ProductsService } from '../productos/products.service';
 import { Product } from '../productos/product.model';
@@ -16,51 +16,52 @@ declare const bootstrap: any;
   templateUrl: './nuevos-ingresos.component.html',
   styleUrls: ['./nuevos-ingresos.component.scss'],
 })
-export class NuevosIngresosComponent implements OnInit, OnDestroy {
+export class NuevosIngresosComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
   readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
-  private readonly destroy$ = new Subject<void>();
+  private readonly cdr = inject(ChangeDetectorRef);
 
   loading = true;
   error = false;
   productos: Product[] = [];
 
   ngOnInit(): void {
-    this.productsService.products$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (all) => {
-          const activos = (all ?? []).filter(p => (p as any).estado ?? true);
+  this.loading = true;
+  this.error = false;
+  this.productos = [];
 
-          const ordenados = [...activos].sort(
-            (a, b) => (Number(b.id) || 0) - (Number(a.id) || 0)
-          );
+  this.productsService.load().pipe(take(1)).subscribe({
+    next: (all) => {
+      try {
+        const lista = Array.isArray(all) ? all : [];
 
-          this.productos = ordenados.slice(0, 6);
-          this.loading = false;
-          this.error = false;
-        },
-        error: () => {
-          this.error = true;
-          this.loading = false;
-        },
-      });
+        const activos = lista.filter((p: any) => p?.estado !== false);
 
-    this.productsService.load()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        error: () => {
-          this.error = true;
-          this.loading = false;
-        },
-      });
-  }
+        const ordenados = [...activos].sort(
+          (a: any, b: any) => (Number(b?.id) || 0) - (Number(a?.id) || 0)
+        );
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+        this.productos = ordenados.slice(0, 6);
+        this.error = false;
+      } catch (e) {
+        console.error('Error procesando nuevos ingresos:', e);
+        this.productos = [];
+        this.error = true;
+      } finally {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    },
+    error: (err) => {
+      console.error('Error cargando nuevos ingresos:', err);
+      this.productos = [];
+      this.error = true;
+      this.loading = false;
+      this.cdr.detectChanges();
+    },
+  });
+}
 
   getImagen(p: Product): string {
     return p.img || 'assets/img/placeholder-producto.png';
