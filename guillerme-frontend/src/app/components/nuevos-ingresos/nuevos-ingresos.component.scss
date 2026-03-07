@@ -1,6 +1,7 @@
 .home-nuevos {
   padding: 3.5rem 4vw;
-  background-color: #ffffff;
+  background-color: #EDDA6A;
+  position: relative;
 }
 
 .home-nuevos-inner {
@@ -22,35 +23,46 @@
 .home-nuevos-eyebrow {
   font-size: 0.9rem;
   margin: 0;
+  color: #fff;
 }
 
-/* ---------- GRID DE PRODUCTOS (hasta 6) ---------- */
+.home-nuevos .section-title {
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.home-nuevos .section-title::after {
+  content: none;
+}
+
+/* ---------- GRID DE PRODUCTOS ---------- */
 .home-nuevos-content {
   width: 100%;
+  min-width: 0;
 }
 
 .home-nuevos-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); // 3 columnas ⇒ hasta 6 ítems = 2 filas
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
   align-items: stretch;
 }
 
-/* ---------- CARD FILA: IMAGEN IZQUIERDA ---------- */
+/* ---------- CARD ---------- */
 .nuevo-product-card {
   background-color: #fff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
   overflow: hidden;
-
   display: flex;
   flex-direction: row;
   align-items: stretch;
-
   min-height: 160px;
 }
 
-/* Columna imagen */
 .nuevo-product-card__image {
   flex: 0 0 38%;
   max-width: 220px;
@@ -63,9 +75,10 @@
 .nuevo-product-card__image img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
-/* Columna texto */
 .nuevo-product-card__body {
   flex: 1 1 auto;
   padding: 1.1rem 1.4rem 1.3rem;
@@ -89,13 +102,11 @@
   margin: 0;
 }
 
-/* Botón "Agregar" alineado al inicio como el COMPRAR */
 .btn-nuevo-comprar {
   margin-top: 0.4rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 0.45rem 1.8rem;
   border-radius: 999px;
   border: 1.8px solid #e30613;
@@ -120,9 +131,7 @@
   transform: translateY(-1px);
 }
 
-/* ---------- RESPONSIVE ---------- */
-
-/* Hasta 1200px: 2 columnas de cards */
+/* ---------- TABLET ---------- */
 @media (max-width: 1199.98px) {
   .home-nuevos-inner {
     grid-template-columns: 180px minmax(0, 1fr);
@@ -133,33 +142,90 @@
   }
 }
 
-/* Mobile: una columna, imagen arriba como antes */
+/* ---------- MOBILE ---------- */
 @media (max-width: 767.98px) {
+  .home-nuevos {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    padding: 28px 0 32px;
+  }
+
   .home-nuevos-inner {
     grid-template-columns: 1fr;
-    row-gap: 1.8rem;
+    row-gap: 1.4rem;
+    max-width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .home-nuevos-left {
     text-align: left;
   }
 
+  .home-nuevos-eyebrow {
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+  }
+
+  .home-nuevos .section-title {
+    font-size: 2rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
   .home-nuevos-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .nuevo-product-card {
     flex-direction: column;
+    border-radius: 18px;
+    min-height: unset;
   }
 
   .nuevo-product-card__image {
     flex: 0 0 auto;
     max-width: none;
     width: 100%;
-    height: 190px;
+    height: 180px;
   }
 
   .nuevo-product-card__image img {
     object-fit: contain;
+  }
+
+  .nuevo-product-card__body {
+    padding: 14px 16px 18px;
+    gap: 8px;
+  }
+
+  .nuevo-product-card__name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .nuevo-product-card__price {
+    font-size: 15px;
+  }
+
+  .btn-nuevo-comprar {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+.home-nuevos {
+  padding: 3.5rem 4vw;
+  background-color: #EDDA6A;
+  position: relative;
+  margin-top: 28px;
+}
+
+@media (min-width: 768px) {
+  .home-nuevos {
+    margin-top: 56px;
   }
 }
