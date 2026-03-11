@@ -15,13 +15,13 @@ export class HomeBeneficiosComponent {
     {
       id: 'envios',
       title: 'ENVÍOS',
-      text: 'A domicilio y a todas las Sucursales de Correo Argentino del país.',
+      text: 'LLegamos a todo el pais con Via Cargo.',
       icon: 'assets/envios-icono.jpg'     
     },
     {
       id: 'pagos',
       title: 'PAGOS',
-      text: 'Con todas las tarjetas de crédito y débito, efectivo y transferencia bancaria.',
+      text: 'Efectivo y transferencia bancaria.',
       icon: 'assets/pago-icono.webp'
     },
     {

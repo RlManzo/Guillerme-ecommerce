@@ -117,3 +117,11 @@
   opacity: 0.6;
   margin: 0 24px; // achica un poquito para que no vaya de borde a borde
 }
+
+@media (max-width: 767.98px) {
+  .faq .section-title {
+    white-space: nowrap;
+    font-size: 26px;
+    line-height: 1.1;
+  }
+}

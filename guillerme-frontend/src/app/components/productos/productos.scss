@@ -348,4 +348,101 @@
   }
 }
 
+.sectionProd {
+  position: relative;
+  top: 0;
+}
 
+@media (max-width: 767.98px) {
+  #producto.sectionProd {
+    top: 0 !important;
+    margin-top: 24px;
+  }
+
+  #producto .box-title-contact {
+    width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 10px;
+    flex-wrap: nowrap !important;
+  }
+
+  #producto .box-title-contact h4 {
+    margin: 0;
+    white-space: nowrap;
+    font-size: 26px;
+    line-height: 1.1;
+  }
+
+  /* opcional: ocultar el logo en mobile para que entre cómodo */
+  #producto .title-logo-guillerme {
+    display: none;
+  }
+}
+
+/* =========================
+   TÍTULO PRODUCTOS
+========================= */
+
+#producto .box-title-contact {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+#producto .sectionProd-title {
+  margin: 0;
+  display: block;
+  font-family: "Calistoga", cursive;
+  font-size: 56px;
+  line-height: 1.05;
+  color: var(--azul);
+  white-space: normal;
+}
+
+#producto .title-logo-guillerme {
+  display: block;
+  width: 42px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 767.98px) {
+  #producto.sectionProd {
+    top: 0 !important;
+    margin-top: 20px;
+  }
+
+  #producto .box-title-contact {
+    width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 10px;
+    flex-wrap: nowrap !important;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  #producto .sectionProd-title {
+    margin: 0;
+    display: block;
+    white-space: nowrap;
+    font-size: 26px;
+    line-height: 1.1;
+    color: var(--azul);
+  }
+
+  #producto .title-logo-guillerme {
+    display: none;
+  }
+}
+
+/* Desktop: separar el inicio de la sección del header sticky */
+@media (min-width: 768px) {
+  #producto.sectionProd {
+    margin-top: 110px;
+  }
+}

@@ -5,6 +5,9 @@
   (mouseleave)="onMouseLeave()"
 >
   <section class="carousel">
+    (touchstart)="onTouchStart($event)"
+  (touchmove)="onTouchMove($event)"
+  (touchend)="onTouchEnd()"
     <!-- Slides -->
     <article
       class="carousel-image"

@@ -29,7 +29,7 @@
 
                 <!-- ✅ precio unitario (si lo tenés) -->
                 <div class="small text-muted" *ngIf="(it.producto.precio ?? 0) > 0">
-                  Unitario: {{ (it.producto.precio ?? 0) | currency:'ARS':'symbol':'1.0-0' }}
+                  Unitario: {{ (it.producto.precio ?? 0) | currency:'$':'symbol':'1.0-0' }}
                 </div>
 
                 <!-- ✅ controls cantidad -->
@@ -70,7 +70,7 @@
                 <!-- ✅ subtotal por item -->
                 <div class="small mt-2">
                   Subtotal:
-                  <b>{{ lineTotal(it) | currency:'ARS':'symbol':'1.0-0' }}</b>
+                  <b>{{ lineTotal(it) | currency:'$':'symbol':'1.0-0' }}</b>
                 </div>
               </div>
             </li>
@@ -83,7 +83,7 @@
             </div>
 
             <div class="fw-semibold">
-              Total: {{ totalPrice() | currency:'ARS':'symbol':'1.0-0' }}
+              Total: {{ totalPrice() | currency:'$':'symbol':'1.0-0' }}
             </div>
           </div>
         }
