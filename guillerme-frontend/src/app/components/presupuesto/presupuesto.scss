@@ -46,3 +46,10 @@
     background: #37939a;
   }
 }
+
+/* Desktop: separar el inicio de la sección del header sticky */
+@media (min-width: 768px) {
+  #nosotros {
+    margin-top: 100px;
+  }
+}

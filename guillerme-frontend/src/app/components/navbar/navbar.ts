@@ -177,4 +177,10 @@ goFaq(code: 'como-compro' | 'metodos-envio') {
     // queryParamsHandling: 'merge'
   });
 }
+
+goContactoForm() {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.router.navigateByUrl('/contacto');
+  }
 }

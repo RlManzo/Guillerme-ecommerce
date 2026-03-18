@@ -1,9 +1,6 @@
 package com.guillerme_backend.app.api.auth;
 
-import com.guillerme_backend.app.api.auth.dto.AuthResponse;
-import com.guillerme_backend.app.api.auth.dto.LoginRequest;
-import com.guillerme_backend.app.api.auth.dto.MeResponse;
-import com.guillerme_backend.app.api.auth.dto.RegisterRequest;
+import com.guillerme_backend.app.api.auth.dto.*;
 import com.guillerme_backend.app.domain.user.UserRepository;
 import com.guillerme_backend.app.service.AuthService;
 import jakarta.validation.Valid;
@@ -23,9 +20,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
-        String token = authService.register(req);
-        return new AuthResponse(token);
+    public MessageResponse register(@Valid @RequestBody RegisterRequest req) {
+        authService.register(req);
+        return new MessageResponse("Te enviamos un email para verificar tu cuenta");
     }
 
     @PostMapping("/login")
@@ -39,5 +36,11 @@ public class AuthController {
         String email = auth.getName();
         var u = userRepository.findByEmail(email).orElseThrow();
         return new MeResponse(u.getEmail(), u.getRole().name());
+    }
+
+    @PostMapping("/verify-email")
+    public MessageResponse verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return new MessageResponse("Cuenta verificada correctamente");
     }
 }

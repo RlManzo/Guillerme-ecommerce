@@ -5,7 +5,7 @@ import { tap } from 'rxjs/operators';
 export type UserSession = {
   token: string;
   email: string;
-  role?: string; // <- ahora sí lo persistimos
+  role?: string;
 };
 
 export type RegisterDto = {
@@ -33,20 +33,24 @@ export class AuthService {
   readonly token = computed(() => this._session()?.token ?? null);
   readonly email = computed(() => this._session()?.email ?? null);
 
-  // ✅ nuevo
   readonly role = computed(() => this._session()?.role ?? null);
   readonly isAdmin = computed(() => (this.role() ?? '').toUpperCase() === 'ADMIN');
 
   register(dto: RegisterDto) {
-    return this.http
-      .post<{ token: string }>('/api/auth/register', dto)
-      .pipe(tap((r) => this.setToken(r.token, dto.email)));
+    return this.http.post<{ message: string }>('/api/auth/register', dto);
   }
 
   login(dto: LoginDto) {
     return this.http
       .post<{ token: string }>('/api/auth/login', dto)
       .pipe(tap((r) => this.setToken(r.token, dto.email)));
+  }
+
+  verifyEmail(token: string) {
+    return this.http.post<{ message: string }>(
+      `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
+      {}
+    );
   }
 
   logout() {
@@ -57,7 +61,6 @@ export class AuthService {
   private setToken(token: string, email: string) {
     const decoded = this.decodeJwt(token);
 
-    // OJO: el claim puede llamarse role, rol, authority, etc.
     const role =
       (decoded?.role as string | undefined) ??
       (decoded?.rol as string | undefined) ??
@@ -78,7 +81,6 @@ export class AuthService {
     }
   }
 
-  // ✅ JWT decode sin librerías
   private decodeJwt(token: string): any | null {
     try {
       const parts = token.split('.');
@@ -88,7 +90,6 @@ export class AuthService {
         .replace(/-/g, '+')
         .replace(/_/g, '/');
 
-      // padding base64
       const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
 
       const json = decodeURIComponent(

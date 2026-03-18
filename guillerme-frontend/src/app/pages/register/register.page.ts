@@ -97,38 +97,42 @@ export class RegisterPage {
   }
 
   submit() {
-    this.submitted.set(true);
-    this.error.set(null);
+  this.submitted.set(true);
+  this.error.set(null);
 
-    if (!this.formValid()) {
-      this.error.set('Revisá los campos marcados');
-      return;
-    }
-
-    this.loading.set(true);
-
-    const telefono = `${this.areaCode()} ${this.telefonoNumero().trim()}`.trim();
-    const direccion = `${this.provincia().trim()} - ${this.direccionLinea().trim()}`.trim();
-
-    this.auth
-      .register({
-        nombre: this.nombre().trim(),
-        apellido: this.apellido().trim(),
-        telefono,
-        direccion,
-        email: this.email().trim(),
-        password: this.password(), // ✅ igual que antes
-      })
-      .subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.router.navigateByUrl('/');
-        },
-        error: (e) => {
-          console.error(e);
-          this.loading.set(false);
-          this.error.set('No se pudo registrar (email ya existe o datos inválidos)');
-        },
-      });
+  if (!this.formValid()) {
+    this.error.set('Revisá los campos marcados');
+    return;
   }
+
+  this.loading.set(true);
+
+  const telefono = `${this.areaCode()} ${this.telefonoNumero().trim()}`.trim();
+  const direccion = `${this.provincia().trim()} - ${this.direccionLinea().trim()}`.trim();
+
+  this.auth
+    .register({
+      nombre: this.nombre().trim(),
+      apellido: this.apellido().trim(),
+      telefono,
+      direccion,
+      email: this.email().trim(),
+      password: this.password(),
+    })
+    .subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/login'], {
+          state: {
+            successMessage: '¡Te registraste exitosamente! Revisá tu email para validar tu cuenta y comenzar a comprar.'
+          }
+        });
+      },
+      error: (e) => {
+        console.error(e);
+        this.loading.set(false);
+        this.error.set(e.error?.message || 'No se pudo registrar');
+      },
+    });
+}
 }

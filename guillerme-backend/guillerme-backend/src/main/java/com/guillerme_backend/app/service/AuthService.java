@@ -13,6 +13,9 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
@@ -22,12 +25,13 @@ public class AuthService {
     private final JwtService jwtService;
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder encoder,
             AuthenticationManager authManager,
-            JwtService jwtService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder
+            JwtService jwtService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder, MailService mailService
     ) {
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -35,19 +39,29 @@ public class AuthService {
         this.jwtService = jwtService;
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailService = mailService;
     }
 
     @Transactional
-    public String register(RegisterRequest req) {
+    public void register(RegisterRequest req) {
+
         if (userRepository.existsByEmail(req.email)) {
             throw new IllegalArgumentException("Email ya registrado");
         }
 
+        String token = UUID.randomUUID().toString();
+
         User u = new User();
-        u.setEmail(req.email);
+        u.setEmail(req.email.trim().toLowerCase());
         u.setPasswordHash(passwordEncoder.encode(req.password));
-        u.setRole(Role.valueOf("USER"));
-        u.setEnabled(true);
+        u.setRole(Role.USER);
+
+        // ✅ clave
+        u.setEnabled(true); // lo dejamos true para evitar conflictos con Spring
+        u.setEmailVerified(false);
+
+        u.setVerificationToken(token);
+        u.setVerificationTokenExpiresAt(LocalDateTime.now().plusHours(24));
 
         u = userRepository.save(u);
 
@@ -60,10 +74,12 @@ public class AuthService {
 
         customerRepository.save(c);
 
-        return jwtService.generateToken(u.getEmail(), u.getRole());
+        // ✅ enviar mail
+        mailService.sendVerificationEmail(u.getEmail(), token);
     }
 
     public String login(String email, String password) {
+
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
@@ -71,6 +87,27 @@ public class AuthService {
         User u = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
+        // ✅ CLAVE
+        if (!u.isEmailVerified()) {
+            throw new IllegalStateException("Debés verificar tu email antes de ingresar");
+        }
+
         return jwtService.generateToken(u.getEmail(), u.getRole());
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+
+        User u = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
+
+        if (u.getVerificationTokenExpiresAt() == null ||
+                u.getVerificationTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("El token venció");
+        }
+
+        u.setEmailVerified(true);
+        u.setVerificationToken(null);
+        u.setVerificationTokenExpiresAt(null);
     }
 }

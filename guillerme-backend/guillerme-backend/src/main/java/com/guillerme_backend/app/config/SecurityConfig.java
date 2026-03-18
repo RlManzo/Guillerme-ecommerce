@@ -41,6 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/auth/verify-email").permitAll()
+
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/orders/**").authenticated()
