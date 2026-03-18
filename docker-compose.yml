@@ -39,6 +39,7 @@ services:
       APP_MAIL_FROM: ${APP_MAIL_FROM}
       APP_MAIL_CONTACT_CHANNEL: ${APP_MAIL_CONTACT_CHANNEL}
       APP_MAIL_SIGNATURE: ${APP_MAIL_SIGNATURE}
+      APP_FRONTEND_URL: ${APP_FRONTEND_URL}
     volumes:
       - uploads:/uploads
     depends_on:
