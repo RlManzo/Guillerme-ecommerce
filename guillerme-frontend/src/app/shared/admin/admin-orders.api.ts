@@ -40,6 +40,11 @@ export interface AdminOrderDetailDto {
   items: AdminOrderItemDto[];
 }
 
+export interface RemoveOrderItemsRequest {
+  productIdsToKeep: number[];
+  adminComment?: string;
+}
+
 export interface PageDto<T> {
   content: T[];
   totalPages: number;
@@ -84,7 +89,7 @@ export class AdminOrdersApi {
     return this.http.patch<void>(`/api/admin/orders/${id}/status`, { status });
   }
 
-  /** ✅ ENVIADO + tracking + archivo (pdf/jpg/png) */
+  /** ENVIADO + tracking + archivo (pdf/jpg/png) */
   markShipped(
     id: number,
     payload: { tracking?: string | null; file: File }
@@ -97,5 +102,13 @@ export class AdminOrdersApi {
     fd.append('file', payload.file);
 
     return this.http.post<void>(`/api/admin/orders/${id}/shipped`, fd);
+  }
+
+  /** Quitar productos del pedido */
+  removeItems(id: number, payload: RemoveOrderItemsRequest) {
+    return this.http.put<AdminOrderDetailDto>(
+      `/api/admin/orders/${id}/items/remove`,
+      payload
+    );
   }
 }

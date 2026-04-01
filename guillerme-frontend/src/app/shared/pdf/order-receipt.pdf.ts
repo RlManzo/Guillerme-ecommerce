@@ -16,7 +16,7 @@ function moneyARS(n: number): string {
   }).format(n);
 }
 
-// ✅ helper afuera (no adentro de la función)
+// helper afuera
 function loadImageAsDataURL(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -42,38 +42,34 @@ export async function downloadPaidOrderPdf(order: any) {
   const orderId = order?.id ?? '';
   const status = (order?.status ?? 'PAGADO').toString().toUpperCase();
 
-  // ✅ Branding (ajustá estos 2)
   const BRAND_NAME = 'Librería Guillerme Guillerme';
-  const BRAND_LOGO = 'assets/sinfondo-guillerme.png'; // <-- poné tu logo blanco/negro acá
+  const BRAND_LOGO = 'assets/sinfondo-guillerme.png';
 
-  // ✅ Cabecera derecha: logo + nombre ecommerce (chiquito)
-    try {
+  // cabecera derecha: logo + nombre ecommerce
+  try {
     const dataUrl = await loadImageAsDataURL(BRAND_LOGO);
 
     const pageW = doc.internal.pageSize.getWidth();
     const rightMargin = 14;
 
-    const logoW = 18; // mm
-    const logoH = 16; // mm
+    const logoW = 18;
+    const logoH = 16;
 
     const logoX = pageW - rightMargin - logoW;
     const logoY = 2;
 
-    // logo
     doc.addImage(dataUrl, 'PNG', logoX, logoY, logoW, logoH);
 
-    // texto debajo del logo
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
 
-    const textY = logoY + logoH + 2; // 4mm abajo del logo
-    // centrado respecto al logo:
+    const textY = logoY + logoH + 2;
     doc.text(BRAND_NAME, logoX + logoW / 2, textY, { align: 'center' });
   } catch {
     // si no carga el logo, no rompemos el PDF
   }
 
-  // ======= TÍTULO =======
+  // título
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.text(`Pedido nro#${orderId}  estado: ${status}`, 14, 14);
@@ -85,15 +81,13 @@ export async function downloadPaidOrderPdf(order: any) {
     doc.text(`Fecha: ${createdAt.toLocaleString('es-AR')}`, 14, 20);
   }
 
-  // ======= ITEMS =======
+  // items
   const items: any[] = Array.isArray(order?.items) ? order.items : [];
 
-  // IMPORTANTE: para que esto funcione perfecto,
-  // cada item debe traer unitPrice (o lo que definas) desde el backend.
   const rows = items.map((it) => {
     const qty = toNumber(it?.qty);
     const nombre = (it?.productNombre ?? it?.nombre ?? '-').toString();
-    const unit = toNumber(it?.unitPrice); // <-- asegurate que exista
+    const unit = toNumber(it?.unitPrice);
     return {
       qty,
       nombre,
@@ -105,21 +99,58 @@ export async function downloadPaidOrderPdf(order: any) {
   const totalItems = rows.reduce((acc, r) => acc + r.qty, 0);
   const totalPrice = rows.reduce((acc, r) => acc + r.lineTotal, 0);
 
-  const body = rows.map((r) => [String(r.qty), r.nombre, moneyARS(r.unit)]);
+  const body = rows.map((r) => [
+    String(r.qty),
+    r.nombre,
+    moneyARS(r.unit),
+    moneyARS(r.lineTotal),
+  ]);
 
-  // fila final (totales)
-  body.push([`TOTAL: ${totalItems}`, '', `TOTAL: ${moneyARS(totalPrice)}`]);
+  // fila final
+  body.push([
+    `TOTAL: ${totalItems}`,
+    '',
+    '',
+    `TOTAL: ${moneyARS(totalPrice)}`,
+  ]);
 
   autoTable(doc, {
     startY: 26,
-    head: [['Cantidad productos', 'Detalle del producto', 'Valor individual']],
+    head: [[
+      'Cantidad productos',
+      'Detalle del producto',
+      'Valor individual',
+      'Subtotal',
+    ]],
     body,
-    styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
-    headStyles: { fillColor: [230, 230, 230], textColor: 20 },
+    styles: {
+  font: 'helvetica',
+  fontSize: 10,
+  cellPadding: 3,
+  lineColor: [180, 180, 180], // color de líneas
+  lineWidth: 0.3,             // grosor de borde
+},
+headStyles: {
+  fillColor: [230, 230, 230],
+  textColor: 20,
+  fontStyle: 'bold',
+  lineColor: [160, 160, 160],
+  lineWidth: 0.4,
+},
+bodyStyles: {
+  lineColor: [200, 200, 200],
+  lineWidth: 0.3,
+},
+footStyles: {
+  lineColor: [160, 160, 160],
+  lineWidth: 0.4,
+},
+theme: 'grid',
     columnStyles: {
-      0: { cellWidth: 45 },
-      1: { cellWidth: 180 },
-      2: { cellWidth: 55, halign: 'right' },
+      0: { cellWidth: 38 },
+      1: { cellWidth: 150 },
+      2: { cellWidth: 42, halign: 'right' },
+      3: { cellWidth: 42, halign: 'right' },
     },
     didParseCell: (data) => {
       const isLast = data.row.index === body.length - 1;
@@ -130,7 +161,7 @@ export async function downloadPaidOrderPdf(order: any) {
     },
   });
 
-  // ======= DATOS CLIENTE (debajo de tabla) =======
+  // datos cliente
   const finalY = (doc as any).lastAutoTable?.finalY ?? 26;
   let y = finalY + 10;
 
@@ -168,6 +199,5 @@ export async function downloadPaidOrderPdf(order: any) {
     doc.text(String(order.comment), 14, y);
   }
 
-  // Descargar
   doc.save(`pedido_${orderId}_${status}.pdf`);
 }

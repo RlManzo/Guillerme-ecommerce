@@ -8,6 +8,7 @@ import {
   AdminOrdersApi,
   AdminOrderDetailDto,
   AdminOrderSummaryDto,
+  AdminOrderItemDto,
   OrderStatus,
 } from '../../shared/admin/admin-orders.api';
 
@@ -49,7 +50,12 @@ export class AdminOrdersPage {
   canPrev = computed(() => this.page() > 0);
   canNext = computed(() => this.page() + 1 < this.totalPages());
 
-  // ✅ totales para el detalle
+  // edición de items: solo quitar
+  removingItems = signal(false);
+  savingItems = signal(false);
+  editableItems = signal<AdminOrderItemDto[]>([]);
+
+  // totales para el detalle normal
   totalItemsSelected = computed(() => {
     const s = this.selected();
     if (!s) return 0;
@@ -60,6 +66,18 @@ export class AdminOrdersPage {
     const s = this.selected();
     if (!s) return 0;
     return (s.items ?? []).reduce(
+      (acc, it) => acc + ((it.unitPrice ?? 0) * (it.qty ?? 0)),
+      0
+    );
+  });
+
+  // totales en modo edición
+  totalItemsEditable = computed(() => {
+    return (this.editableItems() ?? []).reduce((acc, it) => acc + (it.qty ?? 0), 0);
+  });
+
+  totalPriceEditable = computed(() => {
+    return (this.editableItems() ?? []).reduce(
       (acc, it) => acc + ((it.unitPrice ?? 0) * (it.qty ?? 0)),
       0
     );
@@ -83,10 +101,10 @@ export class AdminOrdersPage {
     ENVIADO: 'ENVIADO',
   };
 
-  // ✅ bloque envío (para poder cerrarlo después de guardar)
+  // bloque envío
   shipmentOpen = signal(false);
 
-  // ✅ data envío
+  // data envío
   shipmentTracking = signal<string>('');
   shipmentFile = signal<File | null>(null);
   shipmentFileName = signal<string>('');
@@ -148,6 +166,8 @@ export class AdminOrdersPage {
 
   applyFilters() {
     this.selected.set(null);
+    this.removingItems.set(false);
+    this.editableItems.set([]);
     this.page.set(0);
     this.load();
   }
@@ -158,6 +178,8 @@ export class AdminOrdersPage {
     this.fromDate.set('');
     this.toDate.set('');
     this.selected.set(null);
+    this.removingItems.set(false);
+    this.editableItems.set([]);
     this.page.set(0);
     this.load();
   }
@@ -188,11 +210,14 @@ export class AdminOrdersPage {
   open(id: number) {
     this.selected.set(null);
     this.error.set(null);
+    this.removingItems.set(false);
+    this.editableItems.set([]);
 
     this.api.getById(id).subscribe({
       next: (d) => {
         this.selected.set(d);
         this.statusEdit.set(d.status);
+        this.editableItems.set((d.items ?? []).map((it) => ({ ...it })));
 
         // si ya estaba enviado, no abras el bloque
         this.shipmentOpen.set(d.status === 'ENVIADO' ? false : this.shipmentOpen());
@@ -209,6 +234,80 @@ export class AdminOrdersPage {
     this.selected.set(null);
     this.shipmentOpen.set(false);
     this.clearShipmentInputs();
+    this.removingItems.set(false);
+    this.editableItems.set([]);
+  }
+
+  canEditItems() {
+    const s = this.selected();
+    if (!s) return false;
+    return s.status === 'NUEVO' || s.status === 'PENDIENTE_DE_PAGO';
+  }
+
+  startRemoveItems() {
+    const sel = this.selected();
+    if (!sel || !this.canEditItems()) return;
+
+    this.editableItems.set((sel.items ?? []).map((it) => ({ ...it })));
+    this.removingItems.set(true);
+  }
+
+  cancelRemoveItems() {
+    const sel = this.selected();
+    this.editableItems.set((sel?.items ?? []).map((it) => ({ ...it })));
+    this.removingItems.set(false);
+  }
+
+  removeItem(index: number) {
+    this.editableItems.update((items) => items.filter((_, i) => i !== index));
+  }
+
+  saveRemovedItems() {
+    const sel = this.selected();
+    if (!sel) return;
+
+    const items = this.editableItems() ?? [];
+    if (items.length === 0) {
+      this.toast.error('El pedido no puede quedar sin productos');
+      return;
+    }
+
+    this.savingItems.set(true);
+
+    this.api
+      .removeItems(sel.id, {
+        productIdsToKeep: items.map((it) => it.productId),
+        adminComment: 'Pedido ajustado por falta de stock',
+      })
+      .subscribe({
+        next: (updated) => {
+          this.selected.set(updated);
+          this.editableItems.set((updated.items ?? []).map((it) => ({ ...it })));
+          this.removingItems.set(false);
+          this.savingItems.set(false);
+
+          this.rows.update((arr) =>
+            arr.map((o) =>
+              o.id === sel.id
+                ? {
+                    ...o,
+                    totalItems: (updated.items ?? []).reduce(
+                      (acc, it) => acc + (it.qty ?? 0),
+                      0
+                    ),
+                  }
+                : o
+            )
+          );
+
+          this.toast.success('Productos actualizados');
+        },
+        error: (e) => {
+          console.error(e);
+          this.savingItems.set(false);
+          this.toast.error('No se pudieron actualizar los productos');
+        },
+      });
   }
 
   saveStatus() {
@@ -235,19 +334,15 @@ export class AdminOrdersPage {
         next: () => {
           this.savingStatus.set(false);
 
-          // 1) actualizo detalle local
           this.selected.update((v) => (v ? { ...v, status: next } : v));
 
-          // 2) actualizo listado
           this.rows.update((arr) =>
             arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
           );
 
-          // 3) limpio + cierro bloque
           this.clearShipmentInputs();
           this.shipmentOpen.set(false);
 
-          // 4) toast
           this.toast.success('Pedido actualizado');
         },
         error: (e) => {
@@ -260,24 +355,19 @@ export class AdminOrdersPage {
       return;
     }
 
-    // resto de estados
     this.api.updateStatus(sel.id, next).subscribe({
       next: () => {
         this.savingStatus.set(false);
 
-        // 1) actualizo detalle local
         this.selected.update((v) => (v ? { ...v, status: next } : v));
 
-        // 2) actualizo listado
         this.rows.update((arr) =>
           arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
         );
 
-        // 3) si no es ENVIADO, cerrá bloque y limpiá
         this.shipmentOpen.set(false);
         this.clearShipmentInputs();
 
-        // 4) toast
         this.toast.success('Pedido actualizado');
       },
       error: (e) => {
@@ -322,18 +412,15 @@ export class AdminOrdersPage {
     this.statusEdit.set(next);
 
     if (next === 'ENVIADO') {
-      // abrir bloque para cargar tracking/archivo
       this.shipmentOpen.set(true);
       return;
     }
 
-    // si cambiás a algo distinto de ENVIADO, limpio y cierro
     this.shipmentOpen.set(false);
     this.clearShipmentInputs();
   }
 
   canSaveShipment() {
-    // si es ENVIADO, exigimos archivo válido
     if (this.statusEdit() !== 'ENVIADO') return true;
 
     const f = this.shipmentFile();
