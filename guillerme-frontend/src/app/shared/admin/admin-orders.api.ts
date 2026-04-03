@@ -5,7 +5,8 @@ export type OrderStatus =
   | 'NUEVO'
   | 'PENDIENTE_DE_PAGO'
   | 'PAGADO'
-  | 'ENVIADO';
+  | 'ENVIADO'
+  | 'ANULADO';
 
 export interface AdminOrderSummaryDto {
   id: number;

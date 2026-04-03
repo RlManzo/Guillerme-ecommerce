@@ -88,18 +88,20 @@ export class AdminOrdersPage {
   savingStatus = signal(false);
 
   readonly statusOptions: OrderStatus[] = [
-    'NUEVO',
-    'PENDIENTE_DE_PAGO',
-    'PAGADO',
-    'ENVIADO',
-  ];
+  'NUEVO',
+  'PENDIENTE_DE_PAGO',
+  'PAGADO',
+  'ENVIADO',
+  'ANULADO',
+];
 
   readonly statusLabel: Record<OrderStatus, string> = {
-    NUEVO: 'NUEVO',
-    PENDIENTE_DE_PAGO: 'PENDIENTE DE PAGO',
-    PAGADO: 'PAGADO',
-    ENVIADO: 'ENVIADO',
-  };
+  NUEVO: 'NUEVO',
+  PENDIENTE_DE_PAGO: 'PENDIENTE DE PAGO',
+  PAGADO: 'PAGADO',
+  ENVIADO: 'ENVIADO',
+  ANULADO: 'ANULADO',
+};
 
   // bloque envío
   shipmentOpen = signal(false);
@@ -311,51 +313,26 @@ export class AdminOrdersPage {
   }
 
   saveStatus() {
-    const sel = this.selected();
-    if (!sel) return;
+  const sel = this.selected();
+  if (!sel) return;
 
-    const next = this.statusEdit();
-    if (!next) return;
+  const next = this.statusEdit();
+  if (!next) return;
 
-    this.savingStatus.set(true);
-    this.error.set(null);
+  this.savingStatus.set(true);
+  this.error.set(null);
 
-    if (next === 'ENVIADO') {
-      const file = this.shipmentFile();
-      if (!file) {
-        this.savingStatus.set(false);
-        this.shipmentError.set('Tenés que adjuntar un PDF/JPG/PNG.');
-        return;
-      }
-
-      const tracking = (this.shipmentTracking() ?? '').trim();
-
-      this.api.markShipped(sel.id, { tracking, file }).subscribe({
-        next: () => {
-          this.savingStatus.set(false);
-
-          this.selected.update((v) => (v ? { ...v, status: next } : v));
-
-          this.rows.update((arr) =>
-            arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
-          );
-
-          this.clearShipmentInputs();
-          this.shipmentOpen.set(false);
-
-          this.toast.success('Pedido actualizado');
-        },
-        error: (e) => {
-          console.error(e);
-          this.savingStatus.set(false);
-          this.toast.error('No se pudo marcar como ENVIADO');
-        },
-      });
-
+  if (next === 'ENVIADO') {
+    const file = this.shipmentFile();
+    if (!file) {
+      this.savingStatus.set(false);
+      this.shipmentError.set('Tenés que adjuntar un PDF/JPG/PNG.');
       return;
     }
 
-    this.api.updateStatus(sel.id, next).subscribe({
+    const tracking = (this.shipmentTracking() ?? '').trim();
+
+    this.api.markShipped(sel.id, { tracking, file }).subscribe({
       next: () => {
         this.savingStatus.set(false);
 
@@ -365,18 +342,52 @@ export class AdminOrdersPage {
           arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
         );
 
-        this.shipmentOpen.set(false);
         this.clearShipmentInputs();
+        this.shipmentOpen.set(false);
 
         this.toast.success('Pedido actualizado');
       },
       error: (e) => {
         console.error(e);
         this.savingStatus.set(false);
-        this.toast.error('No se pudo actualizar el estado');
+        this.toast.error('No se pudo marcar como ENVIADO');
       },
     });
+
+    return;
   }
+
+  this.api.updateStatus(sel.id, next).subscribe({
+    next: () => {
+      this.savingStatus.set(false);
+
+      if (next === 'ANULADO') {
+        this.selected.set(null);
+        this.shipmentOpen.set(false);
+        this.clearShipmentInputs();
+        this.load();
+        this.toast.success('Pedido anulado');
+        return;
+      }
+
+      this.selected.update((v) => (v ? { ...v, status: next } : v));
+
+      this.rows.update((arr) =>
+        arr.map((o) => (o.id === sel.id ? { ...o, status: next } : o))
+      );
+
+      this.shipmentOpen.set(false);
+      this.clearShipmentInputs();
+
+      this.toast.success('Pedido actualizado');
+    },
+    error: (e) => {
+      console.error(e);
+      this.savingStatus.set(false);
+      this.toast.error('No se pudo actualizar el estado');
+    },
+  });
+}
 
   downloadPdf() {
     const sel = this.selected();
