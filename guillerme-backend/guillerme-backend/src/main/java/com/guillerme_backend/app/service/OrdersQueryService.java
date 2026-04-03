@@ -35,13 +35,22 @@ public class OrdersQueryService {
                 .orElseThrow(() -> new NotFoundException("Pedido no encontrado"));
 
         var items = itemRepo.findAllByOrderId(id).stream()
-                .map(it -> new OrderItemResponse(it.getProductId(), it.getProductNombre(), it.getQty()))
+                .map(it -> new OrderItemResponse(
+                        it.getProductId(),
+                        it.getProductNombre(),
+                        it.getQty(),
+                        it.getUnitPrice()
+                ))
                 .toList();
 
         return new OrderDetailResponse(
-                o.getId(), o.getCreatedAt(),
-                o.getCustomerNombre(), o.getCustomerApellido(), o.getCustomerEmail(),
-                o.getCustomerTelefono(), o.getCustomerDireccion(),
+                o.getId(),
+                o.getCreatedAt(),
+                o.getCustomerNombre(),
+                o.getCustomerApellido(),
+                o.getCustomerEmail(),
+                o.getCustomerTelefono(),
+                o.getCustomerDireccion(),
                 o.getComment(),
                 items
         );

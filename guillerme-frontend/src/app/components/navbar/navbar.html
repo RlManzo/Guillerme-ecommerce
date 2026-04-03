@@ -61,9 +61,8 @@
           </svg>
         </a>
 
-        <!-- USER SOLO MOBILE (icono + "Ingresar") -->
+        <!-- USER SOLO MOBILE TOP -->
         <div class="user-menu user-menu--mobileTop" (click)="$event.stopPropagation()">
-          <!-- NO LOGUEADO -->
           <ng-container *ngIf="!isLogged()">
             <a class="userTopLink" routerLink="/login" aria-label="Ingresar">
               <span class="userIcon" aria-hidden="true">
@@ -77,7 +76,6 @@
             </a>
           </ng-container>
 
-          <!-- LOGUEADO -->
           <ng-container *ngIf="isLogged()">
             <button
               type="button"
@@ -95,38 +93,33 @@
               </span>
             </button>
 
+            <!-- MOBILE: sin accesos admin -->
             <div class="user-dropdown user-dropdown--top" *ngIf="userMenuOpen()">
-              <div class="user-dropdown-head user-dropdown-head--top">
-                <div class="user-name">{{ email() }}</div>
-              </div>
-
-              <div class="user-dropdown-sep"></div>
-
-              <button
-                *ngIf="isAdmin()"
-                class="user-item"
-                type="button"
-                (click)="goAdminProducts()"
-              >
-                Admin productos
-              </button>
-
-              <button
-                class="user-item"
-                type="button"
-                (click)="goOrders()"
-              >
-                Ver pedidos
-              </button>
-
-              <button
-                class="user-item danger"
-                type="button"
-                (click)="logout()"
-              >
-                Salir
-              </button>
+            <div class="user-dropdown-head user-dropdown-head--top">
+              <div class="user-name">{{ email() }}</div>
             </div>
+
+            <div class="user-dropdown-sep"></div>
+
+            <!-- CLIENTE: sí ve pedidos -->
+            <button
+              *ngIf="!isAdmin()"
+              class="user-item"
+              type="button"
+              (click)="goOrders()"
+            >
+              Ver pedidos
+            </button>
+
+            <!-- TODOS -->
+            <button
+              class="user-item danger"
+              type="button"
+              (click)="logout()"
+            >
+              Salir
+            </button>
+          </div>
           </ng-container>
         </div>
       </div>
@@ -146,9 +139,10 @@
       >
         <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
       </a>
+
       <ng-content></ng-content>
 
-      <!-- ITEMS MENÚ (principalmente para mobile) -->
+      <!-- ITEMS MENÚ -->
       <div
         class="menu-items d-flex justify-content-around align-items-center"
         [ngClass]="{ 'open': menuOpen() }"
@@ -157,7 +151,7 @@
           INICIO
         </a>
 
-        <!-- PRODUCTOS (dropdown mobile) -->
+        <!-- PRODUCTOS -->
         <div
           class="nav-item dropdown"
           [class.open]="productsOpen()"
@@ -206,11 +200,73 @@
             >
               Varios
             </button>
-</div>
+          </div>
         </div>
-        <a class="all sm-mini-phone all-colour" routerLink="/contacto">CONTACTO</a>
 
-       
+        <!-- CONTACTO -->
+        <a
+          *ngIf="!isAdmin() || !isDesktop()"
+          class="all sm-mini-phone all-colour"
+          routerLink="/contacto"
+          (click)="closeMenu()"
+        >
+          CONTACTO
+        </a>
+
+        <!-- ADMINISTRAR SOLO DESKTOP -->
+        <div
+          *ngIf="isAdmin() && isDesktop()"
+          class="nav-item dropdown"
+          [class.open]="adminOpen()"
+          (mouseenter)="openAdminMenu()"
+          (mouseleave)="closeAdminMenu()"
+        >
+          <button
+            type="button"
+            class="all nav-link-btn"
+            (click)="toggleAdminMenu($event)"
+            aria-haspopup="true"
+            [attr.aria-expanded]="adminOpen()"
+          >
+            ADMINISTRAR <span class="user-plus">▾</span>
+          </button>
+
+          <div class="dropdown-menu-custom">
+
+            <button
+            type="button"
+            class="dropdown-item"
+            (click)="goAdminHome()"
+          >
+            Principal
+          </button>
+            
+
+            <button
+              type="button"
+              class="dropdown-item"
+              (click)="goAdminProducts()"
+            >
+              Admin productos
+            </button>
+
+            <button
+              type="button"
+              class="dropdown-item"
+              (click)="goOrders()"
+            >
+              Pedidos WEB
+            </button>
+
+            <button
+              type="button"
+              class="dropdown-item"
+              (click)="goManagePurchases()"
+            >
+              Gestionar compra
+            </button>
+          </div>
+        </div>
 
         <!-- LOGIN SOLO DESKTOP -->
         <a
@@ -222,7 +278,7 @@
           INGRESAR
         </a>
 
-         <!-- BUSCADOR SOLO DESKTOP -->
+        <!-- BUSCADOR SOLO DESKTOP -->
         <div class="nav-search nav-search--desktop" (click)="$event.stopPropagation()">
           <app-header></app-header>
         </div>
@@ -245,20 +301,21 @@
 
           <div class="user-dropdown" *ngIf="userMenuOpen()">
             <button
-              *ngIf="isAdmin()"
-              class="user-item"
-              type="button"
-              (click)="goAdminProducts()"
-            >
-              Admin productos
-            </button>
-
-            <button
+              *ngIf="!isAdmin()"
               class="user-item"
               type="button"
               (click)="goOrders()"
             >
               Ver pedidos
+            </button>
+
+            <button
+              *ngIf="isAdmin()"
+              class="user-item"
+              type="button"
+              (click)="goOrders()"
+            >
+              Gestionar usuario
             </button>
 
             <button
@@ -272,7 +329,7 @@
         </div>
       </div>
 
-      <!-- ACCIONES DERECHA: CARRITO + HAMBURGER -->
+      <!-- ACCIONES DERECHA: solo usuarios no admin -->
       <div
         class="carrito d-flex justify-content-center align-items-center gap-3"
         *ngIf="!isAdmin()"
@@ -327,13 +384,12 @@
     </div>
   </div>
 
-
-
-  <!-- BLOQUE BUSCADOR SOLO MOBILE (siempre visible) -->
+  <!-- BLOQUE BUSCADOR SOLO MOBILE -->
   <div class="mobileSearchBlock">
     <app-header></app-header>
   </div>
-   <!-- SUBNAV FAQ MOBILE / DESKTOP -->
+
+  <!-- SUBNAV FAQ -->
   <div class="subnav" *ngIf="!isAdmin()">
     <div class="subnav-inner">
       <div class="subnav-right">
@@ -364,7 +420,7 @@
             </svg>
           </span>
           <span class="subnav-copy">
-            <span class="subnav-kicker">Métodos de envío. </span>
+            <span class="subnav-kicker">Métodos de envío.</span>
             <span class="subnav-text">Conocer más</span>
           </span>
         </button>

@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe, NgIf, NgFor } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { OrdersService } from '../../shared/orders/orders.service';
 import { OrderDetailDto, OrderSummaryDto } from '../../shared/orders/order.dto';
@@ -23,20 +23,43 @@ export class OrdersPage {
   rows = signal<OrderSummaryDto[]>([]);
   selected = signal<OrderDetailDto | null>(null);
 
+  readonly statusLabel: Record<string, string> = {
+    NUEVO: 'Nuevo',
+    PENDIENTE_DE_PAGO: 'Pendiente de pago',
+    PAGADO: 'Pagado',
+    ENVIADO: 'Enviado',
+    ANULADO: 'Anulado',
+  };
+
+  totalItemsSelected = computed(() => {
+    const s = this.selected();
+    if (!s) return 0;
+    return (s.items ?? []).reduce((acc, it) => acc + (it.qty ?? 0), 0);
+  });
+
+  totalPriceSelected = computed(() => {
+    const s = this.selected();
+    if (!s) return 0;
+    return (s.items ?? []).reduce(
+      (acc, it) => acc + ((it.unitPrice ?? 0) * (it.qty ?? 0)),
+      0
+    );
+  });
+
   ngOnInit() {
-  if (!this.auth.isLogged()) {
-    this.router.navigateByUrl('/login');
-    return;
-  }
+    if (!this.auth.isLogged()) {
+      this.router.navigateByUrl('/login');
+      return;
+    }
 
-  const role = (this.auth.session()?.role ?? '').toUpperCase();
-  if (role === 'ADMIN') {
-    this.router.navigateByUrl('/admin/orders');
-    return;
-  }
+    const role = (this.auth.session()?.role ?? '').toUpperCase();
+    if (role === 'ADMIN') {
+      this.router.navigateByUrl('/admin/orders');
+      return;
+    }
 
-  this.load();
-}
+    this.load();
+  }
 
   load() {
     this.loading.set(true);

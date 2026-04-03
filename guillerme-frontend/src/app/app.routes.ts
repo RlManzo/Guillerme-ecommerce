@@ -8,6 +8,7 @@ import { adminGuard } from './shared/guards/admin.guard';
 import { AdminOrdersPage } from './pages/admin-orders/admin-orders.page';
 import { Productos } from './components/productos/productos';
 import { Presupuesto } from './components/presupuesto/presupuesto';
+import { AdminHomePage } from './pages/admin-home/admin-home.page';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -17,6 +18,7 @@ export const routes: Routes = [
  { path: 'orders', component: OrdersPage },
  { path: 'admin/products', component: AdminProductsPage, canActivate: [adminGuard] },
  { path: 'admin/orders', component: AdminOrdersPage },
+ {path: 'admin', component:AdminHomePage,},
  { path: 'productos', component: Productos },
  { path: 'contacto', component: Presupuesto},
   { path: '**', redirectTo: '' }, // SIEMPRE al final

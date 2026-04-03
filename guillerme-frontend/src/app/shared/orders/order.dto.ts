@@ -2,13 +2,14 @@ export interface OrderSummaryDto {
   id: number;
   createdAt: string; // ISO
   totalItems: number;
-  status: string; // "CREATED", etc
+  status: string;
 }
 
 export interface OrderItemDto {
   productId: number;
   productNombre: string;
   qty: number;
+  unitPrice: number | null;
 }
 
 export interface OrderDetailDto {
@@ -18,4 +19,3 @@ export interface OrderDetailDto {
   items: OrderItemDto[];
   comment?: string | null;
 }
-

@@ -29,35 +29,30 @@ export class Navbar {
   readonly menuOpen = signal(false);
   readonly userMenuOpen = signal(false);
   readonly productsOpen = signal(false);
+  readonly adminOpen = signal(false);
+  readonly isDesktop = signal(window.innerWidth > 768);
 
-  // signals del AuthService
   isLogged = this.auth.isLogged;
   email = this.auth.email;
   isAdmin = this.auth.isAdmin;
-
-  // =======================
-  // NAV & MENÚ PRINCIPAL
-  // =======================
 
   toggleMenu() {
     this.menuOpen.update(v => !v);
     if (!this.menuOpen()) {
       this.productsOpen.set(false);
+      this.adminOpen.set(false);
     }
   }
 
   closeMenu() {
     this.menuOpen.set(false);
     this.productsOpen.set(false);
+    this.adminOpen.set(false);
   }
 
   openCart() {
     this.store.openCart();
   }
-
-  // =======================
-  // MENÚ USUARIO
-  // =======================
 
   toggleUserMenu() {
     this.userMenuOpen.update(v => !v);
@@ -77,6 +72,7 @@ export class Navbar {
   goOrders() {
     this.closeUserMenu();
     this.closeMenu();
+    this.adminOpen.set(false);
 
     const role = (this.auth.session()?.role ?? '').toUpperCase();
     const target = role === 'ADMIN' ? '/admin/orders' : '/orders';
@@ -87,15 +83,18 @@ export class Navbar {
   goAdminProducts() {
     this.closeUserMenu();
     this.closeMenu();
+    this.adminOpen.set(false);
     this.router.navigateByUrl('/admin/products');
   }
 
-  // =======================
-  // DROPDOWN PRODUCTOS
-  // =======================
+  goManagePurchases() {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+    this.router.navigateByUrl('/admin/purchases');
+  }
 
   openProductsMenu() {
-    // Solo hover en desktop
     if (window.innerWidth > 768) {
       this.productsOpen.set(true);
     }
@@ -108,7 +107,6 @@ export class Navbar {
   }
 
   toggleProductsMenu(ev: MouseEvent) {
-    // en desktop el hover manda, no el click
     if (window.innerWidth > 768) return;
 
     ev.preventDefault();
@@ -116,71 +114,88 @@ export class Navbar {
     this.productsOpen.update(v => !v);
   }
 
+  openAdminMenu() {
+    if (window.innerWidth > 768) {
+      this.adminOpen.set(true);
+    }
+  }
+
+  closeAdminMenu() {
+    if (window.innerWidth > 768) {
+      this.adminOpen.set(false);
+    }
+  }
+
+  toggleAdminMenu(ev: MouseEvent) {
+    if (window.innerWidth > 768) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.adminOpen.update(v => !v);
+  }
+
   closeAllMenus() {
     this.productsOpen.set(false);
+    this.adminOpen.set(false);
     this.userMenuOpen.set(false);
     this.menuOpen.set(false);
   }
 
-  // =======================
-  // NAVEGAR A /productos
-  // =======================
-
-  /** Ir a la pantalla de productos */
   private goToProductsRoute() {
     this.router.navigate(['/productos']).then(() => {
-      // por las dudas, scrolleo arriba
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
-  /** categoría (TODOS / LIBRERÍA / COMBOS / VARIOS) */
   goProducts(cat: ProductsCategory) {
-    // 1) seteo filtro global de categoría
     this.productsFilterState.setCategory(cat);
-
-    // 2) cierro menús
     this.closeAllMenus();
-
-    // 3) voy a la ruta /productos
     this.goToProductsRoute();
   }
 
-  /** botón tipo "Ver todos" desde el menú */
   resetProductsFilters() {
-    this.productsFilterState.reset(); // vuelve a 'all'
+    this.productsFilterState.reset();
     this.closeAllMenus();
     this.goToProductsRoute();
   }
-
-  // =======================
-  // CLIC FUERA DEL NAV
-  // =======================
 
   @HostListener('document:click')
   onDocClick() {
     this.productsOpen.set(false);
+    this.adminOpen.set(false);
     this.closeUserMenu();
   }
 
-  // =======================
-// FAQ DESDE LA NAVBAR
-// =======================
+  goFaq(code: 'como-compro' | 'metodos-envio') {
+    this.closeAllMenus();
 
-goFaq(code: 'como-compro' | 'metodos-envio') {
-  this.closeAllMenus();
+    this.router.navigate(['/'], {
+      fragment: 'faq',
+      queryParams: { faq: code },
+    });
+  }
 
-  this.router.navigate(['/'], {
-    fragment: 'faq',
-    queryParams: { faq: code },
-    // opcional si ya usás otros params:
-    // queryParamsHandling: 'merge'
-  });
-}
-
-goContactoForm() {
+  goContactoForm() {
     this.closeUserMenu();
     this.closeMenu();
     this.router.navigateByUrl('/contacto');
   }
+
+  @HostListener('window:resize')
+onResize() {
+  this.isDesktop.set(window.innerWidth > 768);
+
+  // si pasa a mobile, cerramos dropdowns admin
+  if (!this.isDesktop()) {
+    this.adminOpen.set(false);
+    this.userMenuOpen.set(false);
+  }
+}
+
+goAdminHome() {
+  this.closeUserMenu();
+  this.closeMenu();
+  this.adminOpen.set(false);
+  this.router.navigateByUrl('/admin');
+}
 }

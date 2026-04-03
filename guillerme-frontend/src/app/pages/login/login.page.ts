@@ -74,6 +74,14 @@ export class LoginPage {
       .subscribe({
         next: () => {
           this.loading.set(false);
+
+          const role = (this.auth.session()?.role ?? '').toUpperCase();
+
+          if (role === 'ADMIN') {
+            this.router.navigateByUrl('/admin');
+            return;
+          }
+
           this.router.navigateByUrl('/');
         },
         error: (e: HttpErrorResponse) => {
