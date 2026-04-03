@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -37,25 +38,24 @@ public class AdminMailService {
     @Value("${app.uploads.dir:/uploads}")
     private String uploadsDir;
 
-    public AdminMailService(JavaMailSender mailSender, OrderRepository orderRepo, OrderItemRepository itemRepo) {
+    public AdminMailService(
+            JavaMailSender mailSender,
+            OrderRepository orderRepo,
+            OrderItemRepository itemRepo
+    ) {
         this.mailSender = mailSender;
         this.orderRepo = orderRepo;
         this.itemRepo = itemRepo;
     }
 
     // ==========================================================
-    // ADMIN: Nuevo pedido (HTML mismo formato/grilla)
+    // ADMIN: Nuevo pedido
     // ==========================================================
     public void sendNewOrderEmailToAdmin(Long orderId) {
         var o = orderRepo.findById(orderId).orElseThrow();
         var items = itemRepo.findAllByOrderId(orderId);
 
-        long total = 0L;
-        for (var it : items) {
-            long unit = (it.getUnitPrice() == null) ? 0L : it.getUnitPrice().longValue();
-            int qty = it.getQty();
-            total += unit * (long) qty;
-        }
+        long total = calculateTotal(items);
 
         String shippingText = "A coordinar";
         String paymentText = "A coordinar";
@@ -79,7 +79,9 @@ public class AdminMailService {
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
-                o.getComment()
+                o.getComment(),
+                null,
+                false
         );
 
         try {
@@ -98,18 +100,13 @@ public class AdminMailService {
     }
 
     // ==========================================================
-    // CLIENTE: Pedido recibido (HTML tipo ticket, sin bancos)
+    // CLIENTE: Pedido recibido
     // ==========================================================
     public void sendOrderConfirmationToCustomer(Long orderId) {
         var o = orderRepo.findById(orderId).orElseThrow();
         var items = itemRepo.findAllByOrderId(orderId);
 
-        long total = 0L;
-        for (var it : items) {
-            long unit = (it.getUnitPrice() == null) ? 0L : it.getUnitPrice().longValue();
-            int qty = it.getQty();
-            total += unit * (long) qty;
-        }
+        long total = calculateTotal(items);
 
         String shippingText = "A coordinar";
         String paymentText = "A coordinar";
@@ -133,7 +130,9 @@ public class AdminMailService {
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
-                o.getComment()
+                o.getComment(),
+                null,
+                true
         );
 
         try {
@@ -152,6 +151,57 @@ public class AdminMailService {
     }
 
     // ==========================================================
+    // CLIENTE: Pedido ajustado por falta de stock
+    // ==========================================================
+    public void sendOrderAdjustedToCustomer(Long orderId, List<String> removedProductNames) {
+        var o = orderRepo.findById(orderId).orElseThrow();
+        var items = itemRepo.findAllByOrderId(orderId);
+
+        long total = calculateTotal(items);
+
+        String shippingText = "A coordinar";
+        String paymentText = "A coordinar";
+
+        String title = "Actualización de tu pedido";
+        String intro = "Tuvimos que modificar tu pedido porque no contábamos con stock de uno o más productos.";
+
+        String html = buildOrderEmailHtml(
+                title,
+                intro,
+                o.getCustomerNombre(),
+                orderId,
+                o.getCreatedAt() != null ? o.getCreatedAt().toString() : null,
+                null,
+                items,
+                shippingText,
+                paymentText,
+                total,
+                o.getCustomerNombre(),
+                o.getCustomerApellido(),
+                o.getCustomerDireccion(),
+                o.getCustomerTelefono(),
+                o.getCustomerEmail(),
+                o.getComment(),
+                removedProductNames,
+                true
+        );
+
+        try {
+            MimeMessage mime = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mime, false, "UTF-8");
+
+            helper.setFrom(from);
+            helper.setTo(o.getCustomerEmail());
+            helper.setSubject("Actualización de tu pedido #" + orderId + " - " + signature);
+            helper.setText(html, true);
+
+            mailSender.send(mime);
+        } catch (MessagingException e) {
+            throw new RuntimeException("No se pudo enviar el mail de actualización del pedido", e);
+        }
+    }
+
+    // ==========================================================
     // CLIENTE: Pedido enviado (HTML + tracking + adjunto)
     // ==========================================================
     public void sendOrderShippedToCustomer(Long orderId) {
@@ -161,15 +211,10 @@ public class AdminMailService {
         String tracking = (o.getShipmentTracking() == null) ? "" : o.getShipmentTracking().trim();
         String fileName = (o.getShipmentFileName() == null) ? "" : o.getShipmentFileName().trim();
 
-        long total = 0L;
-        for (var it : items) {
-            long unit = (it.getUnitPrice() == null) ? 0L : it.getUnitPrice().longValue();
-            int qty = it.getQty();
-            total += unit * (long) qty;
-        }
+        long total = calculateTotal(items);
 
         String shippingText = "Envío gestionado";
-        String paymentText = "Transferencia"; // ✅ CAMBIO ACÁ
+        String paymentText = "Transferencia";
 
         String title = "¡Tu pedido fue enviado! 🚚";
         String intro = "Tu pedido ya está en camino. Abajo te dejamos el detalle. "
@@ -191,7 +236,9 @@ public class AdminMailService {
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
-                o.getComment()
+                o.getComment(),
+                null,
+                false
         );
 
         try {
@@ -224,7 +271,7 @@ public class AdminMailService {
     }
 
     // ==========================================================
-    // HTML builder (layout tipo imagen, SIN datos bancarios, SIN subtotal)
+    // HTML builder
     // ==========================================================
     private String buildOrderEmailHtml(
             String headerTitle,
@@ -242,7 +289,9 @@ public class AdminMailService {
             String direccion,
             String telefono,
             String email,
-            String comment
+            String comment,
+            List<String> removedProductNames,
+            boolean showAdjustedNotice
     ) {
         var currency = NumberFormat.getCurrencyInstance(new Locale("es", "AR"));
 
@@ -267,30 +316,56 @@ public class AdminMailService {
 
                 int qty = (qtyObj == null) ? 0 : (Integer) qtyObj;
                 long unit = (unitObj == null) ? 0L : ((Number) unitObj).longValue();
+                long subtotal = unit * (long) qty;
 
                 rows.append("<tr>")
                         .append("<td style=\"padding:10px;border:1px solid #e6e6e6;\">").append(esc(prod)).append("</td>")
-                        .append("<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:center;\">").append(qty).append("</td>")
                         .append("<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;\">").append(esc(currency.format(unit))).append("</td>")
+                        .append("<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:center;\">").append(qty).append("</td>")
+                        .append("<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;\">").append(esc(currency.format(subtotal))).append("</td>")
                         .append("</tr>");
-            } catch (Exception ignore) { }
+            } catch (Exception ignore) {
+            }
         }
 
         String trackingBlock = "";
         if (tracking != null && !tracking.isBlank()) {
             trackingBlock =
-                    "<p style=\"margin:12px 0 0;font-size:13px;line-height:1.5;\">" +
-                            "<b>Código de seguimiento:</b> " + esc(tracking) +
-                            "</p>";
+                    "<p style=\"margin:12px 0 0;font-size:13px;line-height:1.5;\">"
+                            + "<b>Código de seguimiento:</b> " + esc(tracking)
+                            + "</p>";
+        }
+
+        String removedBlock = "";
+        if (removedProductNames != null && !removedProductNames.isEmpty()) {
+            StringBuilder removedList = new StringBuilder();
+            for (String p : removedProductNames) {
+                removedList.append("<li>").append(esc(p)).append("</li>");
+            }
+
+            removedBlock =
+                    "<div style=\"margin:12px 0 0;font-size:12px;color:#444;\">"
+                            + "<b>Producto(s) quitado(s) por falta de stock:</b>"
+                            + "<ul style=\"margin:8px 0 0 18px;padding:0;\">" + removedList + "</ul>"
+                            + "</div>";
+        }
+
+        String adjustedNoticeBlock = "";
+        if (showAdjustedNotice) {
+            adjustedNoticeBlock =
+                    "<p style=\"margin:14px 0 0;font-size:12px;line-height:1.5;color:#444;\">"
+                            + "Nos pondremos en contacto para coordinar el pago y el envío. "
+                            + "Recordá que solo te estaremos contactando por nuestro WhatsApp oficial."
+                            + "</p>";
         }
 
         String commentBlock = "";
         if (comment != null && !comment.isBlank()) {
             commentBlock =
-                    "<tr>" +
-                            "<td style=\"padding:10px;border:1px solid #e6e6e6;\"><b>Nota:</b></td>" +
-                            "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"2\">" + esc(comment) + "</td>" +
-                            "</tr>";
+                    "<tr>"
+                            + "<td style=\"padding:10px;border:1px solid #e6e6e6;\"><b>Nota:</b></td>"
+                            + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"3\">" + esc(comment) + "</td>"
+                            + "</tr>";
         }
 
         return ""
@@ -301,7 +376,7 @@ public class AdminMailService {
                 + "<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#222;\">"
 
                 + "<div style=\"max-width:620px;margin:0 auto;padding:24px 12px;\">"
-                + "<div style=\"max-width:360px;margin:0 auto;background:#fff;border:1px solid #e6e6e6;\">"
+                + "<div style=\"max-width:620px;margin:0 auto;background:#fff;border:1px solid #e6e6e6;\">"
 
                 + "<div style=\"background:#EA5534;color:#fff;padding:14px 16px;text-align:center;font-weight:700;font-size:14px;\">"
                 + esc(headerTitle)
@@ -311,6 +386,7 @@ public class AdminMailService {
 
                 + "<p style=\"margin:0 0 10px;font-size:13px;line-height:1.5;\">Hola " + safeName + ",</p>"
                 + "<p style=\"margin:0 0 10px;font-size:13px;line-height:1.5;\">" + safeIntro + "</p>"
+                + removedBlock
 
                 + "<div style=\"margin:10px 0 0;font-size:12px;color:#555;\">"
                 + "<b>Pedido #" + orderId + "</b>"
@@ -324,8 +400,9 @@ public class AdminMailService {
                 + "<thead>"
                 + "<tr>"
                 + "<th style=\"padding:10px;border:1px solid #e6e6e6;text-align:left;background:#fafafa;\">Producto</th>"
+                + "<th style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;background:#fafafa;\">Unitario</th>"
                 + "<th style=\"padding:10px;border:1px solid #e6e6e6;text-align:center;background:#fafafa;\">Cantidad</th>"
-                + "<th style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;background:#fafafa;\">Precio</th>"
+                + "<th style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;background:#fafafa;\">Subtotal</th>"
                 + "</tr>"
                 + "</thead>"
                 + "<tbody>"
@@ -338,19 +415,22 @@ public class AdminMailService {
                 + "<table style=\"width:100%;border-collapse:collapse;font-size:12px;\">"
                 + "<tr>"
                 + "<td style=\"padding:10px;border:1px solid #e6e6e6;\"><b>Envío:</b></td>"
-                + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"2\">" + esc(shippingText) + "</td>"
+                + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"3\">" + esc(shippingText) + "</td>"
                 + "</tr>"
                 + "<tr>"
                 + "<td style=\"padding:10px;border:1px solid #e6e6e6;\"><b>Método de pago:</b></td>"
-                + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"2\">" + esc(paymentText) + "</td>"
+                + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"3\">" + esc(paymentText) + "</td>"
                 + "</tr>"
                 + "<tr>"
                 + "<td style=\"padding:10px;border:1px solid #e6e6e6;\"><b>Total:</b></td>"
-                + "<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;\" colspan=\"2\"><b>" + esc(currency.format(total)) + "</b></td>"
+                + "<td style=\"padding:10px;border:1px solid #e6e6e6;\" colspan=\"2\"></td>"
+                + "<td style=\"padding:10px;border:1px solid #e6e6e6;text-align:right;\"><b>" + esc(currency.format(total)) + "</b></td>"
                 + "</tr>"
                 + commentBlock
                 + "</table>"
                 + "</div>"
+
+                + adjustedNoticeBlock
 
                 + "<p style=\"margin:14px 0 0;font-size:12px;line-height:1.5;color:#444;\">"
                 + "<b>¿Dudas?</b> Escribinos por: " + safeChannel
@@ -370,6 +450,25 @@ public class AdminMailService {
 
                 + "</div></div></div>"
                 + "</body></html>";
+    }
+
+    private long calculateTotal(Iterable<?> items) {
+        long total = 0L;
+
+        for (Object obj : items) {
+            try {
+                Object qtyObj = obj.getClass().getMethod("getQty").invoke(obj);
+                Object unitObj = obj.getClass().getMethod("getUnitPrice").invoke(obj);
+
+                int qty = (qtyObj == null) ? 0 : (Integer) qtyObj;
+                long unit = (unitObj == null) ? 0L : ((Number) unitObj).longValue();
+
+                total += unit * (long) qty;
+            } catch (Exception ignore) {
+            }
+        }
+
+        return total;
     }
 
     private static String esc(String s) {

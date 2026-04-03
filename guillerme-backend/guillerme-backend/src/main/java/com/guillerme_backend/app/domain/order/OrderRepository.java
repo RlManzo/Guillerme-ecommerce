@@ -17,7 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByCustomerEmailOrderByCreatedAtDesc(String customerEmail);
     Optional<Order> findByIdAndCustomerEmail(Long id, String customerEmail);
 
-
     interface OrderAdminRow {
         Long getId();
         Instant getCreatedAt();
@@ -29,23 +28,27 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     }
 
     @Query("""
-select
-  o.id as id,
-  o.createdAt as createdAt,
-  o.status as status,
-  o.customerEmail as customerEmail,
-  o.customerNombre as customerNombre,
-  o.customerApellido as customerApellido,
-  (select coalesce(sum(i.qty), 0) from OrderItem i where i.order.id = o.id) as totalItems
-from Order o
-where (:q is null or :q = ''
-       or lower(o.customerEmail) like lower(concat('%', :q, '%'))
-       or cast(o.id as string) = :q)
-  and (:status is null or o.status = :status)
-  and o.createdAt >= coalesce(:fromDt, o.createdAt)
-  and o.createdAt <= coalesce(:toDt,   o.createdAt)
-order by o.createdAt desc
-""")
+    select
+      o.id as id,
+      o.createdAt as createdAt,
+      o.status as status,
+      o.customerEmail as customerEmail,
+      o.customerNombre as customerNombre,
+      o.customerApellido as customerApellido,
+      (select coalesce(sum(i.qty), 0) from OrderItem i where i.order.id = o.id) as totalItems
+    from Order o
+    where (:q is null or :q = ''
+           or lower(o.customerEmail) like lower(concat('%', :q, '%'))
+           or cast(o.id as string) = :q)
+      and (
+           (:status is not null and o.status = :status)
+           or
+           (:status is null and o.status <> com.guillerme_backend.app.domain.order.OrderStatus.ANULADO)
+      )
+      and o.createdAt >= coalesce(:fromDt, o.createdAt)
+      and o.createdAt <= coalesce(:toDt,   o.createdAt)
+    order by o.createdAt desc
+    """)
     Page<OrderAdminRow> adminSearch(
             @Param("q") String q,
             @Param("status") OrderStatus status,
@@ -53,5 +56,4 @@ order by o.createdAt desc
             @Param("toDt") OffsetDateTime toDt,
             Pageable pageable
     );
-
 }

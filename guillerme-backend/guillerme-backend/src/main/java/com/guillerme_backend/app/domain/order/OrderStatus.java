@@ -4,5 +4,6 @@ public enum OrderStatus {
     NUEVO,
     PENDIENTE_DE_PAGO,
     PAGADO,
-    ENVIADO
+    ENVIADO,
+    ANULADO
 }

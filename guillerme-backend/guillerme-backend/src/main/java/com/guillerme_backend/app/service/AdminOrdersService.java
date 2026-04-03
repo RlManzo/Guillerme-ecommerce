@@ -2,6 +2,7 @@ package com.guillerme_backend.app.service;
 
 import com.guillerme_backend.app.api.admin.orders.dto.OrderAdminDetailResponse;
 import com.guillerme_backend.app.api.admin.orders.dto.OrderAdminSummaryResponse;
+import com.guillerme_backend.app.api.admin.orders.dto.RemoveOrderItemsRequest;
 import com.guillerme_backend.app.domain.order.Order;
 import com.guillerme_backend.app.domain.order.OrderItemRepository;
 import com.guillerme_backend.app.domain.order.OrderRepository;
@@ -24,15 +25,17 @@ public class AdminOrdersService {
     private final OrderRepository orderRepo;
     private final OrderItemRepository itemRepo;
     private final ProductRepository productRepo;
+    private final AdminMailService mailService;
 
     public AdminOrdersService(
             OrderRepository orderRepo,
             OrderItemRepository itemRepo,
-            ProductRepository productRepo
+            ProductRepository productRepo, AdminMailService mailService1
     ) {
         this.orderRepo = orderRepo;
         this.itemRepo = itemRepo;
         this.productRepo = productRepo;
+        this.mailService = mailService1;
     }
 
     @Transactional(readOnly = true)
@@ -125,5 +128,61 @@ public class AdminOrdersService {
 
         o.setStatus(newStatus);
         orderRepo.save(o);
+    }
+
+    @Transactional
+    public OrderAdminDetailResponse removeItems(Long orderId, RemoveOrderItemsRequest req) {
+        Order o = orderRepo.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Pedido no encontrado"));
+
+        if (o.getStatus() == OrderStatus.PAGADO || o.getStatus() == OrderStatus.ENVIADO) {
+            throw new IllegalStateException("No se pueden eliminar productos de un pedido PAGADO o ENVIADO");
+        }
+
+        var items = itemRepo.findByOrderId(o.getId());
+
+        if (items.isEmpty()) {
+            throw new IllegalStateException("El pedido no tiene items");
+        }
+
+        var idsToKeep = new java.util.HashSet<>(req.productIdsToKeep);
+
+        var toDelete = items.stream()
+                .filter(it -> !idsToKeep.contains(it.getProductId()))
+                .toList();
+
+        if (toDelete.isEmpty()) {
+            return getDetail(orderId);
+        }
+
+        if (toDelete.size() == items.size()) {
+            throw new IllegalStateException("El pedido no puede quedar sin productos");
+        }
+
+        var removedProductNames = toDelete.stream()
+                .map(it -> it.getProductNombre())
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        itemRepo.deleteAll(toDelete);
+
+        String adminComment = (req.adminComment != null && !req.adminComment.isBlank())
+                ? req.adminComment.trim()
+                : "Pedido ajustado por falta de stock";
+
+        String prev = (o.getComment() == null || o.getComment().isBlank())
+                ? ""
+                : o.getComment() + "\n";
+
+        o.setComment(prev + "[ADMIN] " + adminComment);
+        orderRepo.save(o);
+
+        OrderAdminDetailResponse updated = getDetail(orderId);
+
+        mailService.sendOrderAdjustedToCustomer(orderId, removedProductNames);
+
+
+        return updated;
     }
 }

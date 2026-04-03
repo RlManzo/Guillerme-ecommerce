@@ -2,6 +2,7 @@ package com.guillerme_backend.app.api.admin.orders;
 
 import com.guillerme_backend.app.api.admin.orders.dto.OrderAdminDetailResponse;
 import com.guillerme_backend.app.api.admin.orders.dto.OrderAdminSummaryResponse;
+import com.guillerme_backend.app.api.admin.orders.dto.RemoveOrderItemsRequest;
 import com.guillerme_backend.app.api.admin.orders.dto.UpdateOrderStatusRequest;
 import com.guillerme_backend.app.domain.order.OrderStatus;
 import com.guillerme_backend.app.service.AdminOrderShippingService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,5 +58,13 @@ public class AdminOrdersController {
             @RequestParam("file") MultipartFile file
     ) {
         adminOrderShippingService.markAsShipped(id, tracking, file);
+    }
+
+    @PutMapping("/{id}/items/remove")
+    public ResponseEntity<OrderAdminDetailResponse> removeItems(
+            @PathVariable Long id,
+            @Valid @RequestBody RemoveOrderItemsRequest request
+    ) {
+        return ResponseEntity.ok(service.removeItems(id, request));
     }
 }
