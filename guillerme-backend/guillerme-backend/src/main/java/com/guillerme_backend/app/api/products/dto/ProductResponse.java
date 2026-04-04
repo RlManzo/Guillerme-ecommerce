@@ -11,6 +11,8 @@ public class ProductResponse {
     public String imgUrl2;
     public String imgUrl3;
 
+    public String barcode;
+
     public String categorias;
     public String servicios;
     public String keywords;
@@ -31,6 +33,7 @@ public class ProductResponse {
         r.imgUrl = p.getImgUrl();
         r.imgUrl2 = p.getImgUrl2();
         r.imgUrl3 = p.getImgUrl3();
+        r.barcode = p.getBarcode();
         r.categorias = p.getCategorias();
         r.servicios = p.getServicios();
         r.keywords = p.getKeywords();

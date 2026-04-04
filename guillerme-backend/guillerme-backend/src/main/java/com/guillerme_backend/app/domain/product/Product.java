@@ -54,6 +54,9 @@ public class Product {
     @Column(nullable = false)
     private boolean estado = true;
 
+    @Column(name = "barcode", length = 64)
+    private String barcode;
+
     public boolean isEstado() { return estado; }
     public void setEstado(boolean estado) { this.estado = estado; }
 
@@ -63,24 +66,35 @@ public class Product {
     public String getImgUrl3() { return imgUrl3; }
     public void setImgUrl3(String imgUrl3) { this.imgUrl3 = imgUrl3; }
 
-
     public BigDecimal getPrecio() { return precio; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
+
+    public String getBarcode() { return barcode; }
+    public void setBarcode(String barcode) { this.barcode = barcode; }
+
     public Long getId() { return id; }
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
+
     public String getDescripcionCorta() { return descripcionCorta; }
     public void setDescripcionCorta(String descripcionCorta) { this.descripcionCorta = descripcionCorta; }
+
     public String getInfoModal() { return infoModal; }
     public void setInfoModal(String infoModal) { this.infoModal = infoModal; }
+
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
+
     public String getCategorias() { return categorias; }
     public void setCategorias(String categorias) { this.categorias = categorias; }
+
     public String getServicios() { return servicios; }
     public void setServicios(String servicios) { this.servicios = servicios; }
+
     public String getKeywords() { return keywords; }
     public void setKeywords(String keywords) { this.keywords = keywords; }
+
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
 }

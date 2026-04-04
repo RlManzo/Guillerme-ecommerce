@@ -9,6 +9,7 @@ import { AdminOrdersPage } from './pages/admin-orders/admin-orders.page';
 import { Productos } from './components/productos/productos';
 import { Presupuesto } from './components/presupuesto/presupuesto';
 import { AdminHomePage } from './pages/admin-home/admin-home.page';
+import { AdminCartPage } from './pages/admin-cart/admin-cart.page';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -19,6 +20,7 @@ export const routes: Routes = [
  { path: 'admin/products', component: AdminProductsPage, canActivate: [adminGuard] },
  { path: 'admin/orders', component: AdminOrdersPage },
  {path: 'admin', component:AdminHomePage,},
+ {path: 'admin/cartOrders', component:AdminCartPage,},
  { path: 'productos', component: Productos },
  { path: 'contacto', component: Presupuesto},
   { path: '**', redirectTo: '' }, // SIEMPRE al final

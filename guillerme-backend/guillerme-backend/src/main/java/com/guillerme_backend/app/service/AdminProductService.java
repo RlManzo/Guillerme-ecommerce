@@ -1,11 +1,12 @@
 package com.guillerme_backend.app.service;
 
-
 import com.guillerme_backend.app.api.products.dto.CreateProductRequest;
 import com.guillerme_backend.app.domain.product.Product;
 import com.guillerme_backend.app.domain.product.ProductRepository;
 import com.guillerme_backend.app.domain.product.Stock;
 import com.guillerme_backend.app.domain.product.StockRepository;
+import com.guillerme_backend.app.exception.BadRequestException;
+import com.guillerme_backend.app.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,12 @@ public class AdminProductService {
         List<Long> ids = new ArrayList<>();
 
         for (CreateProductRequest it : items) {
-            // 1) crear producto
+            String barcode = blankToNull(it.barcode);
+
+            if (barcode != null && productRepository.existsByBarcode(barcode)) {
+                throw new BadRequestException("Ya existe un producto con el código de barras: " + barcode);
+            }
+
             Product p = new Product();
             p.setNombre(it.nombre);
             p.setDescripcionCorta(it.descripcionCorta);
@@ -36,6 +42,7 @@ public class AdminProductService {
             p.setImgUrl(it.imgUrl);
             p.setImgUrl2(it.imgUrl2);
             p.setImgUrl3(it.imgUrl3);
+            p.setBarcode(barcode);
             p.setCategorias(it.categorias);
             p.setServicios(it.servicios);
             p.setKeywords(it.keywords);
@@ -67,7 +74,6 @@ public class AdminProductService {
         Stock s = stockRepository.findById(productId).orElse(null);
         if (s == null) {
             s = new Stock();
-            // suponiendo que Stock tiene relación @MapsId o FK a Product
             Product pRef = productRepository.getReferenceById(productId);
             s.setProduct(pRef);
         }
@@ -80,12 +86,19 @@ public class AdminProductService {
         Product p = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado id=" + id));
 
+        String barcode = blankToNull(it.barcode);
+
+        if (barcode != null && productRepository.existsByBarcodeAndIdNot(barcode, id)) {
+            throw new BadRequestException("Ya existe otro producto con ese código de barras");
+        }
+
         p.setNombre(it.nombre);
         p.setDescripcionCorta(it.descripcionCorta);
         p.setInfoModal(it.infoModal);
         p.setImgUrl(it.imgUrl);
         p.setImgUrl2(it.imgUrl2);
         p.setImgUrl3(it.imgUrl3);
+        p.setBarcode(barcode);
         p.setCategorias(it.categorias);
         p.setServicios(it.servicios);
         p.setKeywords(it.keywords);
@@ -103,19 +116,13 @@ public class AdminProductService {
 
     @Transactional
     public void delete(Long id) {
-        // recomendado: borrado lógico
         Product p = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado id=" + id));
 
         p.setActivo(false);
         productRepository.save(p);
 
-        // opcional: poner stock en 0 para que no aparezca como disponible
         setStock(id, 0);
-
-        // si quisieras borrado físico:
-        // stockRepository.deleteById(id);
-        // productRepository.deleteById(id);
     }
 
     @Transactional
@@ -126,5 +133,21 @@ public class AdminProductService {
         productRepository.save(p);
     }
 
+    public Product getByBarcode(String barcode) {
+        String code = normalizeBarcode(barcode);
+        return productRepository.findByBarcode(code)
+                .orElseThrow(() -> new NotFoundException("No existe un producto con ese código"));
+    }
 
+    private String blankToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+    private String normalizeBarcode(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
 }

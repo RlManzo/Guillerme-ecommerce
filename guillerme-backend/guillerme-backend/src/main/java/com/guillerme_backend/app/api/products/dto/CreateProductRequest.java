@@ -18,6 +18,7 @@ public class CreateProductRequest {
     public String imgUrl2;
     public String imgUrl3;
 
+    public String barcode;
 
     // MVP: vienen como string (CSV o JSON string)
     public String categorias;
@@ -35,5 +36,4 @@ public class CreateProductRequest {
     public BigDecimal precio;
 
     public Boolean estado;
-
 }

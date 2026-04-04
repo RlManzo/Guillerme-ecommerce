@@ -2,21 +2,22 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export type CreateProductRequest = {
+export interface CreateProductRequest {
   nombre: string;
-  descripcionCorta?: string | null;
-  infoModal?: string | null;
-  imgUrl?: string | null;
+  descripcionCorta?: string;
+  infoModal?: string;
+  imgUrl?: string;
   imgUrl2?: string;
   imgUrl3?: string;
-  categorias?: string | null;
-  servicios?: string | null;
-  keywords?: string | null;
-
-  activo?: boolean | null;
+  barcode?: string;
+  categorias?: string;
+  servicios?: string;
+  keywords?: string;
+  activo?: boolean;
   stock: number;
   precio: number;
-};
+  estado?: boolean;
+}
 
 export type ProductResponse = {
   id: number;
@@ -31,6 +32,7 @@ export type ProductResponse = {
   stock: number;
   precio: number;
   estado?: boolean;
+  barcode?: string | null;
 };
 
 export type BulkProductCreateRequest = { items: CreateProductRequest[] };
@@ -67,6 +69,13 @@ export class AdminProductsApi {
 
   updateEstado(id: number, estado: boolean) {
   return this.http.patch<void>(`/api/admin/products/${id}/estado`, { estado });
+}
+
+getByBarcode(code: string) {
+  return this.http.get<ProductResponse>(
+    `/api/admin/products/by-barcode`,
+    { params: { code } }
+  );
 }
 
 }

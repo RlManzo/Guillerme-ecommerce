@@ -373,3 +373,58 @@ label{
 .switch input:checked + .slider:before {
   transform: translateX(22px);
 }
+
+
+.field-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+.filters-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0 14px;
+
+  input {
+    min-width: 260px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  select {
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+  }
+
+  button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .btn-search {
+    background: #1976d2;
+    color: white;
+
+    &:hover {
+      background: #125aa0;
+    }
+  }
+
+  .btn-clear {
+    background: #e0e0e0;
+
+    &:hover {
+      background: #cfcfcf;
+    }
+  }
+}

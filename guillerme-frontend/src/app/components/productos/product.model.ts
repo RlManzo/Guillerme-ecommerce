@@ -24,6 +24,7 @@ export interface Product {
   imgUrl2?: string;
   imgUrl3?: string;
   estado?: boolean;
+  barcode?: string | null;
 }
 
 

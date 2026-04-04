@@ -14,4 +14,5 @@ export interface ProductResponseDto {
   stock: number;
   precio: number;
   estado?: boolean;
+  barcode?: string | null;
 }

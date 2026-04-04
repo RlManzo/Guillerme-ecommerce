@@ -39,43 +39,49 @@
     <h3 style="margin: 0 0 10px 0;">Productos</h3>
 
     <!-- ✅ BUSCADOR + FILTRO CATEGORIA + PAGE SIZE -->
-    <div
-      style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin: 8px 0 12px;"
-    >
-      <input
-        style="min-width:260px;"
-        placeholder="Buscar por nombre, descripción, keywords..."
-        [ngModel]="q()"
-        (ngModelChange)="onSearchChange($event)"
-      />
+    <div class="filters-bar">
+  <input
+    placeholder="Buscar por nombre, descripción, keywords o código..."
+    [ngModel]="searchInput()"
+    (ngModelChange)="searchInput.set($event)"
+    (keydown.enter)="applySearch()"
+  />
 
-      <select
-        [ngModel]="categoriaFilter()"
-        (ngModelChange)="onCategoriaChange($event)"
-      >
-        <!-- ✅ mantener igual -->
-        <option value="ALL">Todas</option>
-        <option value="LIBRERIA">Librería</option>
-        <option value="COMBOS">Combos</option>
-        <option value="JUGUETERIA">Varios</option>
-      </select>
+  <select
+    [ngModel]="categoriaFilter()"
+    (ngModelChange)="onCategoriaChange($event)"
+  >
+    <option value="ALL">Todas</option>
+    <option value="LIBRERIA">Librería</option>
+    <option value="COMBOS">Combos</option>
+    <option value="VARIOS">Varios</option>
+  </select>
 
-      <select
-          [ngModel]="sortBy()"
-          (ngModelChange)="onSortChange($event)"
-        >
-          <option value="NEWEST">Más nuevo</option>
-          <option value="OLDEST">Más antiguo</option>
-          <option value="AZ">Nombre (A → Z)</option>
-          <option value="ZA">Nombre (Z → A)</option>
-        </select>
+  <select
+    [ngModel]="sortBy()"
+    (ngModelChange)="onSortChange($event)"
+  >
+    <option value="NEWEST">Más nuevo</option>
+    <option value="OLDEST">Más antiguo</option>
+    <option value="AZ">Nombre (A → Z)</option>
+    <option value="ZA">Nombre (Z → A)</option>
+  </select>
 
-    </div>
+  <button class="btn-search" (click)="applySearch()">
+    Buscar
+  </button>
+
+  <button class="btn-clear" (click)="clearSearch()">
+    Limpiar
+  </button>
+</div>
+      
 
     <div style="overflow:auto;">
       <table class="admin-table">
         <thead>
           <tr>
+            <th>Código</th>
             <th>Imagen</th>
             <th>Nombre</th>
             <th>Descripción</th>
@@ -90,6 +96,7 @@
           <ng-container *ngFor="let p of pagedProducts(); trackBy: trackById">
             <!-- FILA NORMAL (solo lectura) -->
             <tr>
+              <td>{{ p.barcode || '-' }}</td>
               <td>
                 <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
                   <img
@@ -282,6 +289,19 @@
                       </label>
 
                       <label>
+                      <span>Código de barras</span>
+                      <input
+                        placeholder="Ej: 7798100960487"
+                        [ngModel]="editRow().barcode"
+                        (ngModelChange)="onEditBarcodeChange($event)"
+                      />
+
+                      <div *ngIf="barcodeErrorEdit()" class="field-error">
+                        {{ barcodeErrorEdit() }}
+                      </div>
+                    </label>
+
+                      <label>
                         <span>Descripción corta</span>
                         <input
                           [ngModel]="editRow().descripcionCorta"
@@ -398,6 +418,23 @@
             [ngModel]="form().nombre"
             (ngModelChange)="setField('nombre', $event)"
           />
+        </label>
+
+        <label>
+          <span>Código de barras</span>
+          <input
+            placeholder="Ej: 7798100960487"
+            [ngModel]="form().barcode"
+            (ngModelChange)="onCreateBarcodeChange($event)"
+          />
+
+          <div *ngIf="barcodeErrorCreate()" class="field-error">
+            {{ barcodeErrorCreate() }}
+          </div>
+
+          <div style="font-size: 12px; opacity: .7; margin-top: 6px;">
+            Por ahora podés cargarlo manualmente. Más adelante también se podrá completar con la pistola lectora.
+          </div>
         </label>
 
         <!-- ✅ 3 slots media (imagen o video) -->

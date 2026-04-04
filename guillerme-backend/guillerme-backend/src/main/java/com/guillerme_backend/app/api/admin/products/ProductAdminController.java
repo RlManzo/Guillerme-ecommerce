@@ -60,5 +60,11 @@ public class ProductAdminController {
         adminProductService.setEstado(id, req.estado);
     }
 
+    @GetMapping("/by-barcode")
+    public ProductResponse getByBarcode(@RequestParam String code) {
+        var p = adminProductService.getByBarcode(code);
+        return ProductResponse.of(p, productService.getStock(p.getId()));
+    }
+
 }
 

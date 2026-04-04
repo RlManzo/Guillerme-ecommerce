@@ -87,6 +87,13 @@ export class Navbar {
     this.router.navigateByUrl('/admin/products');
   }
 
+  goLocalSales() {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+    this.router.navigateByUrl('/admin/cartOrders');
+  }
+
   goManagePurchases() {
     this.closeUserMenu();
     this.closeMenu();

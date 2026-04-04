@@ -5,6 +5,7 @@ import com.guillerme_backend.app.domain.product.Product;
 import com.guillerme_backend.app.domain.product.ProductRepository;
 import com.guillerme_backend.app.domain.product.Stock;
 import com.guillerme_backend.app.domain.product.StockRepository;
+import com.guillerme_backend.app.exception.BadRequestException;
 import com.guillerme_backend.app.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,6 @@ public class ProductService {
     }
 
     public List<Product> listAllActive() {
-        // MVP: sin filtro, o podés agregar query method por activo=true
         return productRepository.findAll().stream().filter(Product::isActivo).toList();
     }
 
@@ -36,6 +36,12 @@ public class ProductService {
     }
 
     public Product create(CreateProductRequest req) {
+        String barcode = blankToNull(req.barcode);
+
+        if (barcode != null && productRepository.existsByBarcode(barcode)) {
+            throw new BadRequestException("Ya existe un producto con ese código de barras");
+        }
+
         Product p = new Product();
         p.setNombre(req.nombre.trim());
         p.setDescripcionCorta(blankToNull(req.descripcionCorta));
@@ -43,16 +49,16 @@ public class ProductService {
         p.setImgUrl(blankToNull(req.imgUrl));
         p.setImgUrl2(blankToNull(req.imgUrl2));
         p.setImgUrl3(blankToNull(req.imgUrl3));
+        p.setBarcode(barcode);
         p.setCategorias(blankToNull(req.categorias));
         p.setServicios(blankToNull(req.servicios));
         p.setKeywords(blankToNull(req.keywords));
         p.setPrecio(req.precio == null ? BigDecimal.ZERO : req.precio);
         if (req.activo != null) p.setActivo(req.activo);
+        if (req.estado != null) p.setEstado(req.estado);
 
-        // 1) guardar producto
         p = productRepository.save(p);
 
-        // 2) guardar stock asociado (1 a 1 con mapsId)
         Stock s = new Stock();
         s.setProduct(p);
         s.setStock(req.stock == null ? 0 : req.stock);

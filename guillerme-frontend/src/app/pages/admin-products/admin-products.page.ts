@@ -50,16 +50,31 @@ export class AdminProductsPage implements OnInit {
   loading = signal(false);
   uploadingImg = signal(false);
 
+  barcodeErrorCreate = signal<string | null>(null);
+  barcodeErrorEdit = signal<string | null>(null);
+
   // ✅ OJO: NO private, así el HTML puede usar productsSig()
   readonly productsSig = toSignal(this.productsService.products$, {
     initialValue: [] as Product[],
   });
+
+  
 
   productsCount = computed(() => this.productsSig().length);
 
   totalStock = computed(() =>
     this.productsSig().reduce((acc, p) => acc + (p.stock ?? 0), 0)
   );
+
+  onCreateBarcodeChange(value: string) {
+  this.barcodeErrorCreate.set(null);
+  this.setField('barcode', value as any);
+  }
+
+  onEditBarcodeChange(value: string) {
+    this.barcodeErrorEdit.set(null);
+    this.setEditField('barcode', value as any);
+  }
 
   // =========================
   // Catálogos UI (alta simple)
@@ -83,6 +98,21 @@ export class AdminProductsPage implements OnInit {
   // =========================
   q = signal<string>('');
   categoriaFilter = signal<CategoriaFilter>('ALL');
+
+  searchInput = signal<string>('');
+
+  applySearch() {
+  this.q.set(this.searchInput() ?? '');
+  this.page.set(1);
+}
+
+clearSearch() {
+  this.searchInput.set('');
+  this.q.set('');
+  this.categoriaFilter.set('ALL');
+  this.sortBy.set('NEWEST');
+  this.page.set(1);
+}
 
   sortBy = signal<SortBy>('NEWEST');
   onSortChange(v: SortBy) {
@@ -112,16 +142,17 @@ export class AdminProductsPage implements OnInit {
   }
 
   private productText(p: Product): string {
-    return this.norm(
-      [
-        p.nombre,
-        p.descripcionCorta,
-        p.infoModal,
-        this.productKeywordsText(p),
-        (p.categorias ?? []).join(' '),
-      ].join(' ')
-    );
-  }
+  return this.norm(
+    [
+      p.nombre,
+      p.descripcionCorta,
+      p.infoModal,
+      this.productKeywordsText(p),
+      (p.categorias ?? []).join(' '),
+      p.barcode ?? '',
+    ].join(' ')
+  );
+}
 
   // ✅ para "más nuevo/antiguo": usa createdAt/created_at si existe; sino id
   private getTimeOrId(p: any): number {
@@ -282,20 +313,20 @@ export class AdminProductsPage implements OnInit {
   // CREATE (alta simple) DTO real + precio
   // -----------------------------
   form = signal<CreateProductRequest>({
-    nombre: '',
-    descripcionCorta: '',
-    infoModal: '',
-    imgUrl: '',
-    imgUrl2: '',
-    imgUrl3: '',
-    categorias: '',
-    servicios: '',
-    keywords: '',
-
-    activo: true,
-    stock: 0,
-    precio: 0,
-  });
+  nombre: '',
+  descripcionCorta: '',
+  infoModal: '',
+  imgUrl: '',
+  imgUrl2: '',
+  imgUrl3: '',
+  barcode: '',
+  categorias: '',
+  servicios: '',
+  keywords: '',
+  activo: true,
+  stock: 0,
+  precio: 0,
+});
 
   setField<K extends keyof CreateProductRequest>(
     key: K,
@@ -418,6 +449,7 @@ export class AdminProductsPage implements OnInit {
             imgUrl: '',
             imgUrl2: '',
             imgUrl3: '',
+            barcode: '',
             categorias: '',
             servicios: '',
             keywords: '',
@@ -426,6 +458,8 @@ export class AdminProductsPage implements OnInit {
             precio: 0,
           });
 
+          this.barcodeErrorCreate.set(null);
+
           this.showForm.set(false);
           this.productsService.refresh().subscribe();
           this.toggleProducts();
@@ -433,7 +467,18 @@ export class AdminProductsPage implements OnInit {
         error: (e) => {
           this.loading.set(false);
           console.error(e);
-          this.toast.error('No se pudo crear el producto');
+
+          const msg = e?.error?.message || 'No se pudo crear el producto';
+          const normalizedMsg = this.normalizeText(msg);
+
+          if (
+            normalizedMsg.includes('codigo de barras') ||
+            normalizedMsg.includes('barcode')
+          ) {
+            this.barcodeErrorCreate.set(msg);
+          }
+
+          this.toast.error(msg);
         },
       });
   }
@@ -522,6 +567,7 @@ export class AdminProductsPage implements OnInit {
     imgUrl: '',
     imgUrl2: '',
     imgUrl3: '',
+    barcode: '',
     categorias: '',
     servicios: '',
     keywords: '',
@@ -536,6 +582,7 @@ export class AdminProductsPage implements OnInit {
 
   startEdit(p: Product) {
     this.editingId.set(p.id);
+    this.barcodeErrorEdit.set(null);
 
     this.editRow.set({
       nombre: p.nombre ?? '',
@@ -544,11 +591,10 @@ export class AdminProductsPage implements OnInit {
       imgUrl: p.imgUrl ?? p.img ?? '',
       imgUrl2: p.imgUrl2 ?? '',
       imgUrl3: p.imgUrl3 ?? '',
-
+      barcode: (p as any).barcode ?? '',
       categorias: (p.categorias ?? []).join(', '),
       servicios: (p.servicios ?? []).join(', '),
       keywords: (p.keywords ?? []).join(', '),
-
       activo: (p as any).activo ?? true,
       stock: Number(p.stock ?? 0),
       precio: Number((p as any).precio ?? 0),
@@ -556,6 +602,7 @@ export class AdminProductsPage implements OnInit {
   }
 
   cancelEdit() {
+    this.barcodeErrorEdit.set(null);
     this.editingId.set(null);
   }
 
@@ -599,7 +646,18 @@ export class AdminProductsPage implements OnInit {
         error: (e) => {
           console.error(e);
           this.savingRow.set(false);
-          this.toast.error('No se pudo actualizar');
+
+          const msg = e?.error?.message || 'No se pudo actualizar';
+          const normalizedMsg = this.normalizeText(msg);
+
+          if (
+            normalizedMsg.includes('codigo de barras') ||
+            normalizedMsg.includes('barcode')
+          ) {
+            this.barcodeErrorEdit.set(msg);
+          }
+
+          this.toast.error(msg);
         },
       });
   }
@@ -733,6 +791,11 @@ toggleEstado(p: Product) {
   });
 }
 
-
+private normalizeText(value: string): string {
+  return String(value ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
 
 }

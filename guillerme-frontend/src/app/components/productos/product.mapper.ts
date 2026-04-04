@@ -59,6 +59,7 @@ export function mapProductFromApi(p: ProductResponseDto): Product {
 
     imagenes,             // ✅ thumbs
 
+    barcode: p.barcode ?? null,
     categorias: parseStringList(p.categorias),
     servicios: parseStringList(p.servicios),
     keywords: parseStringList(p.keywords),
