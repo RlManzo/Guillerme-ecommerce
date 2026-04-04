@@ -24,6 +24,8 @@ export class LoginPage {
   error = signal<string | null>(null);
   success = signal<string | null>(null);
 
+  showPassword = signal(false);
+
   constructor() {
     const navState = history.state;
     if (navState?.successMessage) {

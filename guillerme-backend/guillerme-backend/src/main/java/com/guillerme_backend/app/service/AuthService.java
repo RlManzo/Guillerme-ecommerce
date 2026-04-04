@@ -1,15 +1,17 @@
 package com.guillerme_backend.app.service;
 
+import com.guillerme_backend.app.api.auth.dto.ForgotPasswordRequest;
 import com.guillerme_backend.app.api.auth.dto.RegisterRequest;
+import com.guillerme_backend.app.api.auth.dto.ResetPasswordRequest;
 import com.guillerme_backend.app.domain.customer.Customer;
 import com.guillerme_backend.app.domain.customer.CustomerRepository;
 import com.guillerme_backend.app.domain.user.Role;
 import com.guillerme_backend.app.domain.user.User;
 import com.guillerme_backend.app.domain.user.UserRepository;
-import com.guillerme_backend.app.exception.ConflictException;
 import com.guillerme_backend.app.security.JwtService;
 import jakarta.transaction.Transactional;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +33,10 @@ public class AuthService {
             UserRepository userRepository,
             PasswordEncoder encoder,
             AuthenticationManager authManager,
-            JwtService jwtService, CustomerRepository customerRepository, PasswordEncoder passwordEncoder, MailService mailService
+            JwtService jwtService,
+            CustomerRepository customerRepository,
+            PasswordEncoder passwordEncoder,
+            MailService mailService
     ) {
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -55,9 +60,7 @@ public class AuthService {
         u.setEmail(req.email.trim().toLowerCase());
         u.setPasswordHash(passwordEncoder.encode(req.password));
         u.setRole(Role.USER);
-
-        // ✅ clave
-        u.setEnabled(true); // lo dejamos true para evitar conflictos con Spring
+        u.setEnabled(true);
         u.setEmailVerified(false);
 
         u.setVerificationToken(token);
@@ -74,12 +77,10 @@ public class AuthService {
 
         customerRepository.save(c);
 
-        // ✅ enviar mail
         mailService.sendVerificationEmail(u.getEmail(), token);
     }
 
     public String login(String email, String password) {
-
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
@@ -87,7 +88,6 @@ public class AuthService {
         User u = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        // ✅ CLAVE
         if (!u.isEmailVerified()) {
             throw new IllegalStateException("Debés verificar tu email antes de ingresar");
         }
@@ -97,7 +97,6 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String token) {
-
         User u = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
 
@@ -109,5 +108,40 @@ public class AuthService {
         u.setEmailVerified(true);
         u.setVerificationToken(null);
         u.setVerificationTokenExpiresAt(null);
+    }
+
+    @Transactional
+    public void requestPasswordReset(ForgotPasswordRequest req) {
+        String email = req.email == null ? "" : req.email.trim().toLowerCase();
+
+        userRepository.findByEmail(email).ifPresent(u -> {
+            String token = UUID.randomUUID().toString();
+
+            u.setPasswordResetToken(token);
+            u.setPasswordResetTokenExpiresAt(LocalDateTime.now().plusHours(2));
+
+            userRepository.save(u);
+
+            mailService.sendPasswordResetEmail(u.getEmail(), token);
+        });
+
+        // OJO: no tirar error si no existe, para no filtrar usuarios válidos
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest req) {
+        User u = userRepository.findByPasswordResetToken(req.token)
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
+
+        if (u.getPasswordResetTokenExpiresAt() == null ||
+                u.getPasswordResetTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("El token venció");
+        }
+
+        u.setPasswordHash(passwordEncoder.encode(req.newPassword));
+        u.setPasswordResetToken(null);
+        u.setPasswordResetTokenExpiresAt(null);
+
+        userRepository.save(u);
     }
 }

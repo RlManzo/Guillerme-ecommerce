@@ -104,4 +104,12 @@ export class AuthService {
       return null;
     }
   }
+
+  requestPasswordReset(email: string) {
+  return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
+}
+
+resetPassword(body: { token: string; newPassword: string }) {
+  return this.http.post<{ message: string }>('/api/auth/reset-password', body);
+}
 }

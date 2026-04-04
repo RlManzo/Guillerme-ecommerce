@@ -43,4 +43,18 @@ public class AuthController {
         authService.verifyEmail(token);
         return new MessageResponse("Cuenta verificada correctamente");
     }
+
+    @PostMapping("/forgot-password")
+    public MessageResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        authService.requestPasswordReset(req);
+        return new MessageResponse(
+                "Si el email existe, te enviamos un enlace para restablecer tu contraseña"
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public MessageResponse resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        authService.resetPassword(req);
+        return new MessageResponse("Tu contraseña fue actualizada correctamente");
+    }
 }

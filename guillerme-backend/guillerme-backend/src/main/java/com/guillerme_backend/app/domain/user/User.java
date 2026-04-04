@@ -34,7 +34,27 @@ public class User {
     // ✅ NUEVO
     private LocalDateTime verificationTokenExpiresAt;
 
-    // getters y setters
+    @Column(name = "password_reset_token", length = 120)
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expires_at")
+    private LocalDateTime passwordResetTokenExpiresAt;
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiresAt() {
+        return passwordResetTokenExpiresAt;
+    }
+
+    public void setPasswordResetTokenExpiresAt(LocalDateTime passwordResetTokenExpiresAt) {
+        this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+    }
 
     public Long getId() { return id; }
 
