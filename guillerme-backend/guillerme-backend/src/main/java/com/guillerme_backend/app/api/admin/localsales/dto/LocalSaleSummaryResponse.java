@@ -11,6 +11,7 @@ public class LocalSaleSummaryResponse {
     public Integer totalItems;
     public BigDecimal totalAmount;
     public String comment;
+    public String status;
 
     public static LocalSaleSummaryResponse of(
             Long id,
@@ -19,7 +20,8 @@ public class LocalSaleSummaryResponse {
             String customerName,
             Integer totalItems,
             BigDecimal totalAmount,
-            String comment
+            String comment,
+            String status
     ) {
         LocalSaleSummaryResponse r = new LocalSaleSummaryResponse();
         r.id = id;
@@ -29,6 +31,7 @@ public class LocalSaleSummaryResponse {
         r.totalItems = totalItems;
         r.totalAmount = totalAmount;
         r.comment = comment;
+        r.status = status;
         return r;
     }
 }

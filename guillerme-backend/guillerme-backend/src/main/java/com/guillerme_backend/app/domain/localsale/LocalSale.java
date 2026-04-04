@@ -36,6 +36,13 @@ public class LocalSale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LocalSaleItem> items = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private LocalSaleStatus status = LocalSaleStatus.FINALIZADA;
+
+    public LocalSaleStatus getStatus() { return status; }
+    public void setStatus(LocalSaleStatus status) { this.status = status; }
+
     public Long getId() { return id; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

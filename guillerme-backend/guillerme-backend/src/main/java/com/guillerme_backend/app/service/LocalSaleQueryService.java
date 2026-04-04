@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 public class LocalSaleQueryService {
 
@@ -26,8 +28,13 @@ public class LocalSaleQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<LocalSaleSummaryResponse> list(Pageable pageable) {
-        return localSaleRepository.findAll(pageable)
+    public Page<LocalSaleSummaryResponse> list(
+            String q,
+            Instant from,
+            Instant to,
+            Pageable pageable
+    ) {
+        return localSaleRepository.adminSearch(q, from, to, pageable)
                 .map(s -> LocalSaleSummaryResponse.of(
                         s.getId(),
                         s.getCreatedAt(),
@@ -35,7 +42,8 @@ public class LocalSaleQueryService {
                         s.getCustomerName(),
                         s.getTotalItems(),
                         s.getTotalAmount(),
-                        s.getComment()
+                        s.getComment(),
+                        s.getStatus() != null ? s.getStatus().name() : null
                 ));
     }
 
@@ -54,6 +62,7 @@ public class LocalSaleQueryService {
         d.totalAmount = s.getTotalAmount();
         d.comment = s.getComment();
         d.customerName = s.getCustomerName();
+        d.status = s.getStatus() != null ? s.getStatus().name() : null;
 
         d.items = items.stream().map(it -> {
             LocalSaleDetailResponse.Item x = new LocalSaleDetailResponse.Item();

@@ -147,7 +147,7 @@
       <div class="card" *ngIf="selected(); else emptyDetail">
         <div class="card-header d-flex justify-content-between align-items-center">
           <span>Detalle pedido nro#{{ selected()!.id }}</span>
-          <button class="btn btn-sm btn-danger" type="button" (click)="closeDetail()">
+          <button class="btn btn-sm btn-secondary" type="button" (click)="closeDetail()">
             Cerrar
           </button>
         </div>
@@ -182,7 +182,7 @@
             </button>
 
             <button
-              class="btn btn-secondary"
+              class="btn btn-warning"
               type="button"
               (click)="downloadPdf()"
               [disabled]="!selected()"
@@ -244,7 +244,7 @@
               <div class="d-flex gap-2" *ngIf="canEditItems()">
                 <button
                   *ngIf="!removingItems()"
-                  class="btn btn-sm btn-warning"
+                  class="btn btn-sm btn-primary"
                   type="button"
                   (click)="startRemoveItems()"
                 >
@@ -253,7 +253,7 @@
 
                 <button
                   *ngIf="removingItems()"
-                  class="btn btn-sm btn-success"
+                  class="btn btn-sm btn-primary"
                   type="button"
                   (click)="saveRemovedItems()"
                   [disabled]="savingItems() || editableItems().length === 0"
@@ -263,7 +263,7 @@
 
                 <button
                   *ngIf="removingItems()"
-                  class="btn btn-sm btn-secondary"
+                  class="btn btn-sm btn-danger"
                   type="button"
                   (click)="cancelRemoveItems()"
                 >

@@ -7,7 +7,15 @@ export interface CreateLocalSaleRequest {
     qty: number;
   }>;
   comment?: string | null;
+  customerName?: string | null;
+}
 
+export interface UpdateLocalSaleRequest {
+  items: Array<{
+    productId: number;
+    qty: number;
+  }>;
+  comment?: string | null;
   customerName?: string | null;
 }
 
@@ -23,6 +31,7 @@ export interface LocalSaleSummaryDto {
   totalItems: number;
   totalAmount: number;
   comment?: string | null;
+  status: 'ABIERTA' | 'FINALIZADA' | 'ANULADA';
 }
 
 export interface LocalSaleItemDto {
@@ -35,13 +44,14 @@ export interface LocalSaleItemDto {
 }
 
 export interface LocalSaleDetailDto {
-   id: number;
+  id: number;
   createdAt: string;
   createdByEmail?: string | null;
   customerName?: string | null;
   totalItems: number;
   totalAmount: number;
   comment?: string | null;
+  status: 'ABIERTA' | 'FINALIZADA' | 'ANULADA';
   items: LocalSaleItemDto[];
 }
 
@@ -61,23 +71,45 @@ export class LocalSalesApi {
     return this.http.post<CreateLocalSaleResponse>('/api/admin/local-sales', body);
   }
 
-  list(params?: {
-    page?: number;
-    size?: number;
-    sort?: string;
-  }) {
-    let p = new HttpParams();
-
-    if (params?.page != null) p = p.set('page', String(params.page));
-    if (params?.size != null) p = p.set('size', String(params.size));
-    if (params?.sort) p = p.set('sort', params.sort);
-
-    return this.http.get<PageDto<LocalSaleSummaryDto>>('/api/admin/local-sales', {
-      params: p,
-    });
+  update(id: number, body: UpdateLocalSaleRequest) {
+    return this.http.put<CreateLocalSaleResponse>(`/api/admin/local-sales/${id}`, body);
   }
+
+  cancel(id: number) {
+    return this.http.patch<void>(`/api/admin/local-sales/${id}/cancel`, {});
+  }
+
+  reopen(id: number) {
+    return this.http.patch<void>(`/api/admin/local-sales/${id}/reopen`, {});
+  }
+
+  list(params?: {
+  q?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}) {
+  let p = new HttpParams();
+
+  if (params?.q) p = p.set('q', params.q);
+  if (params?.from) p = p.set('from', params.from);
+  if (params?.to) p = p.set('to', params.to);
+  if (params?.page != null) p = p.set('page', String(params.page));
+  if (params?.size != null) p = p.set('size', String(params.size));
+  if (params?.sort) p = p.set('sort', params.sort);
+
+  return this.http.get<PageDto<LocalSaleSummaryDto>>('/api/admin/local-sales', {
+    params: p,
+  });
+}
 
   getById(id: number) {
     return this.http.get<LocalSaleDetailDto>(`/api/admin/local-sales/${id}`);
   }
+
+  close(id: number) {
+  return this.http.patch<void>(`/api/admin/local-sales/${id}/close`, {});
+}
 }
