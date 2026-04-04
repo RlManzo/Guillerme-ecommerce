@@ -18,7 +18,8 @@ export class RegisterPage {
   nombre = signal('');
   apellido = signal('');
 
-  areaCode = signal('+54 11');
+  // ahora este select representa país / prefijo internacional
+  countryCode = signal('+54');
   telefonoNumero = signal('');
 
   provincia = signal('');
@@ -26,9 +27,8 @@ export class RegisterPage {
 
   email = signal('');
   password = signal('');
-  confirmPassword = signal(''); // ✅ nuevo
+  confirmPassword = signal('');
 
-  // ✅ ver/ocultar
   showPassword = signal(false);
   showConfirmPassword = signal(false);
 
@@ -37,9 +37,18 @@ export class RegisterPage {
 
   submitted = signal(false);
 
-  readonly areaCodes = [
-    '+54 11', '+54 221', '+54 261', '+54 341', '+54 351',
-    '+54 381', '+54 387', '+54 376', '+54 299',
+  readonly countryCodes = [
+    { label: 'Arg (+54)', value: '+54' },
+    { label: 'Uru (+598)', value: '+598' },
+    { label: 'Chi (+56)', value: '+56' },
+    { label: 'Par (+595)', value: '+595' },
+    { label: 'Bol (+591)', value: '+591' },
+    { label: 'Bras (+55)', value: '+55' },
+    { label: 'Per (+51)', value: '+51' },
+    { label: 'Col (+57)', value: '+57' },
+    { label: 'Méx (+52)', value: '+52' },
+    { label: 'Esp (+34)', value: '+34' },
+    { label: 'Usa (+1)', value: '+1' },
   ];
 
   readonly provincias = [
@@ -54,21 +63,40 @@ export class RegisterPage {
   // Validadores
   // -------------------------
   private nameRx = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
+
+  // ahora permitimos escribir área + número en el mismo input
+  // se validan solo dígitos, entre 6 y 15
   private phoneRx = /^[0-9]{6,15}$/;
+
   private emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   private passRx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  vNombre = computed(() => this.nombre().trim().length > 0 && this.nameRx.test(this.nombre().trim()));
-  vApellido = computed(() => this.apellido().trim().length > 0 && this.nameRx.test(this.apellido().trim()));
+  vNombre = computed(() =>
+    this.nombre().trim().length > 0 && this.nameRx.test(this.nombre().trim())
+  );
 
-  vTelefono = computed(() => this.phoneRx.test(this.telefonoNumero().trim()));
+  vApellido = computed(() =>
+    this.apellido().trim().length > 0 && this.nameRx.test(this.apellido().trim())
+  );
+
+  vTelefono = computed(() =>
+    this.phoneRx.test(this.telefonoNumero().trim())
+  );
+
   vProvincia = computed(() => !!this.provincia().trim());
-  vDireccion = computed(() => this.direccionLinea().trim().length >= 3);
 
-  vEmail = computed(() => this.emailRx.test(this.email().trim()));
-  vPassword = computed(() => this.passRx.test(this.password()));
+  vDireccion = computed(() =>
+    this.direccionLinea().trim().length >= 6
+  );
 
-  // ✅ confirmación (solo tiene sentido si password tiene algo)
+  vEmail = computed(() =>
+    this.emailRx.test(this.email().trim())
+  );
+
+  vPassword = computed(() =>
+    this.passRx.test(this.password())
+  );
+
   vConfirmPassword = computed(() => {
     const p = this.password();
     const c = this.confirmPassword();
@@ -92,47 +120,49 @@ export class RegisterPage {
   }
 
   onTelefonoNumeroChange(v: string) {
+    // permitimos que escriba área + número, pero guardamos solo dígitos
     const onlyDigits = String(v ?? '').replace(/\D/g, '');
     this.telefonoNumero.set(onlyDigits);
   }
 
   submit() {
-  this.submitted.set(true);
-  this.error.set(null);
+    this.submitted.set(true);
+    this.error.set(null);
 
-  if (!this.formValid()) {
-    this.error.set('Revisá los campos marcados');
-    return;
+    if (!this.formValid()) {
+      this.error.set('Revisá los campos marcados');
+      return;
+    }
+
+    this.loading.set(true);
+
+    const telefono = `${this.countryCode()} ${this.telefonoNumero().trim()}`.trim();
+    const direccion = `${this.provincia().trim()} - ${this.direccionLinea().trim()}`.trim();
+
+    this.auth
+      .register({
+        nombre: this.nombre().trim(),
+        apellido: this.apellido().trim(),
+        telefono,
+        direccion,
+        email: this.email().trim(),
+        password: this.password(),
+      })
+      .subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.router.navigate(['/login'], {
+            state: {
+              successMessage:
+                '¡Te registraste exitosamente! Revisá tu email para validar tu cuenta y comenzar a comprar.',
+            },
+          });
+        },
+        error: (e) => {
+          console.error(e);
+          this.loading.set(false);
+          this.error.set(e.error?.message || 'No se pudo registrar');
+        },
+      });
   }
-
-  this.loading.set(true);
-
-  const telefono = `${this.areaCode()} ${this.telefonoNumero().trim()}`.trim();
-  const direccion = `${this.provincia().trim()} - ${this.direccionLinea().trim()}`.trim();
-
-  this.auth
-    .register({
-      nombre: this.nombre().trim(),
-      apellido: this.apellido().trim(),
-      telefono,
-      direccion,
-      email: this.email().trim(),
-      password: this.password(),
-    })
-    .subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/login'], {
-          state: {
-            successMessage: '¡Te registraste exitosamente! Revisá tu email para validar tu cuenta y comenzar a comprar.'
-          }
-        });
-      },
-      error: (e) => {
-        console.error(e);
-        this.loading.set(false);
-        this.error.set(e.error?.message || 'No se pudo registrar');
-      },
-    });
-}
 }
