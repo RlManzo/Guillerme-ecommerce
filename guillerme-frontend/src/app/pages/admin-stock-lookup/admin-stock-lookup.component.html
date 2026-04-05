@@ -1,0 +1,146 @@
+<section class="panel container" style="margin-bottom: 12px;">
+  <div
+    style="display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap: wrap;"
+  >
+    <div>
+      <div style="font-size: 14px; opacity: .8;">Productos activos</div>
+      <div style="font-size: 22px; font-weight: 700;">
+        {{ productsCount() }}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 14px; opacity: .8;">Stock total disponible</div>
+      <div style="font-size: 22px; font-weight: 700;">
+        {{ totalStock() }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel container">
+  <h3 style="margin: 0 0 10px 0;">Consulta rápida de stock</h3>
+
+  <div class="filters-bar">
+    <input
+      placeholder="Buscar por nombre, descripción, keywords o código..."
+      [ngModel]="searchInput()"
+      (ngModelChange)="searchInput.set($event)"
+      (keydown.enter)="applySearch()"
+    />
+
+    <select
+      [ngModel]="categoriaFilter()"
+      (ngModelChange)="onCategoriaChange($event)"
+    >
+      <option value="ALL">Todas</option>
+      <option value="LIBRERIA">Librería</option>
+      <option value="COMBOS">Combos</option>
+      <option value="VARIOS">Varios</option>
+    </select>
+
+    <select
+      [ngModel]="sortBy()"
+      (ngModelChange)="onSortChange($event)"
+    >
+      <option value="NEWEST">Más nuevo</option>
+      <option value="OLDEST">Más antiguo</option>
+      <option value="AZ">Nombre (A → Z)</option>
+      <option value="ZA">Nombre (Z → A)</option>
+    </select>
+
+    <button class="btn-search" (click)="applySearch()">
+      Buscar
+    </button>
+
+    <button class="btn-clear" (click)="clearSearch()">
+      Limpiar
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="hint" style="margin-top: 8px;">
+    Cargando productos...
+  </div>
+
+  <div style="overflow:auto;" *ngIf="!loading()">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Keywords</th>
+          <th>Stock</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let p of pagedProducts(); trackBy: trackById">
+          <td>{{ p.barcode || '-' }}</td>
+
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
+              <img
+                class="thumb img-grid"
+                [src]="fileUrl(p.imgUrl || p.img)"
+                [alt]="p.nombre"
+              />
+              <img
+                *ngIf="p.imgUrl2"
+                class="thumb img-grid"
+                [src]="fileUrl(p.imgUrl2)"
+                [alt]="p.nombre"
+              />
+              <img
+                *ngIf="p.imgUrl3"
+                class="thumb img-grid"
+                [src]="fileUrl(p.imgUrl3)"
+                [alt]="p.nombre"
+              />
+            </div>
+          </td>
+
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.descripcionCorta }}</td>
+          <td>{{ (p.keywords ?? []).join(', ') || '-' }}</td>
+          <td>{{ p.stock ?? 0 }}</td>
+          <td>${{ (p.precio ?? 0) | number:'1.2-2' }}</td>
+        </tr>
+
+        <tr *ngIf="pagedProducts().length === 0">
+          <td colspan="7" style="text-align:center; opacity:.75;">
+            No se encontraron productos para esos filtros.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      style="display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top: 12px;"
+    >
+      <select
+        [ngModel]="pageSize()"
+        (ngModelChange)="pageSize.set(+$event); page.set(1)"
+      >
+        <option [ngValue]="5">5 por página</option>
+        <option [ngValue]="10">10 por página</option>
+        <option [ngValue]="20">20 por página</option>
+        <option [ngValue]="50">50 por página</option>
+      </select>
+
+      <div style="font-size:12px; opacity:.8;">
+        Mostrando {{ pagedProducts().length }} de {{ totalFiltered() }}
+      </div>
+
+      <button (click)="goPrev()" [disabled]="page() <= 1">Anterior</button>
+
+      <div style="font-size: 13px;">
+        Página {{ page() }} / {{ totalPages() }}
+      </div>
+
+      <button (click)="goNext()" [disabled]="page() >= totalPages()">Siguiente</button>
+    </div>
+  </div>
+</section>

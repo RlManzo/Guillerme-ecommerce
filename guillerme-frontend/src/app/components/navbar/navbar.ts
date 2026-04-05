@@ -1,4 +1,4 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, HostListener, computed } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
@@ -33,8 +33,12 @@ export class Navbar {
   readonly isDesktop = signal(window.innerWidth > 768);
 
   isLogged = this.auth.isLogged;
-  email = this.auth.email;
-  isAdmin = this.auth.isAdmin;
+email = this.auth.email;
+isAdmin = this.auth.isAdmin;
+isOperador = this.auth.isOperador;
+
+isAdminOrOperador = computed(() => this.isAdmin() || this.isOperador());
+isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
 
   toggleMenu() {
     this.menuOpen.update(v => !v);

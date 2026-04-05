@@ -980,3 +980,29 @@
     white-space: nowrap;
   }
 }
+
+.navbar-operador {
+  justify-content: space-between; // logo izquierda, user derecha
+
+  .menu-items {
+    display: none; // oculta todo el menú central
+  }
+
+  .carrito {
+    display: none; // por las dudas
+  }
+
+  .user-menu--desktop {
+    margin-left: auto; // empuja a la derecha total
+  }
+}
+
+.navbar-operador {
+  justify-content: flex-start;
+  padding: 0 24px;
+
+  .user-menu--desktop {
+    margin-left: auto;
+    margin-right: 16px;
+  }
+}

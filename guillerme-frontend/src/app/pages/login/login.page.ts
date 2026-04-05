@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../shared/auth/auth.service';
+import { AuthService, MeResponse } from '../../shared/auth/auth.service';
 
 @Component({
   standalone: true,
@@ -75,16 +75,30 @@ export class LoginPage {
       .login({ email: this.email().trim(), password: this.password() })
       .subscribe({
         next: () => {
-          this.loading.set(false);
+          this.auth.me().subscribe({
+            next: (me: MeResponse) => {
+              this.loading.set(false);
 
-          const role = (this.auth.session()?.role ?? '').toUpperCase();
+              const role = (me?.role ?? '').toUpperCase();
 
-          if (role === 'ADMIN') {
-            this.router.navigateByUrl('/admin');
-            return;
-          }
+              if (role === 'ADMIN') {
+                this.router.navigateByUrl('/admin');
+                return;
+              }
 
-          this.router.navigateByUrl('/');
+              if (role === 'OPERADOR') {
+                this.router.navigateByUrl('/admin/cartOrders');
+                return;
+              }
+
+              this.router.navigateByUrl('/');
+            },
+            error: (e: HttpErrorResponse) => {
+              console.error(e);
+              this.loading.set(false);
+              this.router.navigateByUrl('/');
+            },
+          });
         },
         error: (e: HttpErrorResponse) => {
           console.error(e);

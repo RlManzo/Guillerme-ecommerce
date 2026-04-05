@@ -43,6 +43,12 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/auth/verify-email").permitAll()
 
+                        // ventas local
+                        .requestMatchers("/api/admin/local-sales/**").hasAnyRole("ADMIN", "OPERADOR")
+
+                        // búsqueda por barcode para caja
+                        .requestMatchers("/api/admin/products/by-barcode").hasAnyRole("ADMIN", "OPERADOR")
+                        .requestMatchers("/api/admin/products/by-barcode/**").hasAnyRole("ADMIN", "OPERADOR")
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/orders/**").authenticated()

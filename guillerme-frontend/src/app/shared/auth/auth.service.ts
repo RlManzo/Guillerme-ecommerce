@@ -22,6 +22,11 @@ export type LoginDto = {
   password: string;
 };
 
+export type MeResponse = {
+  email: string;
+  role: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -35,6 +40,7 @@ export class AuthService {
 
   readonly role = computed(() => this._session()?.role ?? null);
   readonly isAdmin = computed(() => (this.role() ?? '').toUpperCase() === 'ADMIN');
+  readonly isOperador = computed(() => (this.role() ?? '').toUpperCase() === 'OPERADOR');
 
   register(dto: RegisterDto) {
     return this.http.post<{ message: string }>('/api/auth/register', dto);
@@ -44,6 +50,24 @@ export class AuthService {
     return this.http
       .post<{ token: string }>('/api/auth/login', dto)
       .pipe(tap((r) => this.setToken(r.token, dto.email)));
+  }
+
+  me() {
+    return this.http.get<MeResponse>('/api/auth/me').pipe(
+      tap((me) => {
+        const current = this._session();
+        if (!current) return;
+
+        const updated: UserSession = {
+          ...current,
+          email: me.email ?? current.email,
+          role: me.role ?? current.role,
+        };
+
+        this._session.set(updated);
+        localStorage.setItem('auth.session', JSON.stringify(updated));
+      })
+    );
   }
 
   verifyEmail(token: string) {
@@ -106,10 +130,10 @@ export class AuthService {
   }
 
   requestPasswordReset(email: string) {
-  return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
-}
+    return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
+  }
 
-resetPassword(body: { token: string; newPassword: string }) {
-  return this.http.post<{ message: string }>('/api/auth/reset-password', body);
-}
+  resetPassword(body: { token: string; newPassword: string }) {
+    return this.http.post<{ message: string }>('/api/auth/reset-password', body);
+  }
 }

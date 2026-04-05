@@ -6,6 +6,7 @@ import {
   ViewChild,
   ElementRef,
   OnInit,
+  HostListener,
 } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,6 +21,7 @@ import {
 import { AuthService } from '../../shared/auth/auth.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { downloadLocalSalePdf } from '../../shared/pdf/local-sale-receipt.pdf';
+import { AdminStockLookupComponent } from '../admin-stock-lookup/admin-stock-lookup.component';
 
 type CartItem = {
   productId: number;
@@ -33,7 +35,7 @@ type CartItem = {
 @Component({
   standalone: true,
   selector: 'app-admin-purchases',
-  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe],
+  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe, AdminStockLookupComponent],
   templateUrl: './admin-cart.page.html',
   styleUrl: './admin-cart.page.scss',
 })
@@ -46,10 +48,11 @@ export class AdminCartPage implements OnInit {
 
   @ViewChild('scanInputEl') scanInputEl?: ElementRef<HTMLInputElement>;
 
-  tab = signal<'new' | 'history'>('history');
+  tab = signal<'new' | 'history' | 'stock'>('history');
+
   q = signal('');
   fromDate = signal<string | null>(null);
-toDate = signal<string | null>(null);
+  toDate = signal<string | null>(null);
 
   orderStarted = signal(false);
   scanInput = signal('');
@@ -72,6 +75,10 @@ toDate = signal<string | null>(null);
   // number = venta reabierta en edición
   editingSaleId = signal<number | null>(null);
 
+  // scanner global
+  private scannerBuffer = '';
+  private scannerTimer: ReturnType<typeof setTimeout> | null = null;
+
   ngOnInit(): void {
     if (this.tab() === 'history') {
       this.loadHistory();
@@ -86,15 +93,18 @@ toDate = signal<string | null>(null);
     this.cart().reduce((acc, it) => acc + it.precio * it.qty, 0)
   );
 
-  switchTab(next: 'new' | 'history') {
-    this.tab.set(next);
+  switchTab(next: 'new' | 'history' | 'stock') {
+  this.tab.set(next);
 
-    if (next === 'history') {
-      this.loadHistory();
-    } else {
-      this.selectedSale.set(null);
-    }
+  if (next === 'history') {
+    this.loadHistory();
+  } else if (next === 'new') {
+    this.selectedSale.set(null);
+    this.focusInput();
+  } else {
+    this.selectedSale.set(null);
   }
+}
 
   startOrder() {
     this.tab.set('new');
@@ -104,61 +114,146 @@ toDate = signal<string | null>(null);
     this.cart.set([]);
     this.lastAddedId.set(null);
     this.editingSaleId.set(null);
+    this.scannerBuffer = '';
+    this.clearScannerTimer();
     this.focusInput();
   }
 
   cancelOrder() {
-  const saleId = this.editingSaleId();
+    const saleId = this.editingSaleId();
 
-  // si no estoy editando una venta reabierta, limpiar normal
-  if (saleId == null) {
-    this.orderStarted.set(false);
-    this.scanInput.set('');
-    this.customerName.set('');
-    this.cart.set([]);
-    this.lastAddedId.set(null);
-    this.editingSaleId.set(null);
-    return;
-  }
-
-  if (!confirm(`¿Cancelar la edición de la venta #${saleId}? La venta volverá a FINALIZADA y se descontará nuevamente el stock original.`)) {
-    return;
-  }
-
-  this.sending.set(true);
-
-  this.localSalesApi.close(saleId).subscribe({
-    next: () => {
-      this.sending.set(false);
-
-      this.toast.success(`Venta #${saleId} restaurada a FINALIZADA`);
-
+    if (saleId == null) {
       this.orderStarted.set(false);
       this.scanInput.set('');
       this.customerName.set('');
       this.cart.set([]);
       this.lastAddedId.set(null);
       this.editingSaleId.set(null);
+      this.scannerBuffer = '';
+      this.clearScannerTimer();
+      return;
+    }
 
-      this.switchTab('history');
-      this.openSale(saleId);
-      this.loadHistory();
-    },
-    error: (e) => {
-      console.error(e);
-      this.sending.set(false);
-      this.toast.error(
-        e?.error?.message || 'No se pudo cancelar la edición de la venta'
-      );
-    },
-  });
-}
+    if (
+      !confirm(
+        `¿Cancelar la edición de la venta #${saleId}? La venta volverá a FINALIZADA y se descontará nuevamente el stock original.`
+      )
+    ) {
+      return;
+    }
+
+    this.sending.set(true);
+
+    this.localSalesApi.close(saleId).subscribe({
+      next: () => {
+        this.sending.set(false);
+
+        this.toast.success(`Venta #${saleId} restaurada a FINALIZADA`);
+
+        this.orderStarted.set(false);
+        this.scanInput.set('');
+        this.customerName.set('');
+        this.cart.set([]);
+        this.lastAddedId.set(null);
+        this.editingSaleId.set(null);
+        this.scannerBuffer = '';
+        this.clearScannerTimer();
+
+        this.switchTab('history');
+        this.openSale(saleId);
+        this.loadHistory();
+      },
+      error: (e) => {
+        console.error(e);
+        this.sending.set(false);
+        this.toast.error(
+          e?.error?.message || 'No se pudo cancelar la edición de la venta'
+        );
+      },
+    });
+  }
 
   focusInput() {
     setTimeout(() => {
       this.scanInputEl?.nativeElement.focus();
       this.scanInputEl?.nativeElement.select();
     }, 0);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onGlobalKeydown(event: KeyboardEvent) {
+    if (!this.orderStarted()) return;
+    if (this.loading() || this.sending()) return;
+
+    const target = event.target as HTMLElement | null;
+    const tag = target?.tagName?.toLowerCase();
+
+    // No interceptar si el usuario está escribiendo en otro campo distinto del input de escaneo
+    if (
+      target &&
+      (
+        tag === 'textarea' ||
+        tag === 'select' ||
+        (tag === 'input' && target !== this.scanInputEl?.nativeElement)
+      )
+    ) {
+      return;
+    }
+
+    // Ignorar combinaciones tipo Ctrl/Cmd/Alt
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    // Enter => procesar buffer
+    if (event.key === 'Enter') {
+      const code = this.scannerBuffer.trim() || this.scanInput().trim();
+      if (!code) return;
+
+      event.preventDefault();
+      this.scanInput.set(code);
+      this.scannerBuffer = '';
+      this.clearScannerTimer();
+      this.scanCode();
+      return;
+    }
+
+    // Backspace para edición manual
+    if (event.key === 'Backspace') {
+      this.scannerBuffer = this.scannerBuffer.slice(0, -1);
+      this.scanInput.set(this.scannerBuffer);
+      return;
+    }
+
+    // Ignorar teclas especiales
+    if (event.key.length !== 1) {
+      return;
+    }
+
+    this.scannerBuffer += event.key;
+    this.scanInput.set(this.scannerBuffer);
+    this.restartScannerTimer();
+  }
+
+  private restartScannerTimer() {
+    this.clearScannerTimer();
+
+    // Si el scanner no manda Enter, resolvemos el buffer por timeout corto
+    this.scannerTimer = setTimeout(() => {
+      const code = this.scannerBuffer.trim();
+      if (!code) return;
+
+      this.scanInput.set(code);
+      this.scannerBuffer = '';
+      this.scanCode();
+    }, 120);
+  }
+
+  private clearScannerTimer() {
+    if (this.scannerTimer) {
+      clearTimeout(this.scannerTimer);
+      this.scannerTimer = null;
+    }
   }
 
   scanCode() {
@@ -172,12 +267,16 @@ toDate = signal<string | null>(null);
         this.loading.set(false);
         this.addToCart(p);
         this.scanInput.set('');
+        this.scannerBuffer = '';
+        this.clearScannerTimer();
         this.focusInput();
       },
       error: () => {
         this.loading.set(false);
         this.toast.error('No se encontró producto con ese código');
         this.scanInput.set('');
+        this.scannerBuffer = '';
+        this.clearScannerTimer();
         this.focusInput();
       },
     });
@@ -253,6 +352,8 @@ toDate = signal<string | null>(null);
     this.cart.set([]);
     this.scanInput.set('');
     this.lastAddedId.set(null);
+    this.scannerBuffer = '';
+    this.clearScannerTimer();
     this.focusInput();
   }
 
@@ -292,109 +393,119 @@ toDate = signal<string | null>(null);
 
     const saleId = this.editingSaleId();
 
-    const req$ = saleId == null
-      ? this.localSalesApi.create(body)
-      : this.localSalesApi.update(saleId, body);
+    const req$ =
+      saleId == null
+        ? this.localSalesApi.create(body)
+        : this.localSalesApi.update(saleId, body);
 
     req$.subscribe({
-    next: (res) => {
-            this.localSalesApi.getById(res.saleId).subscribe({
-                next: async (saleDetail) => {
-                this.sending.set(false);
+      next: (res) => {
+        this.localSalesApi.getById(res.saleId).subscribe({
+          next: async (saleDetail) => {
+            this.sending.set(false);
 
-                this.toast.success(
-                    saleId == null
-                    ? `Venta #${res.saleId} generada correctamente`
-                    : `Venta #${res.saleId} actualizada correctamente`
-                );
+            this.toast.success(
+              saleId == null
+                ? `Venta #${res.saleId} generada correctamente`
+                : `Venta #${res.saleId} actualizada correctamente`
+            );
 
-                await this.downloadSalePdf(saleDetail);
+            await this.downloadSalePdf(saleDetail);
 
-                this.cart.set([]);
-                this.scanInput.set('');
-                this.lastAddedId.set(null);
-                this.orderStarted.set(false);
-                this.customerName.set('');
-                this.editingSaleId.set(null);
+            this.cart.set([]);
+            this.scanInput.set('');
+            this.lastAddedId.set(null);
+            this.orderStarted.set(false);
+            this.customerName.set('');
+            this.editingSaleId.set(null);
+            this.scannerBuffer = '';
+            this.clearScannerTimer();
 
-                this.switchTab('history');
-                this.openSale(res.saleId);
-                },
-                error: (e) => {
-                console.error(e);
-                this.sending.set(false);
+            this.switchTab('history');
+            this.openSale(res.saleId);
+          },
+          error: (e) => {
+            console.error(e);
+            this.sending.set(false);
 
-                this.toast.success(
-                    saleId == null
-                    ? `Venta #${res.saleId} generada correctamente`
-                    : `Venta #${res.saleId} actualizada correctamente`
-                );
+            this.toast.success(
+              saleId == null
+                ? `Venta #${res.saleId} generada correctamente`
+                : `Venta #${res.saleId} actualizada correctamente`
+            );
 
-                this.toast.error('La venta se guardó, pero no se pudo descargar el PDF');
+            this.toast.error('La venta se guardó, pero no se pudo descargar el PDF');
 
-                this.cart.set([]);
-                this.scanInput.set('');
-                this.lastAddedId.set(null);
-                this.orderStarted.set(false);
-                this.customerName.set('');
-                this.editingSaleId.set(null);
+            this.cart.set([]);
+            this.scanInput.set('');
+            this.lastAddedId.set(null);
+            this.orderStarted.set(false);
+            this.customerName.set('');
+            this.editingSaleId.set(null);
+            this.scannerBuffer = '';
+            this.clearScannerTimer();
 
-                this.switchTab('history');
-                this.openSale(res.saleId);
-                },
-            });
-            },
+            this.switchTab('history');
+            this.openSale(res.saleId);
+          },
+        });
+      },
+      error: (e) => {
+        console.error(e);
+        this.sending.set(false);
+        this.toast.error(e?.error?.message || 'No se pudo guardar la venta');
+      },
     });
   }
 
   loadHistory() {
-  this.historyLoading.set(true);
+    this.historyLoading.set(true);
 
-  this.localSalesApi
-    .list({
-      q: this.q().trim() || undefined,
-      from: this.toIsoDateStart(this.fromDate()),
-      to: this.toIsoDateEnd(this.toDate()),
-      page: this.page(),
-      size: this.size(),
-      sort: 'createdAt,desc',
-    })
-    .subscribe({
-      next: (r) => {
-        this.historyLoading.set(false);
-        this.historyRows.set(r?.content ?? []);
-        this.totalPages.set(r?.totalPages ?? 0);
-        this.totalElements.set(r?.totalElements ?? 0);
-      },
-      error: (e) => {
-        console.error(e);
-        this.historyLoading.set(false);
-        this.toast.error('No se pudo cargar el historial');
-      },
-    });
-}
+    this.localSalesApi
+      .list({
+        q: this.q().trim() || undefined,
+        from: this.toIsoDateStart(this.fromDate()),
+        to: this.toIsoDateEnd(this.toDate()),
+        page: this.page(),
+        size: this.size(),
+        sort: 'createdAt,desc',
+      })
+      .subscribe({
+        next: (r) => {
+          this.historyLoading.set(false);
+          this.historyRows.set(r?.content ?? []);
+          this.totalPages.set(r?.totalPages ?? 0);
+          this.totalElements.set(r?.totalElements ?? 0);
+        },
+        error: (e) => {
+          console.error(e);
+          this.historyLoading.set(false);
+          this.toast.error('No se pudo cargar el historial');
+        },
+      });
+  }
 
-applyHistoryFilters() {
-  this.page.set(0);
-  this.selectedSale.set(null);
-  this.loadHistory();
-}
+  applyHistoryFilters() {
+    this.page.set(0);
+    this.selectedSale.set(null);
+    this.loadHistory();
+  }
 
-resetHistoryFilters() {
-  this.q.set('');
-  this.fromDate.set(null);
-  this.toDate.set(null);
-  this.page.set(0);
-  this.selectedSale.set(null);
-  this.loadHistory();
-}
+  resetHistoryFilters() {
+    this.q.set('');
+    this.fromDate.set(null);
+    this.toDate.set(null);
+    this.page.set(0);
+    this.selectedSale.set(null);
+    this.loadHistory();
+  }
 
-changeHistorySize(v: number) {
-  this.size.set(Number(v || 10));
-  this.page.set(0);
-  this.selectedSale.set(null);
-  this.loadHistory();
-}
+  changeHistorySize(v: number) {
+    this.size.set(Number(v || 10));
+    this.page.set(0);
+    this.selectedSale.set(null);
+    this.loadHistory();
+  }
 
   openSale(id: number) {
     this.selectedSale.set(null);
@@ -437,7 +548,11 @@ changeHistorySize(v: number) {
     const sale = this.selectedSale();
     if (!sale) return;
 
-    if (!confirm(`¿Reabrir la venta #${sale.id}? Se devolverá el stock para volver a editarla.`)) {
+    if (
+      !confirm(
+        `¿Reabrir la venta #${sale.id}? Se devolverá el stock para volver a editarla.`
+      )
+    ) {
       return;
     }
 
@@ -453,13 +568,15 @@ changeHistorySize(v: number) {
             this.customerName.set(d.customerName ?? '');
             this.scanInput.set('');
             this.lastAddedId.set(null);
+            this.scannerBuffer = '';
+            this.clearScannerTimer();
 
             const items = d.items.map((it) => ({
               productId: it.productId,
               nombre: it.productNombre,
               barcode: it.barcode,
               precio: Number(it.unitPrice ?? 0),
-              stock: 999999, // mejorable luego si querés traer stock actual real
+              stock: 999999,
               qty: Number(it.qty ?? 1),
             }));
 
@@ -526,17 +643,17 @@ changeHistorySize(v: number) {
   }
 
   downloadSalePdf(sale: LocalSaleDetailDto | null) {
-  if (!sale) return;
-  downloadLocalSalePdf(sale);
-}
+    if (!sale) return;
+    downloadLocalSalePdf(sale);
+  }
 
-toIsoDateStart(d: string | null): string | undefined {
-  if (!d) return undefined;
-  return new Date(d + 'T00:00:00').toISOString();
-}
+  toIsoDateStart(d: string | null): string | undefined {
+    if (!d) return undefined;
+    return new Date(d + 'T00:00:00').toISOString();
+  }
 
-toIsoDateEnd(d: string | null): string | undefined {
-  if (!d) return undefined;
-  return new Date(d + 'T23:59:59').toISOString();
-}
+  toIsoDateEnd(d: string | null): string | undefined {
+    if (!d) return undefined;
+    return new Date(d + 'T23:59:59').toISOString();
+  }
 }

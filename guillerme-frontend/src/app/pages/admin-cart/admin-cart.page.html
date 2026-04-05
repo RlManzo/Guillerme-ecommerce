@@ -2,22 +2,30 @@
   <h1>Ventas LOCAL</h1>
 
   <div class="tabs">
-    <button
-      type="button"
-      [class.active]="tab() === 'new'"
-      (click)="switchTab('new')"
-    >
-      Nueva venta
-    </button>
+  <button
+    type="button"
+    [class.active]="tab() === 'new'"
+    (click)="switchTab('new')"
+  >
+    Nueva venta
+  </button>
 
-    <button
-      type="button"
-      [class.active]="tab() === 'history'"
-      (click)="switchTab('history')"
-    >
-      Historial de ventas
-    </button>
-  </div>
+  <button
+    type="button"
+    [class.active]="tab() === 'history'"
+    (click)="switchTab('history')"
+  >
+    Historial de ventas
+  </button>
+
+  <button
+    type="button"
+    [class.active]="tab() === 'stock'"
+    (click)="switchTab('stock')"
+  >
+    Consultar stock
+  </button>
+</div>
 
   <!-- NUEVA VENTA -->
   <ng-container *ngIf="tab() === 'new'">
@@ -406,3 +414,7 @@
     </div>
   </ng-container>
 </div>
+
+<ng-container *ngIf="tab() === 'stock'">
+  <app-admin-stock-lookup></app-admin-stock-lookup>
+</ng-container>

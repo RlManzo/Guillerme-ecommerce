@@ -1,0 +1,153 @@
+:host {
+  display: block;
+}
+
+/* PANEL */
+.panel {
+  background: #fff;
+  border: 1px solid rgba(28, 45, 70, 0.1);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(28, 45, 70, 0.06);
+}
+
+/* FILTROS */
+.filters-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0 14px;
+
+  input {
+    min-width: 260px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-family: 'Inter', sans-serif;
+  }
+
+  select {
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    font-family: 'Inter', sans-serif;
+  }
+
+  button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn-search {
+    background: #1976d2;
+    color: white;
+
+    &:hover {
+      background: #125aa0;
+    }
+  }
+
+  .btn-clear {
+    background: #e0e0e0;
+
+    &:hover {
+      background: #cfcfcf;
+    }
+  }
+}
+
+/* TABLA */
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border: 1px solid rgba(28, 45, 70, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+
+  th,
+  td {
+    padding: 12px 12px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(28, 45, 70, 0.1);
+    font-family: 'Inter', sans-serif;
+  }
+
+  th + th,
+  td + td {
+    border-left: 1px solid rgba(28, 45, 70, 0.1);
+  }
+
+  thead th {
+    background: rgba(69, 172, 180, 0.08);
+    font-weight: 900;
+    font-size: 13px;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+/* IMÁGENES */
+.img-grid {
+  width: 48px !important;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* TEXTO AUXILIAR */
+.hint {
+  font-family: 'Inter', sans-serif;
+  margin: 0 0 10px;
+  opacity: 0.8;
+}
+
+/* PAGINADOR */
+select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+button {
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .filters-bar {
+    input {
+      width: 100%;
+    }
+  }
+
+  .admin-table {
+    font-size: 12px;
+  }
+}
+
+/* ancho final */
+.container {
+  max-width: 1300px !important;
+  margin: 0 auto;
+  padding: 20px;
+}
