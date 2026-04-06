@@ -159,6 +159,22 @@
         </div>
 
         <div class="mb-3">
+          <label class="form-label">Código postal <span class="req">*</span></label>
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vCodigoPostal()) }"
+            [ngModel]="codigoPostal()"
+            (ngModelChange)="onCodigoPostalChange($event)"
+            name="codigoPostal"
+            autocomplete="postal-code"
+            placeholder="Ej: 1744 o B1708"
+          />
+          <div class="invalid-feedback" *ngIf="showErr(vCodigoPostal())">
+            Ingresá un código postal válido.
+          </div>
+        </div>
+
+        <div class="mb-3">
           <label class="form-label">Dirección <span class="req">*</span></label>
           <input
             class="form-control auth-input"

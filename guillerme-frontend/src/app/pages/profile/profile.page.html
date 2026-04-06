@@ -114,7 +114,7 @@
               </div>
               <div class="field-help warn" *ngIf="!documento()">
                 Te recomendamos completar tu documento para agilizar tus pedidos.
-                </div>
+              </div>
             </div>
 
             <div class="mb-3">
@@ -133,21 +133,45 @@
               </div>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label">Dirección <span class="req">*</span></label>
-              <input
-                class="form-control auth-input"
-                [ngClass]="{ 'is-invalid': showErr(vDireccion()) }"
-                [ngModel]="direccion()"
-                (ngModelChange)="direccion.set($event)"
-                name="direccion"
-                autocomplete="street-address"
-                placeholder="Ej: Buenos Aires - Moreno - Calle Siempreviva 183"
-              />
-              <div class="invalid-feedback" *ngIf="showErr(vDireccion())">
-                Completá una dirección válida.
-              </div>
-            </div>
+           
+
+           <div class="row align-items-start">
+  <div class="col-md-8 mb-3">
+    <label class="form-label">Dirección <span class="req">*</span></label>
+    <input
+      class="form-control auth-input"
+      [ngClass]="{ 'is-invalid': showErr(vDireccion()) }"
+      [ngModel]="direccionLinea()"
+      (ngModelChange)="direccionLinea.set($event)"
+      name="direccionLinea"
+      autocomplete="street-address"
+      placeholder="Ej: general manuel belgrano 1371"
+    />
+    <div class="invalid-feedback" *ngIf="showErr(vDireccion())">
+      Completá una dirección válida.
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-3">
+    <label class="form-label">CP <span class="req">*</span></label>
+    <input
+      class="form-control auth-input"
+      [ngClass]="{ 'is-invalid': showErr(vCodigoPostal()) }"
+      [ngModel]="codigoPostal()"
+      (ngModelChange)="onCodigoPostalChange($event)"
+      name="codigoPostal"
+      autocomplete="postal-code"
+      placeholder="1744"
+    />
+    <div class="invalid-feedback" *ngIf="showErr(vCodigoPostal())">
+      Ingresá un CP válido.
+    </div>
+  </div>
+</div>
+
+
+            
+           
 
             <div class="profile-actions">
               <button

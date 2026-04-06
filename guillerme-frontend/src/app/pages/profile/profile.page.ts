@@ -28,11 +28,15 @@ export class ProfilePage {
   apellido = signal('');
   documento = signal('');
   telefono = signal('');
-  direccion = signal('');
+
+  codigoPostal = signal('');
+  direccionLinea = signal('');
+  direccionOriginal = signal('');
 
   private nameRx = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
   private documentoRx = /^[0-9]{7,12}$/;
   private phoneRx = /^[0-9+\s()-]{6,25}$/;
+  private codigoPostalRx = /^[A-Za-z0-9\s-]{4,10}$/;
 
   vNombre = computed(() =>
     this.nombre().trim().length > 0 && this.nameRx.test(this.nombre().trim())
@@ -43,17 +47,22 @@ export class ProfilePage {
   );
 
   vDocumento = computed(() => {
-  const d = this.documento().trim();
-  if (!d) return true; // ahora es opcional
-  return this.documentoRx.test(d);
-});
+    const d = this.documento().trim();
+    if (!d) return true;
+    return this.documentoRx.test(d);
+  });
 
   vTelefono = computed(() =>
     this.phoneRx.test(this.telefono().trim())
   );
 
+  vCodigoPostal = computed(() => {
+    const cp = this.codigoPostal().trim();
+    return this.codigoPostalRx.test(cp);
+  });
+
   vDireccion = computed(() =>
-    this.direccion().trim().length >= 6
+    this.direccionLinea().trim().length >= 6
   );
 
   formValid = computed(() =>
@@ -61,6 +70,7 @@ export class ProfilePage {
     this.vApellido() &&
     this.vDocumento() &&
     this.vTelefono() &&
+    this.vCodigoPostal() &&
     this.vDireccion()
   );
 
@@ -77,6 +87,47 @@ export class ProfilePage {
     this.documento.set(onlyDigits);
   }
 
+  onCodigoPostalChange(v: string) {
+    const normalized = String(v ?? '')
+      .replace(/[^A-Za-z0-9\s-]/g, '')
+      .toUpperCase();
+    this.codigoPostal.set(normalized);
+  }
+
+  private splitDireccion(raw: string | null | undefined) {
+    const full = (raw ?? '').trim();
+    if (!full) {
+      this.codigoPostal.set('');
+      this.direccionLinea.set('');
+      return;
+    }
+
+    const match = full.match(/^(.*?)(?:\s*-\s*)CP\s+([A-Za-z0-9-]+)(?:\s*-\s*)(.*)$/i);
+
+    if (match) {
+      const prefijo = (match[1] ?? '').trim();
+      const cp = (match[2] ?? '').trim().toUpperCase();
+      const resto = (match[3] ?? '').trim();
+
+      this.codigoPostal.set(cp);
+      this.direccionLinea.set(
+        [prefijo, resto].filter(Boolean).join(' - ')
+      );
+      return;
+    }
+
+    this.codigoPostal.set('');
+    this.direccionLinea.set(full);
+  }
+
+  private buildDireccionFinal(): string {
+    const cp = this.codigoPostal().trim().toUpperCase();
+    const dir = this.direccionLinea().trim();
+
+    if (!cp) return dir;
+    return `CP ${cp} - ${dir}`;
+  }
+
   loadProfile() {
     this.loading.set(true);
     this.error.set(null);
@@ -90,7 +141,10 @@ export class ProfilePage {
         this.apellido.set(res.apellido ?? '');
         this.documento.set(res.documento ?? '');
         this.telefono.set(res.telefono ?? '');
-        this.direccion.set(res.direccion ?? '');
+
+        const direccion = res.direccion ?? '';
+        this.direccionOriginal.set(direccion);
+        this.splitDireccion(direccion);
       },
       error: (e: HttpErrorResponse) => {
         console.error(e);
@@ -117,7 +171,7 @@ export class ProfilePage {
       apellido: this.apellido().trim(),
       documento: this.documento().trim(),
       telefono: this.telefono().trim(),
-      direccion: this.direccion().trim(),
+      direccion: this.buildDireccionFinal(),
     }).subscribe({
       next: (res) => {
         this.saving.set(false);
@@ -128,7 +182,10 @@ export class ProfilePage {
         this.apellido.set(res.apellido ?? '');
         this.documento.set(res.documento ?? '');
         this.telefono.set(res.telefono ?? '');
-        this.direccion.set(res.direccion ?? '');
+
+        const direccion = res.direccion ?? '';
+        this.direccionOriginal.set(direccion);
+        this.splitDireccion(direccion);
       },
       error: (e: HttpErrorResponse) => {
         console.error(e);

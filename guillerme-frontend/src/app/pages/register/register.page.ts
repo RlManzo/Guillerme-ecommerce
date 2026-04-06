@@ -6,9 +6,7 @@ import { AuthService } from '../../shared/auth/auth.service';
 import {
   PROVINCIAS_ARGENTINA,
   getLocalidadesByProvincia,
-  type LocalidadOption,
 } from '../../shared/catalogs/argentina-locations.catalog';
-
 
 @Component({
   standalone: true,
@@ -31,6 +29,7 @@ export class RegisterPage {
   provincia = signal('');
   localidad = signal('');
   otraLocalidad = signal('');
+  codigoPostal = signal('');
   direccionLinea = signal('');
 
   email = signal('');
@@ -60,17 +59,16 @@ export class RegisterPage {
 
   readonly provincias = PROVINCIAS_ARGENTINA;
 
-readonly localidadesDisponibles = computed(() => {
-  return getLocalidadesByProvincia(this.provincia().trim());
-});
+  readonly localidadesDisponibles = computed(() => {
+    return getLocalidadesByProvincia(this.provincia().trim());
+  });
 
   private nameRx = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
   private phoneRx = /^[0-9]{6,15}$/;
   private documentoRx = /^[0-9]{7,12}$/;
+  private codigoPostalRx = /^[A-Za-z0-9\s-]{4,10}$/;
   private emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   private passRx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-  
 
   readonly isOtraLocalidad = computed(() => this.localidad() === 'Otra');
 
@@ -100,6 +98,10 @@ readonly localidadesDisponibles = computed(() => {
     return true;
   });
 
+  vCodigoPostal = computed(() =>
+    this.codigoPostalRx.test(this.codigoPostal().trim())
+  );
+
   vDireccion = computed(() =>
     this.direccionLinea().trim().length >= 6
   );
@@ -126,6 +128,7 @@ readonly localidadesDisponibles = computed(() => {
     this.vTelefono() &&
     this.vProvincia() &&
     this.vLocalidad() &&
+    this.vCodigoPostal() &&
     this.vDireccion() &&
     this.vEmail() &&
     this.vPassword() &&
@@ -144,6 +147,13 @@ readonly localidadesDisponibles = computed(() => {
   onTelefonoNumeroChange(v: string) {
     const onlyDigits = String(v ?? '').replace(/\D/g, '');
     this.telefonoNumero.set(onlyDigits);
+  }
+
+  onCodigoPostalChange(v: string) {
+    const normalized = String(v ?? '')
+      .replace(/[^A-Za-z0-9\s-]/g, '')
+      .toUpperCase();
+    this.codigoPostal.set(normalized);
   }
 
   onProvinciaChange(v: string) {
@@ -182,6 +192,7 @@ readonly localidadesDisponibles = computed(() => {
     const direccion = [
       this.provincia().trim(),
       localidadFinal,
+      `CP ${this.codigoPostal().trim()}`,
       this.direccionLinea().trim(),
     ]
       .filter(Boolean)
