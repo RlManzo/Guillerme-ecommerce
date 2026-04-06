@@ -446,9 +446,9 @@ public class AdminMailService {
                 + "<div style=\"color:#EA5534;font-weight:700;margin-bottom:6px;\">Dirección de facturación</div>"
                 + "<div style=\"border:1px solid #e6e6e6;padding:10px;line-height:1.45;\">"
                 + safeNombre + " " + safeApellido + "<br/>"
-                + (safeDocumento.isBlank() ? "" : "Documento: " + safeDocumento + "<br/>")
-                + (safeDireccion.isBlank() ? "" : safeDireccion + "<br/>")
-                + (safeTelefono.isBlank() ? "" : safeTelefono + "<br/>")
+                + (safeDocumento.isBlank() ? "" : "DNI: " + safeDocumento + "<br/>")
+                + (safeDireccion.isBlank() ? "" : "Direccion: " + safeDireccion + "<br/>")
+                + (safeTelefono.isBlank() ? "" : "Tel: " + safeTelefono + "<br/>")
                 + safeEmail
                 + "</div>"
                 + "</div>"
