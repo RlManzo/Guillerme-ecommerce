@@ -52,6 +52,7 @@ public class OrderService {
         o.setCustomerDireccion(customer.getDireccion());
         o.setComment(req.comment);
         o = orderRepo.save(o);
+        o.setCustomerDocumento(customer.getDocumento());
 
         // 3) items
         for (var it : items) {

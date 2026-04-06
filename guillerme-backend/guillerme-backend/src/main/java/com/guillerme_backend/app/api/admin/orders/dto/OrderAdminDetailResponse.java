@@ -16,6 +16,7 @@ public class OrderAdminDetailResponse {
     public String customerApellido;
     public String customerTelefono;
     public String customerDireccion;
+    public String customerDocumento;
 
     public String comment;
     public List<Item> items;

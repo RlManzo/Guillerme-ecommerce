@@ -73,6 +73,12 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
     this.router.navigateByUrl('/');
   }
 
+  goProfile() {
+  this.closeUserMenu();
+  this.closeMenu();
+  this.router.navigateByUrl('/perfil');
+}
+
   goOrders() {
     this.closeUserMenu();
     this.closeMenu();

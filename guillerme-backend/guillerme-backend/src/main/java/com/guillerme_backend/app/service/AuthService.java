@@ -50,19 +50,25 @@ public class AuthService {
     @Transactional
     public void register(RegisterRequest req) {
 
-        if (userRepository.existsByEmail(req.email)) {
+        String email = req.email == null ? "" : req.email.trim().toLowerCase();
+        String documento = req.documento == null ? "" : req.documento.trim();
+
+        if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email ya registrado");
+        }
+
+        if (customerRepository.existsByDocumento(documento)) {
+            throw new IllegalArgumentException("Documento ya registrado");
         }
 
         String token = UUID.randomUUID().toString();
 
         User u = new User();
-        u.setEmail(req.email.trim().toLowerCase());
+        u.setEmail(email);
         u.setPasswordHash(passwordEncoder.encode(req.password));
         u.setRole(Role.USER);
         u.setEnabled(true);
         u.setEmailVerified(false);
-
         u.setVerificationToken(token);
         u.setVerificationTokenExpiresAt(LocalDateTime.now().plusHours(24));
 
@@ -72,6 +78,7 @@ public class AuthService {
         c.setUser(u);
         c.setNombre(req.nombre);
         c.setApellido(req.apellido);
+        c.setDocumento(documento);
         c.setTelefono(req.telefono);
         c.setDireccion(req.direccion);
 

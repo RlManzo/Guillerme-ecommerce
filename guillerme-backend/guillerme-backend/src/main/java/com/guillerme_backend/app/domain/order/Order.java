@@ -37,6 +37,9 @@ public class Order {
     @Column(name = "customer_direccion", columnDefinition = "text")
     private String customerDireccion;
 
+    @Column(name = "customer_documento", length = 20)
+    private String customerDocumento;
+
     @Column(columnDefinition = "text")
     private String comment;
 
@@ -96,4 +99,9 @@ public class Order {
 
     public String getShipmentFileUrl() { return shipmentFileUrl; }
     public void setShipmentFileUrl(String shipmentFileUrl) { this.shipmentFileUrl = shipmentFileUrl; }
+
+    public String getCustomerDocumento() { return customerDocumento; }
+    public void setCustomerDocumento(String customerDocumento) {
+        this.customerDocumento = customerDocumento;
+    }
 }

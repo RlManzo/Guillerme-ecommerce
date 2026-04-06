@@ -12,6 +12,7 @@ import { AdminHomePage } from './pages/admin-home/admin-home.page';
 import { AdminCartPage } from './pages/admin-cart/admin-cart.page';
 import { ResetPasswordPage } from './pages/login/reset-password.page';
 import { ForgotPasswordPage } from './pages/forgot-password/forgot-password.page';
+import { ProfilePage } from './pages/profile/profile.page';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -25,6 +26,7 @@ export const routes: Routes = [
  {path: 'admin/cartOrders', component:AdminCartPage,},
  {path: 'forgot-password', component:ForgotPasswordPage},
  {path: 'reset-password', component:ResetPasswordPage},
+ {path: 'perfil', component:ProfilePage},
  { path: 'productos', component: Productos },
  { path: 'contacto', component: Presupuesto},
   { path: '**', redirectTo: '' }, // SIEMPRE al final

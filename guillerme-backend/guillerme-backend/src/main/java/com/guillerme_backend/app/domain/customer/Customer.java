@@ -27,6 +27,9 @@ public class Customer {
     @Column(nullable=false, length=300)
     private String direccion;
 
+    @Column(name = "documento", length = 20, unique = true)
+    private String documento;
+
     public Long getId() { return id; }
 
     public User getUser() { return user; }
@@ -43,4 +46,12 @@ public class Customer {
 
     public String getDireccion() { return direccion; }
     public void setDireccion(String direccion) { this.direccion = direccion; }
+
+    public String getDocumento() {
+        return documento;
+    }
+
+    public void setDocumento(String documento) {
+        this.documento = documento;
+    }
 }

@@ -6,4 +6,7 @@ import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByUserId(Long userId);
+    boolean existsByDocumento(String documento);
+    boolean existsByDocumentoAndUserIdNot(String documento, Long userId);
+
 }

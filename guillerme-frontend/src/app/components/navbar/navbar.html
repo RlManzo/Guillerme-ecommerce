@@ -316,6 +316,16 @@
           </button>
 
           <div class="user-dropdown" *ngIf="userMenuOpen()">
+
+            <button
+            *ngIf="!isAdmin() && !isOperador()"
+              class="user-item"
+              type="button"
+              (click)="goProfile()"
+            >
+              Mi perfil
+            </button>
+
             <button
               *ngIf="!isAdmin() && !isOperador()"
               class="user-item"

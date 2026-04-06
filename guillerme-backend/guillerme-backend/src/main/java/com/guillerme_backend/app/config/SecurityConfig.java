@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/auth/verify-email").permitAll()
 
+
                         // ventas local
                         .requestMatchers("/api/admin/local-sales/**").hasAnyRole("ADMIN", "OPERADOR")
 
@@ -52,6 +53,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/api/account/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

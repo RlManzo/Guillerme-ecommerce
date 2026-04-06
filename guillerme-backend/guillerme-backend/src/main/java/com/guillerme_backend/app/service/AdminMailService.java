@@ -76,6 +76,7 @@ public class AdminMailService {
                 total,
                 o.getCustomerNombre(),
                 o.getCustomerApellido(),
+                o.getCustomerDocumento(),
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
@@ -127,6 +128,7 @@ public class AdminMailService {
                 total,
                 o.getCustomerNombre(),
                 o.getCustomerApellido(),
+                o.getCustomerDocumento(),
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
@@ -178,6 +180,7 @@ public class AdminMailService {
                 total,
                 o.getCustomerNombre(),
                 o.getCustomerApellido(),
+                o.getCustomerDocumento(),
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
@@ -233,6 +236,7 @@ public class AdminMailService {
                 total,
                 o.getCustomerNombre(),
                 o.getCustomerApellido(),
+                o.getCustomerDocumento(),
                 o.getCustomerDireccion(),
                 o.getCustomerTelefono(),
                 o.getCustomerEmail(),
@@ -286,6 +290,7 @@ public class AdminMailService {
             long total,
             String nombre,
             String apellido,
+            String documento,
             String direccion,
             String telefono,
             String email,
@@ -301,6 +306,7 @@ public class AdminMailService {
 
         String safeNombre = esc(nombre);
         String safeApellido = esc(apellido);
+        String safeDocumento = esc(documento);
         String safeDireccion = esc(direccion);
         String safeTelefono = esc(telefono);
         String safeEmail = esc(email);
@@ -440,6 +446,7 @@ public class AdminMailService {
                 + "<div style=\"color:#EA5534;font-weight:700;margin-bottom:6px;\">Dirección de facturación</div>"
                 + "<div style=\"border:1px solid #e6e6e6;padding:10px;line-height:1.45;\">"
                 + safeNombre + " " + safeApellido + "<br/>"
+                + (safeDocumento.isBlank() ? "" : "Documento: " + safeDocumento + "<br/>")
                 + (safeDireccion.isBlank() ? "" : safeDireccion + "<br/>")
                 + (safeTelefono.isBlank() ? "" : safeTelefono + "<br/>")
                 + safeEmail

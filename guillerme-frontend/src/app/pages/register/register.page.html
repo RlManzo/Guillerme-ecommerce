@@ -51,6 +51,23 @@
         </div>
 
         <div class="mb-3">
+          <label class="form-label">Documento <span class="req">*</span></label>
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vDocumento()) }"
+            [ngModel]="documento()"
+            (ngModelChange)="onDocumentoChange($event)"
+            name="documento"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Ej: 35123456"
+          />
+          <div class="invalid-feedback" *ngIf="showErr(vDocumento())">
+            Ingresá un documento válido (solo números).
+          </div>
+        </div>
+
+        <div class="mb-3">
           <label class="form-label">Teléfono <span class="req">*</span></label>
 
           <div class="phone-row">
@@ -86,6 +103,62 @@
         </div>
 
         <div class="mb-3">
+          <label class="form-label">Provincia <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select
+              class="form-control auth-input"
+              [ngClass]="{ 'is-invalid': showErr(vProvincia()) }"
+              [ngModel]="provincia()"
+              (ngModelChange)="onProvinciaChange($event)"
+              name="provincia"
+            >
+              <option value="" disabled>Seleccionar provincia</option>
+              <option *ngFor="let p of provincias" [value]="p">{{ p }}</option>
+            </select>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="showErr(vProvincia())">
+            Seleccioná una provincia.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Localidad <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select
+              class="form-control auth-input"
+              [ngClass]="{ 'is-invalid': showErr(vLocalidad()) }"
+              [ngModel]="localidad()"
+              (ngModelChange)="onLocalidadChange($event)"
+              name="localidad"
+              [disabled]="!provincia()"
+            >
+              <option value="" disabled>Seleccionar localidad</option>
+              <option *ngFor="let l of localidadesDisponibles()" [value]="l.value">
+                {{ l.label }}
+              </option>
+            </select>
+          </div>
+          <div class="invalid-feedback d-block" *ngIf="showErr(vLocalidad()) && !isOtraLocalidad()">
+            Seleccioná una localidad.
+          </div>
+        </div>
+
+        <div class="mb-3" *ngIf="isOtraLocalidad()">
+          <label class="form-label">Otra localidad <span class="req">*</span></label>
+          <input
+            class="form-control auth-input"
+            [ngClass]="{ 'is-invalid': showErr(vLocalidad()) }"
+            [ngModel]="otraLocalidad()"
+            (ngModelChange)="otraLocalidad.set($event)"
+            name="otraLocalidad"
+            placeholder="Escribí tu localidad"
+          />
+          <div class="invalid-feedback" *ngIf="showErr(vLocalidad())">
+            Escribí una localidad válida.
+          </div>
+        </div>
+
+        <div class="mb-3">
           <label class="form-label">Dirección <span class="req">*</span></label>
           <input
             class="form-control auth-input"
@@ -98,25 +171,6 @@
           />
           <div class="invalid-feedback" *ngIf="showErr(vDireccion())">
             Completá una dirección válida. Ejemplo: Calle Siempreviva 183, Moreno.
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Provincia <span class="req">*</span></label>
-          <div class="select-wrap">
-            <select
-              class="form-control auth-input"
-              [ngClass]="{ 'is-invalid': showErr(vProvincia()) }"
-              [ngModel]="provincia()"
-              (ngModelChange)="provincia.set($event)"
-              name="provincia"
-            >
-              <option value="" disabled>Seleccionar provincia</option>
-              <option *ngFor="let p of provincias" [value]="p">{{ p }}</option>
-            </select>
-          </div>
-          <div class="invalid-feedback d-block" *ngIf="showErr(vProvincia())">
-            Seleccioná una provincia.
           </div>
         </div>
 

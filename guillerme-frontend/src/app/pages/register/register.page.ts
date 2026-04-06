@@ -3,6 +3,12 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/auth/auth.service';
+import {
+  PROVINCIAS_ARGENTINA,
+  getLocalidadesByProvincia,
+  type LocalidadOption,
+} from '../../shared/catalogs/argentina-locations.catalog';
+
 
 @Component({
   standalone: true,
@@ -17,12 +23,14 @@ export class RegisterPage {
 
   nombre = signal('');
   apellido = signal('');
+  documento = signal('');
 
-  // ahora este select representa país / prefijo internacional
   countryCode = signal('+54');
   telefonoNumero = signal('');
 
   provincia = signal('');
+  localidad = signal('');
+  otraLocalidad = signal('');
   direccionLinea = signal('');
 
   email = signal('');
@@ -34,7 +42,6 @@ export class RegisterPage {
 
   loading = signal(false);
   error = signal<string | null>(null);
-
   submitted = signal(false);
 
   readonly countryCodes = [
@@ -51,25 +58,21 @@ export class RegisterPage {
     { label: 'Usa (+1)', value: '+1' },
   ];
 
-  readonly provincias = [
-    'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
-    'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-    'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
-    'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-    'Tierra del Fuego', 'Tucumán',
-  ];
+  readonly provincias = PROVINCIAS_ARGENTINA;
 
-  // -------------------------
-  // Validadores
-  // -------------------------
+readonly localidadesDisponibles = computed(() => {
+  return getLocalidadesByProvincia(this.provincia().trim());
+});
+
   private nameRx = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]+$/;
-
-  // ahora permitimos escribir área + número en el mismo input
-  // se validan solo dígitos, entre 6 y 15
   private phoneRx = /^[0-9]{6,15}$/;
-
+  private documentoRx = /^[0-9]{7,12}$/;
   private emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   private passRx = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  
+
+  readonly isOtraLocalidad = computed(() => this.localidad() === 'Otra');
 
   vNombre = computed(() =>
     this.nombre().trim().length > 0 && this.nameRx.test(this.nombre().trim())
@@ -79,11 +82,23 @@ export class RegisterPage {
     this.apellido().trim().length > 0 && this.nameRx.test(this.apellido().trim())
   );
 
+  vDocumento = computed(() =>
+    this.documentoRx.test(this.documento().trim())
+  );
+
   vTelefono = computed(() =>
     this.phoneRx.test(this.telefonoNumero().trim())
   );
 
   vProvincia = computed(() => !!this.provincia().trim());
+
+  vLocalidad = computed(() => {
+    if (!this.localidad().trim()) return false;
+    if (this.isOtraLocalidad()) {
+      return this.otraLocalidad().trim().length >= 2;
+    }
+    return true;
+  });
 
   vDireccion = computed(() =>
     this.direccionLinea().trim().length >= 6
@@ -107,8 +122,10 @@ export class RegisterPage {
   formValid = computed(() =>
     this.vNombre() &&
     this.vApellido() &&
+    this.vDocumento() &&
     this.vTelefono() &&
     this.vProvincia() &&
+    this.vLocalidad() &&
     this.vDireccion() &&
     this.vEmail() &&
     this.vPassword() &&
@@ -119,10 +136,33 @@ export class RegisterPage {
     return this.submitted() && !ok;
   }
 
+  onDocumentoChange(v: string) {
+    const onlyDigits = String(v ?? '').replace(/\D/g, '');
+    this.documento.set(onlyDigits);
+  }
+
   onTelefonoNumeroChange(v: string) {
-    // permitimos que escriba área + número, pero guardamos solo dígitos
     const onlyDigits = String(v ?? '').replace(/\D/g, '');
     this.telefonoNumero.set(onlyDigits);
+  }
+
+  onProvinciaChange(v: string) {
+    this.provincia.set(v);
+    this.localidad.set('');
+    this.otraLocalidad.set('');
+  }
+
+  onLocalidadChange(v: string) {
+    this.localidad.set(v);
+    if (v !== 'Otra') {
+      this.otraLocalidad.set('');
+    }
+  }
+
+  private buildLocalidadFinal(): string {
+    return this.isOtraLocalidad()
+      ? this.otraLocalidad().trim()
+      : this.localidad().trim();
   }
 
   submit() {
@@ -137,17 +177,26 @@ export class RegisterPage {
     this.loading.set(true);
 
     const telefono = `${this.countryCode()} ${this.telefonoNumero().trim()}`.trim();
-    const direccion = `${this.provincia().trim()} - ${this.direccionLinea().trim()}`.trim();
+    const localidadFinal = this.buildLocalidadFinal();
+
+    const direccion = [
+      this.provincia().trim(),
+      localidadFinal,
+      this.direccionLinea().trim(),
+    ]
+      .filter(Boolean)
+      .join(' - ');
 
     this.auth
       .register({
         nombre: this.nombre().trim(),
         apellido: this.apellido().trim(),
+        documento: this.documento().trim(),
         telefono,
         direccion,
         email: this.email().trim(),
         password: this.password(),
-      })
+      } as any)
       .subscribe({
         next: () => {
           this.loading.set(false);

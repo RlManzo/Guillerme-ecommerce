@@ -36,6 +36,7 @@ export interface AdminOrderDetailDto {
   customerApellido: string;
   customerTelefono?: string | null;
   customerDireccion?: string | null;
+  customerDocumento?: string | null;
 
   comment?: string | null;
   items: AdminOrderItemDto[];

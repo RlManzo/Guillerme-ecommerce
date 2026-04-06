@@ -229,12 +229,16 @@
 
           <div class="mb-3">
             <div class="fw-semibold">Cliente</div>
+
             <div class="text-muted">
-              {{ selected()!.customerNombre }} {{ selected()!.customerApellido }} ·
-              {{ selected()!.customerEmail }}
+              <strong>Nombre y Apellido:</strong> {{ selected()!.customerNombre }} {{ selected()!.customerApellido }}
             </div>
-            <div class="text-muted">{{ selected()!.customerTelefono }}</div>
-            <div class="text-muted">{{ selected()!.customerDireccion }}</div>
+
+            <div class="text-muted"><strong>DNI:</strong> {{ selected()!.customerDocumento || '-' }}</div>
+            <div class="text-muted"><strong>Direccion:</strong> {{ selected()!.customerDireccion }}</div>
+            <div class="text-muted"><strong>Mail:</strong> {{ selected()!.customerEmail }}</div>
+            <div class="text-muted"><strong>Tel:</strong> {{ selected()!.customerTelefono }}</div>
+            
           </div>
 
           <div class="mt-3">

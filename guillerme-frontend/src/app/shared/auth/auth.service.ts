@@ -13,6 +13,7 @@ export type RegisterDto = {
   password: string;
   nombre: string;
   apellido: string;
+  documento: string;
   telefono: string;
   direccion: string;
 };

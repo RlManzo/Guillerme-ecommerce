@@ -175,12 +175,14 @@ theme: 'grid',
 
   const nombre = `${order?.customerNombre ?? ''} ${order?.customerApellido ?? ''}`.trim();
   const email = (order?.customerEmail ?? order?.userEmail ?? '').toString();
+  const documento = (order?.customerDocumento ?? '').toString();
   const tel = (order?.customerTelefono ?? '').toString();
   const dir = (order?.customerDireccion ?? '').toString();
 
   const lines = [
     `Nombre: ${nombre || '-'}`,
     `Email: ${email || '-'}`,
+    `Documento: ${documento || '-'}`,
     `Teléfono: ${tel || '-'}`,
     `Dirección: ${dir || '-'}`,
   ];

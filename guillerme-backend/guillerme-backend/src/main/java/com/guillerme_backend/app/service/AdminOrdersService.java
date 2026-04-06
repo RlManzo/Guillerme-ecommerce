@@ -85,6 +85,7 @@ public class AdminOrdersService {
         d.customerApellido = o.getCustomerApellido();
         d.customerTelefono = o.getCustomerTelefono();
         d.customerDireccion = o.getCustomerDireccion();
+        d.customerDocumento = o.getCustomerDocumento();
 
         d.comment = o.getComment();
 

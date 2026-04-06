@@ -21,4 +21,7 @@ public class RegisterRequest {
 
     @NotBlank @Size(max = 300)
     public String direccion;
+
+    @NotBlank
+    public String documento;
 }

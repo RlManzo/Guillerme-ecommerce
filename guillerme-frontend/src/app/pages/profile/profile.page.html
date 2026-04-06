@@ -1,0 +1,166 @@
+<div class="auth-page container">
+  <div class="auth-wrapper">
+    <div class="auth-back">
+      <a routerLink="/" class="back-link">
+        <span class="back-arrow">←</span>
+        Volver al inicio
+      </a>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-brand">
+          <img src="assets/logo-textos.png" alt="Guillerme" />
+        </div>
+
+        <div class="auth-headings">
+          <h1 class="auth-title">Mi perfil</h1>
+          <p class="auth-sub">Completá y mantené actualizados tus datos</p>
+        </div>
+      </div>
+
+      <div class="alert alert-danger mt-3" *ngIf="error()">
+        {{ error() }}
+      </div>
+
+      <div class="alert alert-success mt-3" *ngIf="success()">
+        {{ success() }}
+      </div>
+
+      <div class="auth-loading" *ngIf="loading()">
+        Cargando datos...
+      </div>
+
+      <form
+        class="profile-form"
+        *ngIf="!loading()"
+        (submit)="$event.preventDefault(); submit()"
+      >
+        <div class="profile-grid">
+          <div class="profile-left">
+            <div class="profile-box">
+              <div class="profile-box-title">Cuenta</div>
+
+              <label class="form-label">Email</label>
+              <input
+                class="form-control auth-input"
+                [ngModel]="email()"
+                name="email"
+                disabled
+                readonly
+              />
+
+              <div class="field-help">
+                El email no se puede modificar desde esta pantalla.
+              </div>
+            </div>
+
+            <div class="profile-box">
+              <div class="profile-box-title">Importante</div>
+
+              <p class="profile-box-text">
+                Mantené estos datos actualizados porque se van a usar para tus
+                pedidos y para identificarte como cliente.
+              </p>
+            </div>
+          </div>
+
+          <div class="profile-right">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre <span class="req">*</span></label>
+                <input
+                  class="form-control auth-input"
+                  [ngClass]="{ 'is-invalid': showErr(vNombre()) }"
+                  [ngModel]="nombre()"
+                  (ngModelChange)="nombre.set($event)"
+                  name="nombre"
+                  autocomplete="given-name"
+                />
+                <div class="invalid-feedback" *ngIf="showErr(vNombre())">
+                  Ingresá un nombre válido.
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Apellido <span class="req">*</span></label>
+                <input
+                  class="form-control auth-input"
+                  [ngClass]="{ 'is-invalid': showErr(vApellido()) }"
+                  [ngModel]="apellido()"
+                  (ngModelChange)="apellido.set($event)"
+                  name="apellido"
+                  autocomplete="family-name"
+                />
+                <div class="invalid-feedback" *ngIf="showErr(vApellido())">
+                  Ingresá un apellido válido.
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Documento <span class="req">*</span></label>
+              <input
+                class="form-control auth-input"
+                [ngClass]="{ 'is-invalid': showErr(vDocumento()) }"
+                [ngModel]="documento()"
+                (ngModelChange)="onDocumentoChange($event)"
+                name="documento"
+                inputmode="numeric"
+                placeholder="Ej: 35123456"
+              />
+              <div class="invalid-feedback" *ngIf="showErr(vDocumento())">
+                Ingresá un documento válido (7 a 12 dígitos).
+              </div>
+              <div class="field-help warn" *ngIf="!documento()">
+                Te recomendamos completar tu documento para agilizar tus pedidos.
+                </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Teléfono <span class="req">*</span></label>
+              <input
+                class="form-control auth-input"
+                [ngClass]="{ 'is-invalid': showErr(vTelefono()) }"
+                [ngModel]="telefono()"
+                (ngModelChange)="telefono.set($event)"
+                name="telefono"
+                autocomplete="tel"
+                placeholder="Ej: +54 11 4567 8910"
+              />
+              <div class="invalid-feedback" *ngIf="showErr(vTelefono())">
+                Ingresá un teléfono válido.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Dirección <span class="req">*</span></label>
+              <input
+                class="form-control auth-input"
+                [ngClass]="{ 'is-invalid': showErr(vDireccion()) }"
+                [ngModel]="direccion()"
+                (ngModelChange)="direccion.set($event)"
+                name="direccion"
+                autocomplete="street-address"
+                placeholder="Ej: Buenos Aires - Moreno - Calle Siempreviva 183"
+              />
+              <div class="invalid-feedback" *ngIf="showErr(vDireccion())">
+                Completá una dirección válida.
+              </div>
+            </div>
+
+            <div class="profile-actions">
+              <button
+                type="submit"
+                class="btn btn-success auth-btn"
+                [disabled]="saving()"
+              >
+                {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
