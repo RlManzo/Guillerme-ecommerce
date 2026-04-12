@@ -3,7 +3,7 @@
 ========================= */
 
 .navbar-fixed {
-  position: sticky !important;
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
@@ -487,7 +487,7 @@
 @media (max-width: 768px) {
 
   nav.navbar-fixed.navbar-mobile {
-    position: sticky !important;
+    
     top: 0 !important;
     z-index: 999 !important;
   }
@@ -831,12 +831,12 @@
 }
 
 @media (max-width: 768px) {
+  @media (max-width: 768px) {
   nav.navbar-fixed.navbar-mobile {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 999 !important;
-    background: var(--crema);
+    position: relative !important; // 🔥 clave
+    top: auto !important;
   }
+}
 
   /* topbar más compacta */
   nav.navbar-fixed.navbar-mobile .topbar {
@@ -1164,3 +1164,4 @@
     gap: 8px;
   }
 }
+
