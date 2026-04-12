@@ -2,6 +2,7 @@ import { Component, computed, signal, inject, effect, AfterViewInit } from '@ang
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ProductsService } from './products.service';
 import { filterProducts } from './search.util';
@@ -10,15 +11,20 @@ import { Product } from './product.model';
 import { ShopStore, Producto } from '../../shared/store/shop.store';
 import { ProductoModal } from '../producto-modal/producto-modal';
 import { ToastService } from '../../shared/service/toast.service';
-
 import { SearchStateService } from '../../shared/search-state.service';
 
-import { ProductsFilterStateService } from '../../shared/products-filter-state.service';
-
-
 type FilterKey = 'all' | 'libreria' | 'combos' | 'varios';
-
 type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA' | 'CHEAPEST' | 'EXPENSIVE';
+
+type BrandKey =
+  | 'all'
+  | 'Filgo'
+  | 'Skycolor'
+  | 'Olami'
+  | 'C-B-X'
+  | 'FW'
+  | 'Keyroad'
+  | 'Ibicraft';
 
 @Component({
   selector: 'app-productos',
@@ -32,43 +38,49 @@ export class Productos implements AfterViewInit {
   public readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
   private readonly searchState = inject(SearchStateService);
-  private readonly productsFilterState = inject(ProductsFilterStateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-
-  // ✅ tabs
   readonly filtro = signal<FilterKey>('all');
-
-  // ✅ query local (sincroniza con el SearchState)
   readonly q = signal<string>('');
-
-  // ✅ paginación (default 10 pero configurable desde UI)
   readonly page = signal(0);
   readonly pageSize = signal(10);
-
-  // ✅ orden
   readonly sortBy = signal<SortBy>('NEWEST');
+  readonly brand = signal<BrandKey>('all');
 
-  // ✅ rango precio (null = sin filtro)
+  readonly brands: BrandKey[] = [
+    'all',
+    'Filgo',
+    'Skycolor',
+    'Olami',
+    'C-B-X',
+    'FW',
+    'Keyroad',
+    'Ibicraft',
+  ];
+
   readonly minPrice = signal<number | null>(null);
   readonly maxPrice = signal<number | null>(null);
 
-  // UI: dropdown precio
-priceOpen = false;
+  priceOpen = false;
 
   constructor() {
-    // sync: header -> productos
     effect(() => {
       this.q.set(this.searchState.query());
       this.page.set(0);
     });
 
-    effect(() => {
-  const cat = this.productsFilterState.category();
-  this.setFilter(cat);   // 'all' | 'libreria' | 'combos' | 'varios'
-  this.page.set(0);
-});
+    this.applyRouteFilters();
 
-    // cargar productos
+    this.route.queryParamMap.subscribe((params) => {
+      const cat = this.parseFilterKey(params.get('cat'));
+      const brand = this.parseBrandKey(params.get('brand'));
+
+      this.filtro.set(cat);
+      this.brand.set(cat === 'libreria' ? brand : 'all');
+      this.page.set(0);
+    });
+
     this.productsService.load().subscribe();
   }
 
@@ -91,6 +103,52 @@ priceOpen = false;
     initialValue: [] as Product[],
   });
 
+  private applyRouteFilters() {
+    const params = this.route.snapshot.queryParamMap;
+    const cat = this.parseFilterKey(params.get('cat'));
+    const brand = this.parseBrandKey(params.get('brand'));
+
+    this.filtro.set(cat);
+    this.brand.set(cat === 'libreria' ? brand : 'all');
+    this.page.set(0);
+  }
+
+  private parseFilterKey(value: string | null): FilterKey {
+    const v = this.norm(value);
+    if (v === 'libreria') return 'libreria';
+    if (v === 'combos') return 'combos';
+    if (v === 'varios') return 'varios';
+    return 'all';
+  }
+
+  private parseBrandKey(value: string | null): BrandKey {
+    const brands: BrandKey[] = [
+      'all',
+      'Filgo',
+      'Skycolor',
+      'Olami',
+      'C-B-X',
+      'FW',
+      'Keyroad',
+      'Ibicraft',
+    ];
+
+    const match = brands.find((b) => this.norm(b) === this.norm(value));
+    return match ?? 'all';
+  }
+
+  private updateRouteFilters(cat: FilterKey, brand: BrandKey) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        cat: cat !== 'all' ? cat : null,
+        brand: cat === 'libreria' && brand !== 'all' ? brand : null,
+      },
+      queryParamsHandling: '',
+      replaceUrl: true,
+    });
+  }
+
   // -------------------------
   // Helpers comunes
   // -------------------------
@@ -112,7 +170,6 @@ priceOpen = false;
     return Number.isFinite(n) ? n : 0;
   }
 
-  // ✅ si no tenés createdAt, fallback por id (id más alto = más nuevo)
   private createdKey(p: Product): number {
     const anyP = p as any;
     const dt =
@@ -152,17 +209,15 @@ priceOpen = false;
   }
 
   // -------------------------
-  // Helpers de categoría
+  // Helpers de categoría / marca
   // -------------------------
   private getCategoriasNormalized(p: Product): string[] {
     const raw: any = (p as any).categorias;
 
-    // array -> ok
     if (Array.isArray(raw)) {
       return raw.map((c) => this.norm(c)).filter(Boolean);
     }
 
-    // string -> split por coma
     if (typeof raw === 'string') {
       return raw
         .split(',')
@@ -171,6 +226,31 @@ priceOpen = false;
     }
 
     return [];
+  }
+
+  private getKeywordsNormalized(p: Product): string[] {
+    const raw: any = (p as any).keywords;
+
+    if (Array.isArray(raw)) {
+      return raw.map((k) => this.norm(k)).filter(Boolean);
+    }
+
+    if (typeof raw === 'string') {
+      return raw
+        .split(',')
+        .map((s) => this.norm(s))
+        .filter(Boolean);
+    }
+
+    return [];
+  }
+
+  private hasBrand(p: Product, brand: string): boolean {
+    const wanted = this.norm(brand);
+    if (!wanted || wanted === 'all') return true;
+
+    const keywords = this.getKeywordsNormalized(p);
+    return keywords.some((k) => k === wanted || k.includes(wanted));
   }
 
   private hasCat(p: Product, wanted: string) {
@@ -187,46 +267,50 @@ priceOpen = false;
   };
 
   // -------------------------
-  // Filtro final (tabs + texto + rango + sort)
+  // Filtro final
   // -------------------------
   readonly productosFiltrados = computed(() => {
-  const all = this.productsSig();
-  const f = this.filtro();
-  const q = this.q();
-  const s = this.sortBy();
-  const minP = this.minPrice();
-  const maxP = this.maxPrice();
+    const all = this.productsSig();
+    const f = this.filtro();
+    const q = this.q();
+    const s = this.sortBy();
+    const minP = this.minPrice();
+    const maxP = this.maxPrice();
+    const brand = this.brand();
 
-  // ✅ 0) SOLO ACTIVOS POR ESTADO (default true si viene undefined/null)
-  const activos = all.filter(p => (p.estado ?? true) === true);
+    const activos = all.filter((p) => (p.estado ?? true) === true);
 
-  // 1) tab
-  const byTab = activos.filter(this.tabFilter[f]);
+    const byTab = activos.filter(this.tabFilter[f]);
 
-  // 2) texto
-  const byText = filterProducts(byTab, q);
+    const byBrand = byTab.filter((p) => this.hasBrand(p, brand));
 
-  // 3) rango precio
-  const byPrice = byText.filter((p) => {
-    const price = this.priceOf(p);
-    const okMin = minP == null || price >= minP;
-    const okMax = maxP == null || price <= maxP;
-    return okMin && okMax;
+    const byText = filterProducts(byBrand, q);
+
+    const byPrice = byText.filter((p) => {
+      const price = this.priceOf(p);
+      const okMin = minP == null || price >= minP;
+      const okMax = maxP == null || price <= maxP;
+      return okMin && okMax;
+    });
+
+    const sorted = this.sortProducts(byPrice, s);
+
+    const tp = Math.max(1, Math.ceil(sorted.length / this.pageSize()));
+    if (this.page() > tp - 1) this.page.set(0);
+
+    return sorted;
   });
 
-  // 4) ordenar
-  const sorted = this.sortProducts(byPrice, s);
-
-  // clamp page
-  const tp = Math.max(1, Math.ceil(sorted.length / this.pageSize()));
-  if (this.page() > tp - 1) this.page.set(0);
-
-  return sorted;
-});
-
+  onBrandChange(v: BrandKey) {
+    const nextBrand = (v ?? 'all') as BrandKey;
+    this.brand.set(nextBrand);
+    this.filtro.set('libreria');
+    this.page.set(0);
+    this.updateRouteFilters('libreria', nextBrand);
+  }
 
   // -------------------------
-  // Paginación (slice local)
+  // Paginación
   // -------------------------
   readonly totalPages = computed(() => {
     const total = this.productosFiltrados().length;
@@ -252,6 +336,14 @@ priceOpen = false;
   // -------------------------
   setFilter(f: FilterKey) {
     this.filtro.set(f);
+
+    if (f !== 'libreria') {
+      this.brand.set('all');
+      this.updateRouteFilters(f, 'all');
+    } else {
+      this.updateRouteFilters('libreria', this.brand());
+    }
+
     this.page.set(0);
   }
 
@@ -283,19 +375,21 @@ priceOpen = false;
     this.page.set(0);
   }
 
-  // opcional (UI)
   applyFilters() {
-    // no hace nada porque ya es reactivo
+    // reactivo
   }
 
   clearFilters() {
     this.q.set('');
     this.searchState.setQuery('');
     this.sortBy.set('NEWEST');
+    this.brand.set('all');
     this.minPrice.set(null);
     this.maxPrice.set(null);
     this.pageSize.set(10);
+    this.filtro.set('all');
     this.page.set(0);
+    this.updateRouteFilters('all', 'all');
   }
 
   openDetalle(p: Product) {
@@ -309,11 +403,19 @@ priceOpen = false;
 
   whatsappInfoLink(p: Product) {
     const phone = '543513721017';
+    const categorias = Array.isArray(p.categorias)
+      ? p.categorias.join(', ')
+      : String(p.categorias ?? '-');
+
+    const servicios = Array.isArray(p.servicios)
+      ? p.servicios.join(', ')
+      : String(p.servicios ?? '-');
+
     const text =
       `Hola LKS! Me gustaria saber mas sobre el siguiente articulo:\n\n` +
       `${p.nombre}.\n\n` +
-      `Categoria:\n${(p.categorias ?? []).join(', ') || '-'}.\n\n` +
-      `Servicios:\n${(p.servicios ?? []).join(', ') || '-'}.\n\n` +
+      `Categoria:\n${categorias || '-'}.\n\n` +
+      `Servicios:\n${servicios || '-'}.\n\n` +
       `Detalle:\n${p.infoModal ?? p.descripcionCorta ?? ''}`;
 
     return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
@@ -322,7 +424,7 @@ priceOpen = false;
   }
 
   // =========================
-  // ✅ VIDEO helper (cards + modal)
+  // VIDEO helper
   // =========================
   private isVideoUrl(url?: string | null): boolean {
     const u = (url ?? '').toLowerCase().trim();
@@ -335,24 +437,21 @@ priceOpen = false;
     );
   }
 
-  // para usar desde el HTML
   isVideo(url?: string | null) {
     return this.isVideoUrl(url);
   }
 
-  // ✅ construye lista de medias (img/video) desde tu Product del BE
   private buildMedias(p: any): string[] {
     const raw = [
-      ...(Array.isArray(p?.imagenes) ? p.imagenes : []), // si ya viene armado
+      ...(Array.isArray(p?.imagenes) ? p.imagenes : []),
       p?.imgUrl,
       p?.imgUrl2,
       p?.imgUrl3,
-      p?.img, // fallback legacy
+      p?.img,
     ]
       .map((x: any) => String(x ?? '').trim())
       .filter(Boolean);
 
-    // unique + preserva orden
     return Array.from(new Set(raw));
   }
 
@@ -363,26 +462,18 @@ priceOpen = false;
     return {
       id: p.id,
       nombre: p.nombre,
-
-      // ✅ para la card y para compatibilidad vieja
       img: principal,
-
       info: p.descripcionCorta ?? '',
       infoModal: p.infoModal ?? p.descripcionCorta ?? '',
-
       cat: 'all',
-
       categoria1: (p.servicios?.[0] as any) ?? '',
       categoria2: (p.servicios?.[1] as any) ?? '',
       detalle1: p.variantes?.[0]?.label ?? '',
       detalle2: p.variantes?.[1]?.label ?? '',
-
       categorias: p.categorias ?? [],
       keywords: p.keywords ?? [],
       stock: p.stock ?? 0,
       precio: p.precio ?? 0,
-
-      // ✅ CLAVE: modal va a mostrar img o video según url
       imagenes: medias.length ? medias : [principal].filter(Boolean),
     };
   }

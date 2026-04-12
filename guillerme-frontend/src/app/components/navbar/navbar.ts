@@ -8,9 +8,18 @@ import { ShopStore } from '../../shared/store/shop.store';
 import { AuthService } from '../../shared/auth/auth.service';
 
 import {
-  ProductsFilterStateService,
   ProductsCategory,
 } from '../../shared/products-filter-state.service';
+
+type ProductsBrand =
+  | 'all'
+  | 'Filgo'
+  | 'Skycolor'
+  | 'Olami'
+  | 'C-B-X'
+  | 'FW'
+  | 'Keyroad'
+  | 'Ibicraft';
 
 @Component({
   selector: 'app-navbar',
@@ -24,27 +33,38 @@ export class Navbar {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  private readonly productsFilterState = inject(ProductsFilterStateService);
-
   readonly menuOpen = signal(false);
   readonly userMenuOpen = signal(false);
   readonly productsOpen = signal(false);
   readonly adminOpen = signal(false);
+  readonly libraryOpen = signal(false);
   readonly isDesktop = signal(window.innerWidth > 768);
 
   isLogged = this.auth.isLogged;
-email = this.auth.email;
-isAdmin = this.auth.isAdmin;
-isOperador = this.auth.isOperador;
+  email = this.auth.email;
+  isAdmin = this.auth.isAdmin;
+  isOperador = this.auth.isOperador;
 
-isAdminOrOperador = computed(() => this.isAdmin() || this.isOperador());
-isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
+  isAdminOrOperador = computed(() => this.isAdmin() || this.isOperador());
+  isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
+
+  readonly libraryBrands: ProductsBrand[] = [
+    'Filgo',
+    'Skycolor',
+    'Olami',
+    'C-B-X',
+    'FW',
+    'Keyroad',
+    'Ibicraft',
+  ];
 
   toggleMenu() {
-    this.menuOpen.update(v => !v);
+    this.menuOpen.update((v) => !v);
+
     if (!this.menuOpen()) {
       this.productsOpen.set(false);
       this.adminOpen.set(false);
+      this.libraryOpen.set(false);
     }
   }
 
@@ -52,6 +72,7 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
     this.menuOpen.set(false);
     this.productsOpen.set(false);
     this.adminOpen.set(false);
+    this.libraryOpen.set(false);
   }
 
   openCart() {
@@ -59,7 +80,7 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
   }
 
   toggleUserMenu() {
-    this.userMenuOpen.update(v => !v);
+    this.userMenuOpen.update((v) => !v);
   }
 
   closeUserMenu() {
@@ -74,10 +95,10 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
   }
 
   goProfile() {
-  this.closeUserMenu();
-  this.closeMenu();
-  this.router.navigateByUrl('/perfil');
-}
+    this.closeUserMenu();
+    this.closeMenu();
+    this.router.navigateByUrl('/perfil');
+  }
 
   goOrders() {
     this.closeUserMenu();
@@ -120,6 +141,7 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
   closeProductsMenu() {
     if (window.innerWidth > 768) {
       this.productsOpen.set(false);
+      this.libraryOpen.set(false);
     }
   }
 
@@ -128,7 +150,24 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
 
     ev.preventDefault();
     ev.stopPropagation();
-    this.productsOpen.update(v => !v);
+    this.productsOpen.update((v) => !v);
+
+    if (!this.productsOpen()) {
+      this.libraryOpen.set(false);
+    }
+  }
+
+  toggleLibraryMenu(ev?: Event) {
+    if (window.innerWidth > 768) return;
+
+    ev?.preventDefault();
+    ev?.stopPropagation();
+
+    this.libraryOpen.update((v) => !v);
+  }
+
+  closeLibraryMenu() {
+    this.libraryOpen.set(false);
   }
 
   openAdminMenu() {
@@ -148,7 +187,7 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
 
     ev.preventDefault();
     ev.stopPropagation();
-    this.adminOpen.update(v => !v);
+    this.adminOpen.update((v) => !v);
   }
 
   closeAllMenus() {
@@ -156,30 +195,43 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
     this.adminOpen.set(false);
     this.userMenuOpen.set(false);
     this.menuOpen.set(false);
+    this.libraryOpen.set(false);
   }
 
-  private goToProductsRoute() {
-    this.router.navigate(['/productos']).then(() => {
+  private goToProductsRoute(
+    category: ProductsCategory = 'all',
+    brand: ProductsBrand = 'all'
+  ) {
+    this.router.navigate(['/productos'], {
+      queryParams: {
+        cat: category !== 'all' ? category : null,
+        brand: brand !== 'all' ? brand : null,
+      },
+    }).then(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
   goProducts(cat: ProductsCategory) {
-    this.productsFilterState.setCategory(cat);
     this.closeAllMenus();
-    this.goToProductsRoute();
+    this.goToProductsRoute(cat, 'all');
+  }
+
+  goProductsByBrand(brand: ProductsBrand) {
+    this.closeAllMenus();
+    this.goToProductsRoute('libreria', brand);
   }
 
   resetProductsFilters() {
-    this.productsFilterState.reset();
     this.closeAllMenus();
-    this.goToProductsRoute();
+    this.goToProductsRoute('all', 'all');
   }
 
   @HostListener('document:click')
   onDocClick() {
     this.productsOpen.set(false);
     this.adminOpen.set(false);
+    this.libraryOpen.set(false);
     this.closeUserMenu();
   }
 
@@ -199,20 +251,21 @@ isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
   }
 
   @HostListener('window:resize')
-onResize() {
-  this.isDesktop.set(window.innerWidth > 768);
+  onResize() {
+    this.isDesktop.set(window.innerWidth > 768);
 
-  // si pasa a mobile, cerramos dropdowns admin
-  if (!this.isDesktop()) {
-    this.adminOpen.set(false);
-    this.userMenuOpen.set(false);
+    if (!this.isDesktop()) {
+      this.adminOpen.set(false);
+      this.userMenuOpen.set(false);
+    } else {
+      this.libraryOpen.set(false);
+    }
   }
-}
 
-goAdminHome() {
-  this.closeUserMenu();
-  this.closeMenu();
-  this.adminOpen.set(false);
-  this.router.navigateByUrl('/admin');
-}
+  goAdminHome() {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+    this.router.navigateByUrl('/admin');
+  }
 }

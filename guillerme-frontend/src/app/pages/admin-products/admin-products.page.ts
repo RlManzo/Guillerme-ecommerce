@@ -89,7 +89,7 @@ export class AdminProductsPage implements OnInit {
     'C-B-X',
     'FW',
     'Keyroad',
-    'Wero',
+    'Ibicraft',
 
   ] as const;
 

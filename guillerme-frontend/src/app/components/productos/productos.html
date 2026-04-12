@@ -69,6 +69,25 @@
     </select>
   </div>
 
+  <!-- Marca -->
+<div class="lks-field">
+  <label class="lks-label">Marca</label>
+  <select
+    class="lks-input"
+    [ngModel]="brand()"
+    (ngModelChange)="onBrandChange($event)"
+  >
+    <option value="all">Todas</option>
+    <option value="Filgo">Filgo</option>
+    <option value="Skycolor">Skycolor</option>
+    <option value="Olami">Olami</option>
+    <option value="C-B-X">C-B-X</option>
+    <option value="FW">FW</option>
+    <option value="Keyroad">Keyroad</option>
+    <option value="Ibicraft">Ibicraft</option>
+  </select>
+</div>
+
   <!-- Precio (dropdown) -->
   <div class="lks-field price-field" (clickOutside)="priceOpen=false">
     <label class="lks-label">Precio</label>

@@ -93,33 +93,30 @@
               </span>
             </button>
 
-            <!-- MOBILE: sin accesos admin -->
             <div class="user-dropdown user-dropdown--top" *ngIf="userMenuOpen()">
-            <div class="user-dropdown-head user-dropdown-head--top">
-              <div class="user-name">{{ email() }}</div>
+              <div class="user-dropdown-head user-dropdown-head--top">
+                <div class="user-name">{{ email() }}</div>
+              </div>
+
+              <div class="user-dropdown-sep"></div>
+
+              <button
+                *ngIf="!isAdmin() && !isOperador()"
+                class="user-item"
+                type="button"
+                (click)="goOrders()"
+              >
+                Ver pedidos
+              </button>
+
+              <button
+                class="user-item danger"
+                type="button"
+                (click)="logout()"
+              >
+                Salir
+              </button>
             </div>
-
-            <div class="user-dropdown-sep"></div>
-
-            <!-- CLIENTE: sí ve pedidos -->
-            <button
-              *ngIf="!isAdmin() && !isOperador()"
-              class="user-item"
-              type="button"
-              (click)="goOrders()"
-            >
-              Ver pedidos
-            </button>
-
-            <!-- TODOS -->
-            <button
-              class="user-item danger"
-              type="button"
-              (click)="logout()"
-            >
-              Salir
-            </button>
-          </div>
           </ng-container>
         </div>
       </div>
@@ -129,12 +126,12 @@
   <!-- NAV PRINCIPAL -->
   <div class="row">
     <div
-        class="navbar col-12 d-flex align-items-center mobile"
-        [ngClass]="{
-          'navbar-operador': isOnlyOperador(),
-          'justify-content-around': !isOnlyOperador()
-        }"
-      >
+      class="navbar col-12 d-flex align-items-center mobile"
+      [ngClass]="{
+        'navbar-operador': isOnlyOperador(),
+        'justify-content-around': !isOnlyOperador()
+      }"
+    >
 
       <!-- LOGO -->
       <a
@@ -154,13 +151,13 @@
         [ngClass]="{ 'open': menuOpen() }"
       >
         <a
-        *ngIf="!isOnlyOperador()"
-        class="all sm-mini-phone all-colour"
-        href="#servicios"
-        (click)="closeMenu()"
-      >
-        INICIO
-      </a>
+          *ngIf="!isOnlyOperador()"
+          class="all sm-mini-phone all-colour"
+          href="#servicios"
+          (click)="closeMenu()"
+        >
+          INICIO
+        </a>
 
         <!-- PRODUCTOS -->
         <div
@@ -189,13 +186,92 @@
               Todos los productos
             </button>
 
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goProducts('libreria')"
-            >
-              Librería
-            </button>
+            <!-- LIBRERÍA -->
+            <div class="dropdown-submenu-inline">
+              <button
+                type="button"
+                class="dropdown-item dropdown-item-with-arrow"
+                (click)="isDesktop() ? goProducts('libreria') : toggleLibraryMenu($event)"
+              >
+                <span>Librería</span>
+                <span class="user-plus">
+                  {{ isDesktop() ? '▸' : (libraryOpen() ? '▾' : '▸') }}
+                </span>
+              </button>
+
+              <!-- MOBILE: submenu inline -->
+              <div
+                class="dropdown-submenu-inline-menu"
+                *ngIf="!isDesktop() && libraryOpen()"
+              >
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('Filgo')"
+                >
+                  Filgo
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('Skycolor')"
+                >
+                  Skycolor
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('Olami')"
+                >
+                  Olami
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('C-B-X')"
+                >
+                  C-B-X
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('FW')"
+                >
+                  FW
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('Keyroad')"
+                >
+                  Keyroad
+                </button>
+
+                <button
+                  type="button"
+                  class="dropdown-subitem"
+                  (click)="goProductsByBrand('Ibicraft')"
+                >
+                  Ibicraft
+                </button>
+              </div>
+
+              <!-- DESKTOP: submenu lateral -->
+              <div class="dropdown-submenu-menu" *ngIf="isDesktop()">
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Filgo')">Filgo</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Skycolor')">Skycolor</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Olami')">Olami</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('C-B-X')">C-B-X</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('FW')">FW</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Keyroad')">Keyroad</button>
+                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Ibicraft')">Ibicraft</button>
+              </div>
+            </div>
 
             <button
               type="button"
@@ -244,15 +320,13 @@
           </button>
 
           <div class="dropdown-menu-custom">
-
             <button
-            type="button"
-            class="dropdown-item"
-            (click)="goAdminHome()"
-          >
-            Principal
-          </button>
-            
+              type="button"
+              class="dropdown-item"
+              (click)="goAdminHome()"
+            >
+              Principal
+            </button>
 
             <button
               type="button"
@@ -316,9 +390,8 @@
           </button>
 
           <div class="user-dropdown" *ngIf="userMenuOpen()">
-
             <button
-            *ngIf="!isAdmin() && !isOperador()"
+              *ngIf="!isAdmin() && !isOperador()"
               class="user-item"
               type="button"
               (click)="goProfile()"
@@ -357,9 +430,9 @@
 
       <!-- ACCIONES DERECHA: solo usuarios no admin -->
       <div
-          class="carrito d-flex justify-content-center align-items-center gap-3"
-          *ngIf="!isAdminOrOperador()"
-        >
+        class="carrito d-flex justify-content-center align-items-center gap-3"
+        *ngIf="!isAdminOrOperador()"
+      >
         <!-- CARRITO -->
         <div class="container-cart">
           <button
@@ -412,8 +485,8 @@
 
   <!-- BLOQUE BUSCADOR SOLO MOBILE -->
   <div class="mobileSearchBlock" *ngIf="!isOnlyOperador()">
-  <app-header></app-header>
-</div>
+    <app-header></app-header>
+  </div>
 
   <!-- SUBNAV FAQ -->
   <div class="subnav" *ngIf="!isAdminOrOperador()">
