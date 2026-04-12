@@ -53,6 +53,9 @@ export class AdminProductsPage implements OnInit {
   barcodeErrorCreate = signal<string | null>(null);
   barcodeErrorEdit = signal<string | null>(null);
 
+  keywordErrorCreate = signal<string | null>(null);
+keywordErrorEdit = signal<string | null>(null);
+
   // ✅ OJO: NO private, así el HTML puede usar productsSig()
   readonly productsSig = toSignal(this.productsService.products$, {
     initialValue: [] as Product[],
@@ -336,41 +339,57 @@ clearSearch() {
   }
 
   // =========================
-  // Keywords (multi-select) -> CSV string en form.keywords
-  // =========================
-  private parseCsv(input: string | null | undefined): string[] {
-    if (!input) return [];
-    return String(input)
-      .split(/[,;|]/g)
-      .map((s) => s.trim())
-      .filter(Boolean);
+// Keyword única obligatoria
+// =========================
+private normalizeKeywordValue(input: string | null | undefined): string {
+  const value = String(input ?? '')
+    .split(/[,;|]/g)[0]
+    ?.trim();
+
+  return value || '';
+}
+
+selectedKeyword(): string {
+  return this.normalizeKeywordValue(this.form().keywords);
+}
+
+selectKeyword(k: string) {
+  this.keywordErrorCreate.set(null);
+  this.setField('keywords', k as any);
+}
+
+selectedEditKeyword(): string {
+  return this.normalizeKeywordValue(this.editRow().keywords);
+}
+
+selectEditKeyword(k: string) {
+  this.keywordErrorEdit.set(null);
+  this.setEditField('keywords', k as any);
+}
+
+private validateCreateKeyword(): boolean {
+  const selected = this.selectedKeyword();
+  if (!selected) {
+    this.keywordErrorCreate.set('Tenés que seleccionar una marca.');
+    this.toast.error('Tenés que seleccionar una marca');
+    return false;
   }
 
-  private toCsv(arr: string[]): string {
-    return arr.map((s) => s.trim()).filter(Boolean).join(', ');
+  this.keywordErrorCreate.set(null);
+  return true;
+}
+
+private validateEditKeyword(): boolean {
+  const selected = this.selectedEditKeyword();
+  if (!selected) {
+    this.keywordErrorEdit.set('Tenés que seleccionar una marca.');
+    this.toast.error('Tenés que seleccionar una marca');
+    return false;
   }
 
-  selectedKeywords(): string[] {
-    return this.parseCsv(this.form().keywords);
-  }
-
-  toggleKeyword(k: string, checked: boolean) {
-    const current = this.selectedKeywords();
-
-    let next = current;
-    if (checked) {
-      if (!current.includes(k)) next = [...current, k];
-    } else {
-      next = current.filter((x) => x !== k);
-    }
-
-    if (next.length > 4) {
-      this.toast.error('Podés elegir hasta 4 palabras clave');
-      return;
-    }
-
-    this.setField('keywords', this.toCsv(next) as any);
-  }
+  this.keywordErrorEdit.set(null);
+  return true;
+}
 
   onFileSelected(evt: Event, slot: 1 | 2 | 3) {
     const input = evt.target as HTMLInputElement;
@@ -417,20 +436,23 @@ clearSearch() {
   saveSingle() {
     const data = this.form();
 
-    if (!data.nombre?.trim()) {
-      this.toast.error('El nombre es obligatorio');
-      return;
-    }
-    if ((data.stock ?? 0) < 0) {
-      this.toast.error('Stock inválido');
-      return;
-    }
-    if ((data.precio ?? 0) < 0) {
-      this.toast.error('Precio inválido');
-      return;
-    }
+  if (!data.nombre?.trim()) {
+    this.toast.error('El nombre es obligatorio');
+    return;
+  }
+  if ((data.stock ?? 0) < 0) {
+    this.toast.error('Stock inválido');
+    return;
+  }
+  if ((data.precio ?? 0) < 0) {
+    this.toast.error('Precio inválido');
+    return;
+  }
+  if (!this.validateCreateKeyword()) {
+    return;
+  }
 
-    this.loading.set(true);
+  this.loading.set(true);
     this.adminApi
       .create({
         ...data,
@@ -459,6 +481,7 @@ clearSearch() {
           });
 
           this.barcodeErrorCreate.set(null);
+          this.keywordErrorCreate.set(null);
 
           this.showForm.set(false);
           this.productsService.refresh().subscribe();
@@ -583,6 +606,7 @@ clearSearch() {
   startEdit(p: Product) {
     this.editingId.set(p.id);
     this.barcodeErrorEdit.set(null);
+    this.keywordErrorEdit.set(null);
 
     this.editRow.set({
       nombre: p.nombre ?? '',
@@ -594,7 +618,9 @@ clearSearch() {
       barcode: (p as any).barcode ?? '',
       categorias: (p.categorias ?? []).join(', '),
       servicios: (p.servicios ?? []).join(', '),
-      keywords: (p.keywords ?? []).join(', '),
+      keywords: this.normalizeKeywordValue(
+        Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords as any)
+      ),
       activo: (p as any).activo ?? true,
       stock: Number(p.stock ?? 0),
       precio: Number((p as any).precio ?? 0),
@@ -602,9 +628,10 @@ clearSearch() {
   }
 
   cancelEdit() {
-    this.barcodeErrorEdit.set(null);
-    this.editingId.set(null);
-  }
+  this.barcodeErrorEdit.set(null);
+  this.keywordErrorEdit.set(null);
+  this.editingId.set(null);
+}
 
   setEditField<K extends keyof CreateProductRequest>(
     key: K,
@@ -628,6 +655,9 @@ clearSearch() {
       this.toast.error('Precio inválido');
       return;
     }
+    if (!this.validateEditKeyword()) {
+  return;
+}
 
     this.savingRow.set(true);
     this.adminApi

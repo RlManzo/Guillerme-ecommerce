@@ -319,13 +319,30 @@
                       </label>
 
                       <label class="full">
-                        <span>Keywords (csv)</span>
-                        <input
-                          placeholder="kw1, kw2, kw3"
-                          [ngModel]="editRow().keywords"
-                          (ngModelChange)="setEditField('keywords', $event)"
-                        />
-                      </label>
+  <span>Marca / palabra clave *</span>
+
+  <div class="kw-box selects-box">
+    <div class="kw-item" *ngFor="let k of keywordsOpts">
+      <label style="display:flex; gap:8px; align-items:center;">
+        <input
+          type="radio"
+          name="editKeyword"
+          [checked]="selectedEditKeyword() === k"
+          (change)="selectEditKeyword(k)"
+        />
+        <span>{{ k }}</span>
+      </label>
+    </div>
+
+    <div style="font-size: 12px; opacity:.75; margin-top:8px;">
+      Seleccionada: {{ selectedEditKeyword() || '-' }}
+    </div>
+
+    <div *ngIf="keywordErrorEdit()" class="field-error">
+      {{ keywordErrorEdit() }}
+    </div>
+  </div>
+</label>
 
                       <!-- ✅ edición: categoria apunta a editRow + setEditField -->
                       <label class="full">
@@ -564,27 +581,32 @@
           </div>
         </label>
 
-        <!-- ✅ KEYWORDS: multiselect hasta 4 -->
         <label class="full">
-          <span>Palabras clave (hasta 4)</span>
+        <span>Marca / palabra clave *</span>
 
-          <div class="kw-box selects-box">
-            <div class="kw-item" *ngFor="let k of keywordsOpts">
-              <label style="display:flex; gap:8px; align-items:center;">
-                <input
-                  type="checkbox"
-                  [checked]="selectedKeywords().includes(k)"
-                  (change)="toggleKeyword(k, $any($event.target).checked)"
-                />
-                <span>{{ k }}</span>
-              </label>
-            </div>
-
-            <div style="font-size: 12px; opacity:.75; margin-top:8px;">
-              Seleccionadas: {{ selectedKeywords().join(', ') || '-' }}
-            </div>
+        <div class="kw-box selects-box">
+          <div class="kw-item" *ngFor="let k of keywordsOpts">
+            <label style="display:flex; gap:8px; align-items:center;">
+              <input
+                type="radio"
+                name="createKeyword"
+                [checked]="selectedKeyword() === k"
+                (change)="selectKeyword(k)"
+              />
+              <span>{{ k }}</span>
+            </label>
           </div>
-        </label>
+
+          <div style="font-size: 12px; opacity:.75; margin-top:8px;">
+            Seleccionada: {{ selectedKeyword() || '-' }}
+          </div>
+
+          <div *ngIf="keywordErrorCreate()" class="field-error">
+            {{ keywordErrorCreate() }}
+          </div>
+        </div>
+      </label>
+        
 
         <!-- ✅ PRECIO con símbolo $ -->
         <label>
