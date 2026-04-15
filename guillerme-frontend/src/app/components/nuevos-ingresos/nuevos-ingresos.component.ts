@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { take } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { ProductsService } from '../productos/products.service';
 import { Product } from '../productos/product.model';
@@ -16,53 +16,59 @@ declare const bootstrap: any;
   templateUrl: './nuevos-ingresos.component.html',
   styleUrls: ['./nuevos-ingresos.component.scss'],
 })
-export class NuevosIngresosComponent implements OnInit {
+export class NuevosIngresosComponent implements OnInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
   readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  private sub?: Subscription;
 
   loading = true;
   error = false;
   productos: Product[] = [];
 
   ngOnInit(): void {
-  this.loading = true;
-  this.error = false;
-  this.productos = [];
+    this.loading = true;
+    this.error = false;
+    this.productos = [];
 
-  this.productsService.load().pipe(take(1)).subscribe({
-    next: (all) => {
-      try {
-        const lista = Array.isArray(all) ? all : [];
+    this.sub = this.productsService.products$.subscribe({
+      next: (all) => {
+        try {
+          const lista = Array.isArray(all) ? all : [];
 
-        const activos = lista.filter((p: any) => p?.estado !== false);
+          const activos = lista.filter((p) => (p.estado ?? true) === true);
 
-        const ordenados = [...activos].sort(
-          (a: any, b: any) => (Number(b?.id) || 0) - (Number(a?.id) || 0)
-        );
+          const ordenados = [...activos].sort(
+            (a: any, b: any) => (Number(b?.id) || 0) - (Number(a?.id) || 0)
+          );
 
-        const maxItems = window.innerWidth <= 767 ? 8 : 6;
-        this.productos = ordenados.slice(0, maxItems);
-        this.error = false;
-      } catch (e) {
-        console.error('Error procesando nuevos ingresos:', e);
+          const maxItems = window.innerWidth <= 767 ? 8 : 6;
+          this.productos = ordenados.slice(0, maxItems);
+          this.error = false;
+        } catch (e) {
+          console.error('Error procesando nuevos ingresos:', e);
+          this.productos = [];
+          this.error = true;
+        } finally {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando nuevos ingresos:', err);
         this.productos = [];
         this.error = true;
-      } finally {
         this.loading = false;
         this.cdr.detectChanges();
-      }
-    },
-    error: (err) => {
-      console.error('Error cargando nuevos ingresos:', err);
-      this.productos = [];
-      this.error = true;
-      this.loading = false;
-      this.cdr.detectChanges();
-    },
-  });
-}
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
 
   getImagen(p: Product): string {
     return p.img || 'assets/img/placeholder-producto.png';
