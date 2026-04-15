@@ -8,6 +8,7 @@ import { ToastService } from '../../shared/service/toast.service';
 import { MatDialog } from '@angular/material/dialog';
 import { OrderSuccessDialogComponent } from './order-success-dialog';
 import { OrderProgressOverlayComponent } from '../progress-overlay/order-progress-overlay.component';
+import { ProductsService } from '../productos/products.service';
 
 @Component({
   selector: 'app-carrito-modal',
@@ -23,13 +24,13 @@ export class CarritoModal {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  private readonly productsService = inject(ProductsService);
+
   readonly showProgress = signal(false);
   readonly progressStep = signal(0);
-
   readonly hasItems = computed(() => this.store.cartCount() > 0);
   readonly sending = signal(false);
 
-  // ✅ totales
   readonly totalItems = computed(() =>
     this.store.cart().reduce((acc, it) => acc + (it.cantidad ?? 0), 0)
   );
@@ -51,116 +52,115 @@ export class CarritoModal {
   }
 
   remove(productId: number, ev?: MouseEvent) {
-  console.log('remove click', productId);
-  ev?.stopPropagation();
-  this.store.removeFromCart(productId);
-}
+    ev?.stopPropagation();
+    this.store.removeFromCart(productId);
+  }
 
   clear() {
+    if (this.sending()) return;
     this.store.clearCart();
   }
 
-  // ✅ cantidad +/- (usa el store con stock)
   inc(productId: number, ev?: MouseEvent) {
-  ev?.stopPropagation();
-  ev?.preventDefault();
+    ev?.stopPropagation();
+    ev?.preventDefault();
 
-  if (this.sending()) return;
+    if (this.sending()) return;
 
-  if (!this.store.canInc(productId)) {
-    this.toast.error('No hay más stock disponible para este producto');
-    return;
+    if (!this.store.canInc(productId)) {
+      this.toast.error('No hay más stock disponible para este producto');
+      return;
+    }
+
+    this.store.incQty(productId);
   }
 
-  this.store.incQty(productId);
-}
+  dec(productId: number, ev?: MouseEvent) {
+    ev?.stopPropagation();
+    ev?.preventDefault();
 
-dec(productId: number, ev?: MouseEvent) {
-  ev?.stopPropagation();
-  ev?.preventDefault();
-
-  if (this.sending()) return;
-  this.store.decQty(productId);
-}
-
+    if (this.sending()) return;
+    this.store.decQty(productId);
+  }
 
   completarCompra() {
-  // si no está logueado -> login
-  if (!this.auth.isLogged()) {
-    this.toast.error('Iniciá sesión para completar la compra');
-    this.router.navigateByUrl('/login');
-    return;
+    if (this.sending()) return;
+
+    if (!this.auth.isLogged()) {
+      this.toast.error('Iniciá sesión para completar la compra');
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
+    const cart = this.store.cart();
+    if (!cart.length) return;
+
+    const invalid = cart.find((it) => {
+      const stock = it.producto.stock ?? 0;
+      return stock <= 0 || it.cantidad > stock;
+    });
+
+    if (invalid) {
+      const name = invalid.producto.nombre ?? 'Producto';
+      this.toast.error(`Stock insuficiente para: ${name}`);
+      return;
+    }
+
+    const body = {
+      items: cart.map((it) => ({
+        productId: it.producto.id,
+        qty: it.cantidad,
+      })),
+      comment: null,
+    };
+
+    this.sending.set(true);
+    this.showProgress.set(true);
+    this.progressStep.set(0);
+
+    const t1 = window.setTimeout(() => this.progressStep.set(1), 600);
+    const t2 = window.setTimeout(() => this.progressStep.set(2), 1200);
+
+    this.orders.checkout(body).subscribe({
+      next: (res) => {
+        window.clearTimeout(t1);
+        window.clearTimeout(t2);
+
+        // refresco inmediato de productos para traer stock/estado actualizado
+        this.productsService.refresh().subscribe({
+          error: (err) => {
+            console.error('Error refrescando productos post-checkout', err);
+          },
+        });
+
+        this.showProgress.set(false);
+        this.sending.set(false);
+
+        this.store.clearCart();
+        this.close();
+
+        this.dialog.open(OrderSuccessDialogComponent, {
+          width: '520px',
+          maxWidth: '92vw',
+          data: {
+            message:
+              '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp desde +54 11 38617954 para completar el pago y acordar el envío.',
+          },
+        });
+
+        this.toast.success(`Pedido #${res.orderId} enviado.`);
+      },
+      error: (e) => {
+        console.error(e);
+
+        window.clearTimeout(t1);
+        window.clearTimeout(t2);
+
+        this.showProgress.set(false);
+        this.sending.set(false);
+
+        this.toast.error('No se pudo completar la compra. Probá de nuevo.');
+      },
+    });
   }
-
-  // armar payload desde el carrito
-  const cart = this.store.cart();
-  if (!cart.length) return;
-
-  // ✅ Validación extra: no permitir comprar si supera stock o stock=0
-  const invalid = cart.find((it) => {
-    const stock = it.producto.stock ?? 0;
-    return stock <= 0 || it.cantidad > stock;
-  });
-
-  if (invalid) {
-    const name = invalid.producto.nombre ?? 'Producto';
-    this.toast.error(`Stock insuficiente para: ${name}`);
-    return;
-  }
-
-  const body = {
-    items: cart.map((it) => ({
-      productId: it.producto.id,
-      qty: it.cantidad,
-    })),
-    comment: null,
-  };
-
-  // ✅ Overlay + stages
-  this.sending.set(true);
-
-  this.showProgress.set(true);     // <-- signal que agregaste
-  this.progressStep.set(0);        // 0: Procesando pedido
-
-  // como tu checkout es 1 request, simulamos avance visual
-  const t1 = window.setTimeout(() => this.progressStep.set(1), 600);  // 1: Confirmando stock
-  const t2 = window.setTimeout(() => this.progressStep.set(2), 1200); // 2: Aceptando pedido
-
-  this.orders.checkout(body).subscribe({
-    next: (res) => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-
-      this.showProgress.set(false);
-      this.sending.set(false);
-
-      this.store.clearCart();
-      this.close();
-
-      this.dialog.open(OrderSuccessDialogComponent, {
-        width: '520px',
-        maxWidth: '92vw',
-        data: {
-          message:
-            '¡Gracias por tu compra! El detalle de tu pedido ha sido enviado a tu mail. Recordá que nos estaremos comunicando por WhatsApp desde +54 11 38617954 para completar el pago y acordar el envío.',
-        },
-      });
-
-      this.toast.success(`Pedido #${res.orderId} enviado.`);
-    },
-    error: (e) => {
-      console.error(e);
-
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-
-      this.showProgress.set(false);
-      this.sending.set(false);
-
-      this.toast.error('No se pudo completar la compra. Probá de nuevo.');
-    },
-  });
-}
-
-  
 }

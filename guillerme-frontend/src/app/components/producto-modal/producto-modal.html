@@ -104,9 +104,15 @@
       </div>
 
       <div class="lks-actions">
-        <button class="lks-btn primary" type="button" (click)="onAgregar()">
-          AGREGAR
-        </button>
+        <button
+            class="lks-btn primary"
+            type="button"
+            [disabled]="!hasStock()"
+            [ngClass]="{ 'outline': !hasStock() }"
+            (click)="onAgregar()"
+          >
+            {{ hasStock() ? 'AGREGAR' : 'SIN STOCK' }}
+          </button>
 
         <button
           class="lks-btn secondary lks-modal-close"

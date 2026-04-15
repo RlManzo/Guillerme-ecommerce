@@ -46,13 +46,17 @@
             {{ getPrecio(p) }}
           </p>
 
+         
+
           <button
-            type="button"
-            class="btn-nuevo-comprar"
-            (click)="add(p)"
-          >
-            Agregar
-          </button>
+        type="button"
+        class="btn-nuevo-comprar"
+        [disabled]="!hasStock(p)"
+        [class.is-disabled]="!hasStock(p)"
+        (click)="add(p)"
+      >
+        {{ hasStock(p) ? 'AGREGAR' : 'SIN STOCK' }}
+      </button>
         </div>
       </article>
     </div>

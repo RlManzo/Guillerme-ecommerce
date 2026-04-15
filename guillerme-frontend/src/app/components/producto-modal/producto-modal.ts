@@ -8,18 +8,16 @@ import { ToastService } from '../../shared/service/toast.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './producto-modal.html',
+  styleUrls: ['./producto-modal.scss'],
 })
 export class ProductoModal {
   readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
 
-  // signal readonly desde el store
   readonly producto = this.store.selected;
 
-  // ✅ media seleccionada (img o video)
   readonly selectedImg = signal<string>('');
 
-  // ✅ lista de medias disponibles (img/video)
   readonly imagenes = computed(() => {
     const p = this.producto();
     if (!p) return [];
@@ -29,6 +27,11 @@ export class ProductoModal {
       .filter(Boolean);
 
     return Array.from(new Set(list));
+  });
+
+  readonly hasStock = computed(() => {
+    const p = this.producto();
+    return Number(p?.stock ?? 0) > 0;
   });
 
   constructor() {
@@ -45,6 +48,12 @@ export class ProductoModal {
   onAgregar(): void {
     const p = this.producto();
     if (!p) return;
+
+    if (!this.hasStock()) {
+      this.toast.error('Producto sin stock');
+      return;
+    }
+
     this.store.addToCart(p);
     this.toast.success('Producto agregado al carrito');
   }
@@ -61,13 +70,11 @@ export class ProductoModal {
       .filter(Boolean);
   }
 
-  // ✅ fallback seguro
   readonly mainImg = computed(() => {
     const imgs = this.imagenes();
     return imgs[0] ?? '';
   });
 
-  // ✅ media grande (selected o fallback)
   readonly bigImg = computed(() => this.selectedImg() || this.mainImg());
 
   private currentIndex(): number {
@@ -94,7 +101,6 @@ export class ProductoModal {
     this.selectedImg.set(imgs[next]);
   }
 
-  // ✅ helper video
   private isVideoUrl(url?: string | null): boolean {
     const u = (url ?? '').toLowerCase().trim();
     return (

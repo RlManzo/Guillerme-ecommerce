@@ -99,9 +99,14 @@ export class ProductosPreview implements AfterViewInit {
   }
 
   add(p: Product) {
-    this.store.addToCart(this.toProducto(p));
-    this.toast.success('Producto agregado al carrito');
+  if (!this.hasStock(p)) {
+    this.toast.error('Producto sin stock');
+    return;
   }
+
+  this.store.addToCart(this.toProducto(p));
+  this.toast.success('Producto agregado al carrito');
+}
 
   goVerMas() {
     this.router.navigateByUrl('/productos');
@@ -137,4 +142,8 @@ export class ProductosPreview implements AfterViewInit {
       imagenes: [p.img].filter(Boolean) as string[],
     } as unknown as Producto;
   }
+
+  hasStock(p: Product): boolean {
+  return Number(p.stock ?? 0) > 0;
+}
 }

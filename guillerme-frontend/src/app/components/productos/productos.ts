@@ -400,9 +400,14 @@ export class Productos implements AfterViewInit {
   }
 
   add(p: Product) {
-    this.store.addToCart(this.toProducto(p));
-    this.toast.success('Producto agregado al carrito');
+  if (!this.hasStock(p)) {
+    this.toast.error('Producto sin stock');
+    return;
   }
+
+  this.store.addToCart(this.toProducto(p));
+  this.toast.success('Producto agregado al carrito');
+}
 
   whatsappInfoLink(p: Product) {
     const phone = '543513721017';
@@ -490,4 +495,8 @@ export class Productos implements AfterViewInit {
       maximumFractionDigits: 0,
     }).format(n);
   }
+
+  hasStock(p: Product): boolean {
+  return Number(p.stock ?? 0) > 0;
+}
 }

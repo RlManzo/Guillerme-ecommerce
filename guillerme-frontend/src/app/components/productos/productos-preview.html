@@ -71,12 +71,14 @@
           </div>
 
           <button
-            type="button"
-            class="home-product-add"
-            (click)="add(p)"
-          >
-            AGREGAR
-          </button>
+          type="button"
+          class="home-product-add"
+          [disabled]="!hasStock(p)"
+          [class.is-disabled]="!hasStock(p)"
+          (click)="add(p)"
+        >
+          {{ hasStock(p) ? 'AGREGAR' : 'SIN STOCK' }}
+        </button>
         </div>
       </article>
     </div>

@@ -211,9 +211,15 @@
           <div class="product-footer">
             <div class="product-price">{{ formatPrice(p.precio) }}</div>
 
-            <button class="btnAdd" type="button" (click)="add(p)">
-              AGREGAR
-            </button>
+            <button
+            class="btnAdd"
+            type="button"
+            [disabled]="!hasStock(p)"
+            [class.is-disabled]="!hasStock(p)"
+            (click)="add(p)"
+          >
+            {{ hasStock(p) ? 'AGREGAR' : 'SIN STOCK' }}
+          </button>
           </div>
         </div>
       </div>

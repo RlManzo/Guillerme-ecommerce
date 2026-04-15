@@ -446,3 +446,35 @@
     margin-top: 110px;
   }
 }
+
+.home-product-add.is-disabled,
+.home-product-add:disabled {
+  background-color: transparent;
+  color: #999;
+  border: 2px solid #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* opcional: hover desactivado */
+.home-product-add.is-disabled:hover,
+.home-product-add:disabled:hover {
+  background-color: transparent;
+  color: #999;
+}
+
+.btnAdd.is-disabled,
+.btnAdd:disabled {
+  background: transparent;
+  color: #999;
+  border: 2px solid #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* evitar hover */
+.btnAdd.is-disabled:hover,
+.btnAdd:disabled:hover {
+  background: transparent;
+  color: #999;
+}

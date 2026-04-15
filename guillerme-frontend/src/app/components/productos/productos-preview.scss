@@ -359,3 +359,19 @@
   overflow: hidden;
   min-height: 36px;
 }
+
+.home-product-add.is-disabled,
+.home-product-add:disabled {
+  background-color: transparent;
+  color: #999;
+  border: 2px solid #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* opcional: hover desactivado */
+.home-product-add.is-disabled:hover,
+.home-product-add:disabled:hover {
+  background-color: transparent;
+  color: #999;
+}

@@ -70,6 +70,10 @@ export class NuevosIngresosComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  hasStock(p: Product): boolean {
+    return Number(p.stock ?? 0) > 0;
+  }
+
   getImagen(p: Product): string {
     return p.img || 'assets/img/placeholder-producto.png';
   }
@@ -89,6 +93,11 @@ export class NuevosIngresosComponent implements OnInit, OnDestroy {
   }
 
   add(p: Product) {
+    if (!this.hasStock(p)) {
+      this.toast.error('Producto sin stock');
+      return;
+    }
+
     this.store.addToCart(this.toProducto(p));
     this.toast.success('Producto agregado al carrito');
   }

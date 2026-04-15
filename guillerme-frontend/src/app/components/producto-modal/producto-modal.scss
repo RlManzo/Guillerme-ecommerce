@@ -1,0 +1,20 @@
+.lks-btn.primary.outline,
+.lks-btn.primary.outline:disabled,
+.lks-btn.primary:disabled.outline {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #999 !important;
+  border: 2px solid #ccc !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #999 !important;
+  cursor: not-allowed !important;
+}
+
+.lks-btn.primary.outline:hover,
+.lks-btn.primary.outline:disabled:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: #999 !important;
+  border: 2px solid #ccc !important;
+}
