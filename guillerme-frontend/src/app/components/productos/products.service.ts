@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, catchError, finalize, map, of, tap, timeout } from 'rxjs';
+import { Injectable, inject, OnDestroy } from '@angular/core';
+import { BehaviorSubject, catchError, finalize, map, of, tap, timeout, interval, Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { Product } from './product.model';
@@ -7,7 +7,7 @@ import { ProductResponseDto } from './product-response.dto';
 import { mapProductFromApi } from './product.mapper';
 
 @Injectable({ providedIn: 'root' })
-export class ProductsService {
+export class ProductsService implements OnDestroy {
   private readonly http = inject(HttpClient);
 
   private readonly _products$ = new BehaviorSubject<Product[]>([]);
@@ -18,6 +18,8 @@ export class ProductsService {
 
   private readonly _error$ = new BehaviorSubject<string | null>(null);
   readonly error$ = this._error$.asObservable();
+
+  private pollingSub?: Subscription;
 
   load() {
     this._loading$.next(true);
@@ -39,7 +41,29 @@ export class ProductsService {
     );
   }
 
+  // 👇 NUEVO: iniciar polling
+  startPolling(intervalMs = 15000) {
+    if (this.pollingSub) return; // evita duplicar
+
+    this.pollingSub = interval(intervalMs).subscribe(() => {
+      this.load().subscribe();
+    });
+
+    // primera carga inmediata
+    this.load().subscribe();
+  }
+
+  // 👇 opcional: detener polling
+  stopPolling() {
+    this.pollingSub?.unsubscribe();
+    this.pollingSub = undefined;
+  }
+
   refresh() {
     return this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 }

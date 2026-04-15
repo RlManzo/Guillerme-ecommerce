@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 
 import { Navbar } from './components/navbar/navbar';
 import { CartPersistenceService } from './shared/cart/cart-persistence.service';
+import { ProductsService } from './components/productos/products.service';
 
 @Component({
   selector: 'app-root',
@@ -13,9 +14,10 @@ import { CartPersistenceService } from './shared/cart/cart-persistence.service';
   imports: [CommonModule, RouterOutlet, Navbar],
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly _cartPersistence = inject(CartPersistenceService);
+  private readonly productsService = inject(ProductsService);
 
   readonly hideNavbar = toSignal(
     this.router.events.pipe(
@@ -24,6 +26,11 @@ export class App {
     ),
     { initialValue: null }
   );
+
+  ngOnInit(): void {
+    // 🚀 arrancás el polling global
+    this.productsService.startPolling(10000); // cada 10s
+  }
 
   shouldHideNavbar(): boolean {
     const url = this.router.url;
