@@ -64,19 +64,21 @@ export class Header {
   }
 
   onInput(ev: Event) {
-    const value = (ev.target as HTMLInputElement).value ?? '';
-    this.query = value;
+  const value = (ev.target as HTMLInputElement).value ?? '';
+  this.query = value;
 
-    const q = value.trim();
-    if (!q) {
-      this.filteredProducts = [];
-      this.resultsOpen = false;
-      return;
-    }
-
-    this.resultsOpen = true;
-    this.filteredProducts = filterProducts(this.productsSig(), q).slice(0, 10);
+  const q = value.trim();
+  if (!q) {
+    this.filteredProducts = [];
+    this.resultsOpen = false;
+    return;
   }
+
+  const visibles = this.productsSig().filter((p) => (p.estado ?? true) === true);
+
+  this.resultsOpen = true;
+  this.filteredProducts = filterProducts(visibles, q).slice(0, 10);
+}
 
   openResults() {
   // solo abrimos si hay texto
