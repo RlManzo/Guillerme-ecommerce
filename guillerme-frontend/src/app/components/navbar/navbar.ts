@@ -19,7 +19,8 @@ type ProductsBrand =
   | 'C-B-X'
   | 'FW'
   | 'Keyroad'
-  | 'Ibicraft';
+  | 'Ibicraft'
+  | 'Otros';
 
 @Component({
   selector: 'app-navbar',
@@ -56,6 +57,7 @@ export class Navbar {
     'FW',
     'Keyroad',
     'Ibicraft',
+    'Otros',
   ];
 
   toggleMenu() {

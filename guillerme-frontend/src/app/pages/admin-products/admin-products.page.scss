@@ -169,6 +169,7 @@ label{
 
 .selects-box{
     display: flex !important;
+    flex-wrap: wrap;
     gap: 40px;
 }
 
@@ -427,4 +428,9 @@ label{
       background: #cfcfcf;
     }
   }
+}
+
+table.admin-table{
+  padding-right: 0px !important; 
+  padding: 0px 0px !important;
 }

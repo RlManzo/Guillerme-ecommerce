@@ -78,7 +78,7 @@
       
 
     <div style="overflow:auto;">
-      <table class="admin-table">
+      <table class="admin-table" >
         <thead>
           <tr>
             <th>Código</th>
@@ -177,7 +177,7 @@
                   <div class="row-editor__grid">
                     <!-- MEDIA (imagen o video) -->
                     <div class="row-editor__block">
-                      <div class="row-editor__label">Media (imagen o video)</div>
+                      <div class="row-editor__label"><strong style="font-size: larger;"> Media (imagen o video)</strong></div>
 
                       <div class="row-editor__uploads">
                         <label>
@@ -281,7 +281,7 @@
                     <!-- CAMPOS -->
                     <div class="row-editor__fields">
                       <label>
-                        <span>Nombre</span>
+                        <span><strong style="font-size: larger;"> Nombre</strong></span>
                         <input
                           [ngModel]="editRow().nombre"
                           (ngModelChange)="setEditField('nombre', $event)"
@@ -289,7 +289,7 @@
                       </label>
 
                       <label>
-                      <span>Código de barras</span>
+                      <span><strong style="font-size: larger;"> Código de barras</strong></span>
                       <input
                         placeholder="Ej: 7798100960487"
                         [ngModel]="editRow().barcode"
@@ -302,7 +302,7 @@
                     </label>
 
                       <label>
-                        <span>Descripción corta</span>
+                        <span><strong style="font-size: larger;">Descripción corta</strong></span>
                         <input
                           [ngModel]="editRow().descripcionCorta"
                           (ngModelChange)="setEditField('descripcionCorta', $event)"
@@ -310,7 +310,7 @@
                       </label>
 
                       <label class="full">
-                        <span>Info Modal (larga)</span>
+                        <span><strong style="font-size: larger;">Info Modal (larga)</strong></span>
                         <textarea
                           rows="3"
                           [ngModel]="editRow().infoModal"
@@ -319,7 +319,7 @@
                       </label>
 
                       <label class="full">
-  <span>Marca / palabra clave *</span>
+  <span><strong style="font-size: larger;">Marca / palabra clave *</strong></span>
 
   <div class="kw-box selects-box">
     <div class="kw-item" *ngFor="let k of keywordsOpts">
@@ -346,7 +346,7 @@
 
                       <!-- ✅ edición: categoria apunta a editRow + setEditField -->
                       <label class="full">
-                        <span>Categoría</span>
+                        <span><strong style="font-size: larger;">Categoría</strong></span>
                         <select
                           [ngModel]="editRow().categorias"
                           (ngModelChange)="setEditField('categorias', $event)"
@@ -362,7 +362,7 @@
                       </label>
 
                       <label>
-                        <span>Stock</span>
+                        <span><strong style="font-size: larger;">Stock</strong></span>
                         <input
                           type="number"
                           min="0"
@@ -372,7 +372,7 @@
                       </label>
 
                       <label>
-                        <span>Precio</span>
+                        <span><strong style="font-size: larger;">Precio</strong></span>
                         <input
                           type="number"
                           min="0"
@@ -548,7 +548,7 @@
         </label>
 
         <label class="full">
-          <span>Descripción corta</span>
+          <span><strong style="font-size: larger;">Descripción corta</strong></span>
           <input
             [ngModel]="form().descripcionCorta"
             (ngModelChange)="setField('descripcionCorta', $event)"
@@ -556,7 +556,7 @@
         </label>
 
         <label class="full">
-          <span>Info Modal (larga)</span>
+          <span> <strong style="font-size: larger;">Info Modal (larga)</strong></span>
           <textarea
             rows="4"
             [ngModel]="form().infoModal"

@@ -24,7 +24,8 @@ type BrandKey =
   | 'C-B-X'
   | 'FW'
   | 'Keyroad'
-  | 'Ibicraft';
+  | 'Ibicraft'
+  | 'Otros';
 
 @Component({
   selector: 'app-productos',
@@ -57,6 +58,7 @@ export class Productos implements AfterViewInit {
     'FW',
     'Keyroad',
     'Ibicraft',
+    'Otros'
   ];
 
   readonly minPrice = signal<number | null>(null);
@@ -131,6 +133,7 @@ export class Productos implements AfterViewInit {
       'FW',
       'Keyroad',
       'Ibicraft',
+      'Otros'
     ];
 
     const match = brands.find((b) => this.norm(b) === this.norm(value));
