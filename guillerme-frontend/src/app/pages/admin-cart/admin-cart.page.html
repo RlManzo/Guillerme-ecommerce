@@ -2,30 +2,30 @@
   <h1>Ventas LOCAL</h1>
 
   <div class="tabs">
-  <button
-    type="button"
-    [class.active]="tab() === 'new'"
-    (click)="switchTab('new')"
-  >
-    Nueva venta
-  </button>
+    <button
+      type="button"
+      [class.active]="tab() === 'new'"
+      (click)="switchTab('new')"
+    >
+      Nueva venta
+    </button>
 
-  <button
-    type="button"
-    [class.active]="tab() === 'history'"
-    (click)="switchTab('history')"
-  >
-    Historial de ventas
-  </button>
+    <button
+      type="button"
+      [class.active]="tab() === 'history'"
+      (click)="switchTab('history')"
+    >
+      Historial de ventas
+    </button>
 
-  <button
-    type="button"
-    [class.active]="tab() === 'stock'"
-    (click)="switchTab('stock')"
-  >
-    Consultar stock
-  </button>
-</div>
+    <button
+      type="button"
+      [class.active]="tab() === 'stock'"
+      (click)="switchTab('stock')"
+    >
+      Consultar stock
+    </button>
+  </div>
 
   <!-- NUEVA VENTA -->
   <ng-container *ngIf="tab() === 'new'">
@@ -40,142 +40,226 @@
     </div>
 
     <ng-container *ngIf="orderStarted()">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="toolbar-title">
-            {{ editingSaleId() ? ('Editando venta #' + editingSaleId()) : 'Pedido en curso' }}
-          </div>
-          <div class="toolbar-subtitle">
-            Escaneá con la pistola o ingresá el código manualmente.
-          </div>
-        </div>
+      <div class="pos-layout">
+        <!-- COLUMNA IZQUIERDA -->
+        <section class="pos-main">
+          <div class="toolbar compact-toolbar">
+            <div class="toolbar-left">
+              <div class="toolbar-title">
+                {{ editingSaleId() ? ('Editando venta #' + editingSaleId()) : 'Pedido en curso' }}
+              </div>
 
-        <div class="toolbar-right">
-          <button
-            class="secondary-btn"
-            type="button"
-            (click)="cancelOrder()"
-            [disabled]="sending()"
-          >
-            {{ editingSaleId() ? 'Cancelar edición' : 'Cancelar pedido' }}
-          </button>
-        </div>
-      </div>
+              <div class="toolbar-subtitle">
+                Escaneá con la pistola o ingresá el código manualmente.
+              </div>
+            </div>
 
-      <div class="scan-box">
-        <input
-          #scanInputEl
-          placeholder="Escaneá o ingresá código"
-          [ngModel]="scanInput()"
-          (ngModelChange)="scanInput.set($event)"
-          (keydown.enter)="scanCode()"
-          [disabled]="loading() || sending()"
-        />
-
-        <button
-          type="button"
-          (click)="scanCode()"
-          [disabled]="loading() || sending()"
-        >
-          {{ loading() ? 'Buscando...' : 'Agregar' }}
-        </button>
-      </div>
-
-      <div class="empty-state" *ngIf="cart().length === 0">
-        Todavía no agregaste productos al pedido.
-      </div>
-
-      <table *ngIf="cart().length > 0">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Cantidad</th>
-            <th>Subtotal</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr
-            *ngFor="let item of cart()"
-            [class.highlight]="item.productId === lastAddedId()"
-          >
-            <td>{{ item.barcode || '-' }}</td>
-            <td>{{ item.nombre }}</td>
-            <td>${{ item.precio | number:'1.0-0' }}</td>
-            <td>{{ item.stock }}</td>
-
-            <td>
-              <input
-                type="number"
-                min="1"
-                [max]="item.stock"
-                [ngModel]="item.qty"
-                (ngModelChange)="changeQty(item, +$event)"
-                [disabled]="sending()"
-              />
-            </td>
-
-            <td>${{ (item.precio * item.qty) | number:'1.0-0' }}</td>
-
-            <td>
+            <div class="toolbar-right">
               <button
-                class="remove-btn"
                 type="button"
-                (click)="removeItem(item.productId)"
+                class="icon-btn"
+                (click)="toggleManualSearchVisible()"
+                [attr.aria-label]="manualSearchVisible() ? 'Cerrar búsqueda manual' : 'Abrir búsqueda manual'"
+                [class.active]="manualSearchVisible()"
+              >
+                <ng-container *ngIf="!manualSearchVisible(); else closeIcon">
+                  <svg viewBox="0 0 24 24" class="icon-search" aria-hidden="true">
+                    <path
+                      d="M10.5 3a7.5 7.5 0 1 0 4.73 13.32l4.72 4.72 1.41-1.41-4.72-4.72A7.5 7.5 0 0 0 10.5 3zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </ng-container>
+
+                <ng-template #closeIcon>
+                  <svg viewBox="0 0 24 24" class="icon-search" aria-hidden="true">
+                    <path
+                      d="M6 6l12 12M18 6L6 18"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </ng-template>
+              </button>
+
+              <button
+                class="secondary-btn"
+                type="button"
+                (click)="cancelOrder()"
                 [disabled]="sending()"
               >
-                X
+                {{ editingSaleId() ? 'Cancelar edición' : 'Cancelar pedido' }}
               </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
 
-      <div class="total-box" *ngIf="cart().length > 0">
-        <div class="totals">
-          <div>Items: <strong>{{ totalItems() }}</strong></div>
-          <div>Total: <strong>${{ totalAmount() | number:'1.0-0' }}</strong></div>
-        </div>
+          <div class="pos-search-card">
+  <div class="manual-search-wrap" *ngIf="manualSearchVisible()">
+    <app-admin-product-search-picker
+      (productSelected)="onManualProductSelected($event)"
+    />
+  </div>
 
-        <div class="customer-box">
-          <label for="customerName">Cliente / referencia</label>
-          <input
-            id="customerName"
-            type="text"
-            placeholder="Ej: Juan Pérez, Mostrador, Reserva Ana..."
-            [ngModel]="customerName()"
-            (ngModelChange)="customerName.set($event)"
-            [disabled]="sending()"
-          />
-        </div>
+  <div class="scan-box pos-scan-box">
+    <div class="scan-row">
+      <input
+        #scanInputEl
+        placeholder="Escaneá o ingresá código"
+        [ngModel]="scanInput()"
+        (ngModelChange)="scanInput.set($event)"
+        (keydown.enter)="scanCode()"
+        [disabled]="loading() || sending()"
+      />
 
-        <div class="actions">
-          <button
-            class="finalize-btn"
-            type="button"
-            (click)="finalize()"
-            [disabled]="sending()"
-          >
-            {{
-              sending()
-                ? 'Procesando...'
-                : (editingSaleId() ? 'Guardar venta reabierta' : 'Finalizar compra')
-            }}
-          </button>
+      <button
+        type="button"
+        (click)="scanCode()"
+        [disabled]="loading() || sending()"
+      >
+        {{ loading() ? 'Buscando...' : 'Agregar' }}
+      </button>
+    </div>
+  </div>
+</div>
 
-          <button
-            class="clear-btn"
-            type="button"
-            (click)="clearCart()"
-            [disabled]="sending()"
-          >
-            Vaciar
-          </button>
-        </div>
+          <div class="pos-cart-card">
+            <div class="pos-cart-head">
+              <div>
+                <div class="pos-card-title">Productos del pedido</div>
+                <div class="pos-card-subtitle">
+                  {{ cart().length === 0 ? 'Todavía no agregaste productos.' : (totalItems() + ' items en el pedido') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-state pos-empty" *ngIf="cart().length === 0">
+              Todavía no agregaste productos al pedido.
+            </div>
+
+            <div class="pos-cart-table-wrap" *ngIf="cart().length > 0" #cartSection>
+              <table class="pos-cart-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr
+                    *ngFor="let item of cart()"
+                    [class.highlight]="item.productId === lastAddedId()"
+                  >
+                    <td>{{ item.barcode || '-' }}</td>
+                    <td>{{ item.nombre }}</td>
+                    <td>${{ item.precio | number:'1.0-0' }}</td>
+                    <td>{{ item.stock }}</td>
+
+                    <td>
+                      <input
+                        type="number"
+                        min="1"
+                        [max]="item.stock"
+                        [ngModel]="item.qty"
+                        (ngModelChange)="changeQty(item, +$event)"
+                        [disabled]="sending()"
+                      />
+                    </td>
+
+                    <td>${{ (item.precio * item.qty) | number:'1.0-0' }}</td>
+
+                    <td>
+                      <button
+                        class="remove-btn"
+                        type="button"
+                        (click)="removeItem(item.productId)"
+                        [disabled]="sending()"
+                      >
+                        X
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- COLUMNA DERECHA -->
+        <aside class="pos-side">
+          <div class="pos-summary-card">
+            <div class="summary-kicker">
+              {{ editingSaleId() ? ('Venta #' + editingSaleId()) : 'Resumen del pedido' }}
+            </div>
+
+            <div class="summary-total">
+              ${{ totalAmount() | number:'1.0-0' }}
+            </div>
+
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span class="summary-label">Items</span>
+                <strong>{{ totalItems() }}</strong>
+              </div>
+
+              <div class="summary-item">
+                <span class="summary-label">Productos</span>
+                <strong>{{ cart().length }}</strong>
+              </div>
+            </div>
+
+            <div class="customer-box pos-customer-box">
+              <label for="customerName">Cliente / referencia</label>
+              <input
+                id="customerName"
+                type="text"
+                placeholder="Ej: Juan Pérez, Mostrador, Reserva Ana..."
+                [ngModel]="customerName()"
+                (ngModelChange)="customerName.set($event)"
+                [disabled]="sending()"
+              />
+            </div>
+          </div>
+
+          <div class="pos-actions-card">
+            <button
+              class="finalize-btn pos-action-main"
+              type="button"
+              (click)="finalize()"
+              [disabled]="sending()"
+            >
+              {{
+                sending()
+                  ? 'Procesando...'
+                  : (editingSaleId() ? 'Guardar venta reabierta' : 'Finalizar compra')
+              }}
+            </button>
+
+            <button
+              class="clear-btn pos-action-secondary"
+              type="button"
+              (click)="clearCart()"
+              [disabled]="sending()"
+            >
+              Vaciar
+            </button>
+
+            <button
+              class="secondary-btn pos-action-secondary"
+              type="button"
+              (click)="cancelOrder()"
+              [disabled]="sending()"
+            >
+              {{ editingSaleId() ? 'Cancelar edición' : 'Cancelar pedido' }}
+            </button>
+          </div>
+        </aside>
       </div>
     </ng-container>
   </ng-container>
@@ -236,8 +320,6 @@
           <button class="btn btn-secondary" type="button" (click)="resetHistoryFilters()">
             Limpiar
           </button>
-
-        
         </div>
 
         <div class="ms-auto text-muted small">
@@ -249,7 +331,7 @@
     <div class="history-layout">
       <div class="history-list panel">
         <div class="history-header">
-        <h3>Ventas realizadas</h3>
+          <h3>Ventas realizadas</h3>
         </div>
 
         <div *ngIf="historyLoading()" class="empty-state">
@@ -324,7 +406,6 @@
                 Cerrar
               </button>
 
-              
               <button
                 type="button"
                 class="danger-btn"
@@ -361,48 +442,50 @@
 
           <table class="detail-table">
             <thead>
-                <tr>
+              <tr>
                 <th>Producto</th>
                 <th>Código</th>
                 <th>Unitario</th>
                 <th>Cantidad</th>
                 <th>Subtotal</th>
-                </tr>
+              </tr>
             </thead>
 
             <tbody>
-                <tr *ngFor="let it of selectedSale()!.items">
+              <tr *ngFor="let it of selectedSale()!.items">
                 <td>{{ it.productNombre }}</td>
                 <td>{{ it.barcode || '-' }}</td>
                 <td>${{ it.unitPrice | number:'1.0-0' }}</td>
                 <td>{{ it.qty }}</td>
                 <td>${{ it.subtotal | number:'1.0-0' }}</td>
-                </tr>
+              </tr>
             </tbody>
 
             <tfoot>
-                <tr class="detail-total-row">
+              <tr class="detail-total-row">
                 <td><strong>Total</strong></td>
                 <td></td>
                 <td></td>
                 <td><strong>{{ selectedSale()!.totalItems }}</strong></td>
                 <td><strong>${{ selectedSale()!.totalAmount | number:'1.0-0' }}</strong></td>
-                </tr>
+              </tr>
             </tfoot>
-            </table>
+          </table>
 
           <div class="comment-box" *ngIf="selectedSale()!.comment">
             <strong>Comentario:</strong>
             <div>{{ selectedSale()!.comment }}</div>
           </div>
-          <br>
+
+          <br />
+
           <button
-                type="button"
-                class="btn btn-warning"
-                (click)="downloadSalePdf(selectedSale())"
-              >
-                Descargar PDF
-              </button>
+            type="button"
+            class="btn btn-warning"
+            (click)="downloadSalePdf(selectedSale())"
+          >
+            Descargar PDF
+          </button>
         </ng-container>
 
         <ng-template #emptyDetail>

@@ -35,8 +35,7 @@ export class AdminOrdersPage {
   fromDate = signal<string>(''); // YYYY-MM-DD
   toDate = signal<string>(''); // YYYY-MM-DD
 
-  rows = signal<AdminOrderSummaryDto[]>([]);
-  selected = signal<AdminOrderDetailDto | null>(null);
+
 
   // filtros
   q = signal('');
@@ -93,14 +92,16 @@ export class AdminOrdersPage {
   'PENDIENTE_DE_PAGO',
   'PAGADO',
   'ENVIADO',
+  'RETIRO_POR_LOCAL',
   'ANULADO',
 ];
 
   readonly statusLabel: Record<OrderStatus, string> = {
   NUEVO: 'NUEVO',
-  PENDIENTE_DE_PAGO: 'PENDIENTE DE PAGO',
+  PENDIENTE_DE_PAGO: 'CHARLANDO POR WP',
   PAGADO: 'PAGADO',
   ENVIADO: 'ENVIADO',
+  RETIRO_POR_LOCAL: 'RETIRO POR LOCAL',
   ANULADO: 'ANULADO',
 };
 
@@ -449,5 +450,17 @@ export class AdminOrdersPage {
     this.shipmentFileName.set('');
   }
 
+
+  rows = signal<AdminOrderSummaryDto[]>([]);
+selected = signal<AdminOrderDetailDto | null>(null);
+
+visibleRows = computed(() =>
+  this.rows().filter(
+    (o) =>
+      o.status !== 'ANULADO' &&
+      o.status !== 'ENVIADO' &&
+      o.status !== 'RETIRO_POR_LOCAL'
+  )
+);
   
 }

@@ -5,5 +5,6 @@ public enum OrderStatus {
     PENDIENTE_DE_PAGO,
     PAGADO,
     ENVIADO,
+    RETIRO_POR_LOCAL,
     ANULADO
 }

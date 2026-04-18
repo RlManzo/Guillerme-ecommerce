@@ -1,0 +1,42 @@
+<div class="manual-search-box">
+  <label class="manual-search-label">Buscar producto manualmente</label>
+
+  <input
+    type="text"
+    class="manual-search-input"
+    placeholder="Escribí nombre, código o palabra clave"
+    [ngModel]="query()"
+    (ngModelChange)="onSearch($event)"
+  />
+
+  <div class="manual-search-loading" *ngIf="loading()">
+    Buscando productos...
+  </div>
+
+  <div
+    class="manual-search-empty"
+    *ngIf="!loading() && query().trim().length >= 2 && results().length === 0"
+  >
+    No se encontraron productos.
+  </div>
+
+  <div
+    class="manual-search-results"
+    *ngIf="!loading() && results().length > 0"
+  >
+    <button
+      type="button"
+      class="manual-search-item"
+      *ngFor="let p of results()"
+      (click)="selectProduct(p)"
+    >
+      <div class="manual-search-name">{{ p.nombre }}</div>
+
+      <div class="manual-search-meta">
+        <span>Código: {{ p.barcode || '-' }}</span>
+        <span>Stock: {{ p.stock }}</span>
+        <span>${{ p.precio | number:'1.0-0' }}</span>
+      </div>
+    </button>
+  </div>
+</div>

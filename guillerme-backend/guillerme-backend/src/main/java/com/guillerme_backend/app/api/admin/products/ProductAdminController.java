@@ -6,10 +6,7 @@ import com.guillerme_backend.app.service.AdminProductService;
 import com.guillerme_backend.app.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,7 +17,11 @@ public class ProductAdminController {
     private final ProductService productService;
     private final AdminProductService adminProductService;
 
-    public ProductAdminController(ProductService productService, AdminProductService adminProductService, AdminOrderShippingService adminOrderShippingService) {
+    public ProductAdminController(
+            ProductService productService,
+            AdminProductService adminProductService,
+            AdminOrderShippingService adminOrderShippingService
+    ) {
         this.productService = productService;
         this.adminProductService = adminProductService;
     }
@@ -28,7 +29,6 @@ public class ProductAdminController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse create(@Valid @RequestBody CreateProductRequest req) {
-
         var ids = adminProductService.bulkCreate(List.of(req));
         Long id = ids.get(0);
 
@@ -66,5 +66,10 @@ public class ProductAdminController {
         return ProductResponse.of(p, productService.getStock(p.getId()));
     }
 
+    @GetMapping("/search")
+    public List<ProductResponse> search(@RequestParam String q) {
+        return adminProductService.search(q).stream()
+                .map(p -> ProductResponse.of(p, productService.getStock(p.getId())))
+                .toList();
+    }
 }
-

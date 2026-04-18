@@ -78,4 +78,11 @@ getByBarcode(code: string) {
   );
 }
 
+search(term: string) {
+  return this.http.get<ProductResponse[]>(
+    '/api/admin/products/search',
+    { params: { q: term } }
+  );
+}
+
 }

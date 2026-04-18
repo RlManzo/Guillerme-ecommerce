@@ -7,6 +7,7 @@ import com.guillerme_backend.app.domain.product.Stock;
 import com.guillerme_backend.app.domain.product.StockRepository;
 import com.guillerme_backend.app.exception.BadRequestException;
 import com.guillerme_backend.app.exception.NotFoundException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -149,5 +150,15 @@ public class AdminProductService {
         if (s == null) return null;
         String t = s.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    public List<Product> search(String q) {
+        String term = q == null ? "" : q.trim();
+
+        if (term.length() < 2) {
+            return List.of();
+        }
+
+        return productRepository.searchForAdminSale(term, PageRequest.of(0, 10));
     }
 }

@@ -12,6 +12,7 @@ import { CommonModule, DatePipe, DecimalPipe, NgIf, NgFor } from '@angular/commo
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
+
 import { AdminProductsApi } from '../../shared/admin/admin-products.api';
 import {
   LocalSalesApi,
@@ -22,6 +23,7 @@ import { AuthService } from '../../shared/auth/auth.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { downloadLocalSalePdf } from '../../shared/pdf/local-sale-receipt.pdf';
 import { AdminStockLookupComponent } from '../admin-stock-lookup/admin-stock-lookup.component';
+import { AdminProductSearchPickerComponent } from '../admin-product-search/admin-product-search-picker.component';
 
 type CartItem = {
   productId: number;
@@ -35,7 +37,7 @@ type CartItem = {
 @Component({
   standalone: true,
   selector: 'app-admin-purchases',
-  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe, AdminStockLookupComponent],
+  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe, AdminStockLookupComponent, AdminProductSearchPickerComponent],
   templateUrl: './admin-cart.page.html',
   styleUrl: './admin-cart.page.scss',
 })
@@ -64,6 +66,7 @@ export class AdminCartPage implements OnInit {
   historyLoading = signal(false);
   historyRows = signal<LocalSaleSummaryDto[]>([]);
   selectedSale = signal<LocalSaleDetailDto | null>(null);
+  
 
   page = signal(0);
   size = signal(10);
@@ -74,6 +77,9 @@ export class AdminCartPage implements OnInit {
   // null = venta nueva
   // number = venta reabierta en edición
   editingSaleId = signal<number | null>(null);
+
+  manualSearchVisible = signal(false);
+  @ViewChild('cartSection') cartSection?: ElementRef;
 
   // scanner global
   private scannerBuffer = '';
@@ -656,4 +662,35 @@ export class AdminCartPage implements OnInit {
     if (!d) return undefined;
     return new Date(d + 'T23:59:59').toISOString();
   }
+
+  onManualProductSelected(p: any) {
+  if (this.sending()) return;
+
+  if ((p.stock ?? 0) <= 0) {
+    this.toast.error(`Sin stock para ${p.nombre}`);
+    return;
+  }
+
+  this.addToCart(p);
+  this.toast.success(`${p.nombre} agregado al pedido`);
+
+  this.scrollToCart();   
+}
+
+toggleManualSearchVisible() {
+  this.manualSearchVisible.update(v => !v);
+}
+
+closeManualSearch() {
+  this.manualSearchVisible.set(false);
+}
+
+scrollToCart() {
+  setTimeout(() => {
+    this.cartSection?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }, 0);
+}
 }
