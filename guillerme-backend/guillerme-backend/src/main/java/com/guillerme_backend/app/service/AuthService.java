@@ -11,6 +11,7 @@ import com.guillerme_backend.app.domain.user.UserRepository;
 import com.guillerme_backend.app.security.JwtService;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -88,9 +89,15 @@ public class AuthService {
     }
 
     public String login(String email, String password) {
-        authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+        try {
+            authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+
+        } catch (BadCredentialsException e) {
+
+            throw new BadCredentialsException("Email o contraseña incorrectos");
+        }
 
         User u = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));

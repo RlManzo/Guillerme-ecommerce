@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 
 export type UserSession = {
@@ -31,6 +32,9 @@ export type MeResponse = {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+
+  private logoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   private readonly _session = signal<UserSession | null>(this.readFromStorage());
   readonly session = this._session.asReadonly();
@@ -42,6 +46,10 @@ export class AuthService {
   readonly role = computed(() => this._session()?.role ?? null);
   readonly isAdmin = computed(() => (this.role() ?? '').toUpperCase() === 'ADMIN');
   readonly isOperador = computed(() => (this.role() ?? '').toUpperCase() === 'OPERADOR');
+
+  constructor() {
+    this.restoreSessionTimer();
+  }
 
   register(dto: RegisterDto) {
     return this.http.post<{ message: string }>('/api/auth/register', dto);
@@ -78,9 +86,49 @@ export class AuthService {
     );
   }
 
-  logout() {
+  logout(reason = 'Tu sesión expiró. Iniciá sesión nuevamente.') {
+    this.clearLogoutTimer();
     this._session.set(null);
     localStorage.removeItem('auth.session');
+
+    this.router.navigate(['/login'], {
+      state: { successMessage: reason },
+    });
+  }
+
+  clearSessionOnly() {
+    this.clearLogoutTimer();
+    this._session.set(null);
+    localStorage.removeItem('auth.session');
+  }
+
+  isTokenExpired(): boolean {
+    const token = this.token();
+    if (!token) return true;
+
+    const exp = this.getTokenExpiration(token);
+    if (!exp) return true;
+
+    return Date.now() >= exp;
+  }
+
+  restoreSessionTimer() {
+    const current = this._session();
+    if (!current?.token) return;
+
+    const exp = this.getTokenExpiration(current.token);
+
+    if (!exp) {
+      this.clearSessionOnly();
+      return;
+    }
+
+    if (Date.now() >= exp) {
+      this.logout('Tu sesión venció. Volvé a iniciar sesión.');
+      return;
+    }
+
+    this.scheduleAutoLogout(current.token);
   }
 
   private setToken(token: string, email: string) {
@@ -95,6 +143,47 @@ export class AuthService {
     const s: UserSession = { token, email, role };
     this._session.set(s);
     localStorage.setItem('auth.session', JSON.stringify(s));
+
+    this.scheduleAutoLogout(token);
+  }
+
+  private scheduleAutoLogout(token: string) {
+    this.clearLogoutTimer();
+
+    const exp = this.getTokenExpiration(token);
+
+    if (!exp) {
+      this.clearSessionOnly();
+      return;
+    }
+
+    const msUntilExpiration = exp - Date.now();
+
+    if (msUntilExpiration <= 0) {
+      this.logout('Tu sesión venció. Volvé a iniciar sesión.');
+      return;
+    }
+
+    this.logoutTimer = setTimeout(() => {
+      this.logout('Tu sesión venció. Volvé a iniciar sesión.');
+    }, msUntilExpiration);
+  }
+
+  private getTokenExpiration(token: string): number | null {
+    const decoded = this.decodeJwt(token);
+    const exp = decoded?.exp;
+
+    if (!exp || typeof exp !== 'number') return null;
+
+    // exp viene en segundos desde epoch
+    return exp * 1000;
+  }
+
+  private clearLogoutTimer() {
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+      this.logoutTimer = null;
+    }
   }
 
   private readFromStorage(): UserSession | null {
