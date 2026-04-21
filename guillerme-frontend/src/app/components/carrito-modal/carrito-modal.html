@@ -27,15 +27,11 @@
               <div class="titleCards">
                 <h6 class="mb-1">{{ it.producto.nombre }}</h6>
 
-                <!-- ✅ precio unitario (si lo tenés) -->
                 <div class="small text-muted" *ngIf="(it.producto.precio ?? 0) > 0">
                   Unitario: {{ (it.producto.precio ?? 0) | currency:'$':'symbol':'1.0-0' }}
                 </div>
 
-                <!-- ✅ controls cantidad -->
                 <div class="d-flex align-items-center gap-2 mt-2">
-                  
-
                   <div class="catCant">
                     Cantidad: <b>{{ it.cantidad }}</b>
                     <span class="text-muted" *ngIf="(it.producto.stock ?? 0) > 0">
@@ -43,31 +39,32 @@
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="dec(it.producto.id, $event)"
-                    [disabled]="sending()"
-                  >
-                    −
-                  </button>
+                  <ng-container *ngIf="(it.producto.stock ?? 0) > 0; else sinStockTpl">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      (click)="dec(it.producto.id, $event)"
+                      [disabled]="sending()"
+                    >
+                      −
+                    </button>
 
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="inc(it.producto.id, $event)"
-                    [disabled]="sending() || !store.canInc(it.producto.id)"
-                    [title]="!store.canInc(it.producto.id) ? 'Sin stock disponible' : 'Sumar'"
-                  >
-                    +
-                  </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      (click)="inc(it.producto.id, $event)"
+                      [disabled]="sending() || !store.canInc(it.producto.id)"
+                      [title]="!store.canInc(it.producto.id) ? 'Sin stock disponible' : 'Sumar'"
+                    >
+                      +
+                    </button>
+                  </ng-container>
 
-                  <span class="small text-danger ms-2" *ngIf="(it.producto.stock ?? 0) <= 0">
-                    Sin stock
-                  </span>
+                  <ng-template #sinStockTpl>
+                    <span class="small text-danger ms-2">Sin stock</span>
+                  </ng-template>
                 </div>
 
-                <!-- ✅ subtotal por item -->
                 <div class="small mt-2">
                   Subtotal:
                   <b>{{ lineTotal(it) | currency:'$':'symbol':'1.0-0' }}</b>
@@ -76,7 +73,6 @@
             </li>
           </ul>
 
-          <!-- ✅ totales del carrito -->
           <div class="mt-3 border-top pt-3 d-flex justify-content-between align-items-center">
             <div class="text-muted">
               Productos: <b>{{ totalItems() }}</b>

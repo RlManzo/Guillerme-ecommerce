@@ -244,4 +244,41 @@ export class ShopStore {
   openCart() { this._cartOpen.set(true); }
   closeCart() { this._cartOpen.set(false); }
   toggleCart() { this._cartOpen.update(v => !v); }
+
+  syncCartStock(
+  products: Array<Pick<Producto, 'id' | 'stock' | 'precio' | 'nombre' | 'img'>>
+) {
+  const productsMap = new Map(products.map(p => [p.id, p]));
+
+  const nextCart = this._cart().map((item) => {
+    const fresh = productsMap.get(item.producto.id);
+
+    if (!fresh) {
+      return {
+        ...item,
+        producto: {
+          ...item.producto,
+          stock: 0
+        }
+      };
+    }
+
+    const stock = Number(fresh.stock ?? 0);
+    const cantidad = Number(item.cantidad ?? 0);
+
+    return {
+      ...item,
+      producto: {
+        ...item.producto,
+        stock: fresh.stock,
+        precio: fresh.precio ?? item.producto.precio,
+        nombre: fresh.nombre ?? item.producto.nombre,
+        img: fresh.img ?? item.producto.img,
+      },
+      cantidad: stock > 0 ? Math.min(cantidad, stock) : cantidad
+    };
+  });
+
+  this._cart.set(nextCart);
+}
 }
