@@ -159,6 +159,6 @@ public class AdminProductService {
             return List.of();
         }
 
-        return productRepository.searchForAdminSale(term, PageRequest.of(0, 10));
+        return productRepository.searchForAdminSale(term, PageRequest.of(0, 50));
     }
 }
