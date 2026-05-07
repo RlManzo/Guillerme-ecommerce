@@ -261,12 +261,13 @@ export class Productos implements AfterViewInit {
   }
 
   private hasBrand(p: Product, brand: string): boolean {
-    const wanted = this.norm(brand);
-    if (!wanted || wanted === 'all') return true;
+  const wanted = this.norm(brand);
+  if (!wanted || wanted === 'all') return true;
 
-    const keywords = this.getKeywordsNormalized(p);
-    return keywords.some((k) => k === wanted || k.includes(wanted));
-  }
+  const keywords = this.getKeywordsNormalized(p);
+
+  return keywords.some((k) => k === wanted);
+}
 
   private hasCat(p: Product, wanted: string) {
     const w = this.norm(wanted);
