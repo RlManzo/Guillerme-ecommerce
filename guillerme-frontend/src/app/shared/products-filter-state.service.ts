@@ -10,6 +10,10 @@ export type ProductsBrand =
   | 'C-B-X'
   | 'FW'
   | 'Keyroad'
+  | 'Wero'
+  | 'Laprida-Exito'
+  | 'Bic'
+  | 'Carpel'
   | 'Ibicraft';
 
 type ProductsFilterState = {

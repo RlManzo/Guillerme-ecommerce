@@ -20,6 +20,10 @@ type ProductsBrand =
   | 'FW'
   | 'Keyroad'
   | 'Ibicraft'
+  | 'Wero'
+  | 'Laprida-Exito'
+  | 'Bic'
+  | 'Carpel'
   | 'Otros';
 
 @Component({
@@ -57,6 +61,10 @@ export class Navbar {
     'FW',
     'Keyroad',
     'Ibicraft',
+    'Wero',
+    'Bic',
+    'Laprida-Exito',
+    'Carpel',
     'Otros',
   ];
 

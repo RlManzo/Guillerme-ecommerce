@@ -93,6 +93,10 @@ keywordErrorEdit = signal<string | null>(null);
     'FW',
     'Keyroad',
     'Ibicraft',
+    'Wero',
+    'Laprida-Exito',
+    'Bic',
+    'Carpel',
     'Otros'
 
   ] as const;

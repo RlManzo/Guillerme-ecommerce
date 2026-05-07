@@ -25,6 +25,10 @@ type BrandKey =
   | 'FW'
   | 'Keyroad'
   | 'Ibicraft'
+  | 'Wero'
+  | 'Laprida-Exito'
+  | 'Bic'
+  | 'Carpel'
   | 'Otros';
 
 @Component({
@@ -58,6 +62,10 @@ export class Productos implements AfterViewInit {
     'FW',
     'Keyroad',
     'Ibicraft',
+    'Wero',
+    'Laprida-Exito',
+    'Bic',
+    'Carpel',
     'Otros'
   ];
 
@@ -133,6 +141,10 @@ export class Productos implements AfterViewInit {
       'FW',
       'Keyroad',
       'Ibicraft',
+      'Wero',
+      'Laprida-Exito',
+      'Bic',
+      'Carpel',
       'Otros'
     ];
 
