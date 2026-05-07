@@ -57,7 +57,7 @@
             <div class="toolbar-right">
               <button
                 type="button"
-                class="icon-btn"
+                class="icon-btn search-toggle-btn"
                 (click)="toggleManualSearchVisible()"
                 [attr.aria-label]="manualSearchVisible() ? 'Cerrar búsqueda manual' : 'Abrir búsqueda manual'"
                 [class.active]="manualSearchVisible()"
@@ -69,6 +69,7 @@
                       fill="currentColor"
                     />
                   </svg>
+                   <span class="search-toggle-text">Buscar productos</span>
                 </ng-container>
 
                 <ng-template #closeIcon>
@@ -81,10 +82,11 @@
                     />
                   </svg>
                 </ng-template>
+                
               </button>
 
               <button
-                class="secondary-btn"
+                class="btn btn-warning"
                 type="button"
                 (click)="cancelOrder()"
                 [disabled]="sending()"
