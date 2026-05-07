@@ -46,6 +46,7 @@ public class SecurityConfig {
 
                         // ventas local
                         .requestMatchers("/api/admin/local-sales/**").hasAnyRole("ADMIN", "OPERADOR")
+                        .requestMatchers("/api/admin/products/search").hasAnyRole("ADMIN","OPERADOR")
 
                         // búsqueda por barcode para caja
                         .requestMatchers("/api/admin/products/by-barcode").hasAnyRole("ADMIN", "OPERADOR")
