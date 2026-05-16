@@ -19,6 +19,9 @@ export class AdminCustomersPage {
   customers = signal<AdminCustomerUserResponse[]>([]);
   search = signal('');
 
+  readonly pageSize = 50;
+  currentPage = signal(1);
+
   filteredCustomers = computed(() => {
     const value = this.search().trim().toLowerCase();
 
@@ -33,9 +36,38 @@ export class AdminCustomersPage {
         customer.email.toLowerCase().includes(value) ||
         fullName.includes(value) ||
         (customer.telefono ?? '').toLowerCase().includes(value) ||
-        (customer.documento ?? '').toLowerCase().includes(value)
+        (customer.documento ?? '').toLowerCase().includes(value) ||
+        (customer.direccion ?? '').toLowerCase().includes(value)
       );
     });
+  });
+
+  totalPages = computed(() => {
+    const total = this.filteredCustomers().length;
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  });
+
+  paginatedCustomers = computed(() => {
+    const page = this.currentPage();
+    const start = (page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    return this.filteredCustomers().slice(start, end);
+  });
+
+  pageStart = computed(() => {
+    if (this.filteredCustomers().length === 0) {
+      return 0;
+    }
+
+    return (this.currentPage() - 1) * this.pageSize + 1;
+  });
+
+  pageEnd = computed(() => {
+    return Math.min(
+      this.currentPage() * this.pageSize,
+      this.filteredCustomers().length
+    );
   });
 
   constructor(private readonly adminCustomersApi: AdminCustomersApi) {}
@@ -51,6 +83,7 @@ export class AdminCustomersPage {
     this.adminCustomersApi.getAll().subscribe({
       next: (customers) => {
         this.customers.set(customers);
+        this.currentPage.set(1);
         this.loading.set(false);
       },
       error: (err) => {
@@ -63,5 +96,22 @@ export class AdminCustomersPage {
 
   onSearch(value: string) {
     this.search.set(value);
+    this.currentPage.set(1);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages()) {
+      return;
+    }
+
+    this.currentPage.set(page);
+  }
+
+  previousPage() {
+    this.goToPage(this.currentPage() - 1);
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage() + 1);
   }
 }

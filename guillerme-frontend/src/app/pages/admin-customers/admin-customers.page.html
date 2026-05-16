@@ -47,8 +47,7 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let customer of filteredCustomers()">
-
+        <tr *ngFor="let customer of paginatedCustomers()">
           <td class="email">
             {{ customer.email }}
           </td>
@@ -87,11 +86,43 @@
         </tr>
 
         <tr *ngIf="filteredCustomers().length === 0">
-          <td colspan="9" class="empty">
+          <td colspan="8" class="empty">
             No se encontraron usuarios registrados.
           </td>
         </tr>
       </tbody>
     </table>
+
+    <div
+      class="pagination"
+      *ngIf="filteredCustomers().length > pageSize"
+    >
+      <div class="pagination-info">
+        Mostrando {{ pageStart() }} - {{ pageEnd() }}
+        de {{ filteredCustomers().length }} usuarios
+      </div>
+
+      <div class="pagination-actions">
+        <button
+          type="button"
+          (click)="previousPage()"
+          [disabled]="currentPage() === 1"
+        >
+          Anterior
+        </button>
+
+        <span class="page-indicator">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <button
+          type="button"
+          (click)="nextPage()"
+          [disabled]="currentPage() === totalPages()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
   </div>
 </section>
