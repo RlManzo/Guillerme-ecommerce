@@ -80,7 +80,7 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let customer of paginatedCustomers()">
+        <tr *ngFor="let customer of filteredCustomers().slice((currentPage() - 1) * pageSize, currentPage() * pageSize)">
           <td class="email">
             {{ customer.email }}
           </td>
