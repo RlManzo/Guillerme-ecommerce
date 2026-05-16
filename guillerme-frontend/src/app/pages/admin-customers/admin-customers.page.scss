@@ -1,0 +1,174 @@
+.admin-customers-page {
+  padding: 2rem 5vw;
+}
+
+.admin-customers-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0;
+    color: #061c34;
+    font-size: 2.1rem;
+    font-weight: 800;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.25rem;
+    color: #45acb4;
+    font-weight: 800;
+  }
+
+  .description {
+    margin: 0.25rem 0 0;
+    color: #6b7280;
+  }
+}
+
+.counter {
+  border: 1px solid #ffd7a8;
+  border-radius: 999px;
+  background: #fff4e6;
+  padding: 0.65rem 1rem;
+  color: #061c34;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  input {
+    width: min(520px, 100%);
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 0.85rem 1.1rem;
+    outline: none;
+    font-size: 0.95rem;
+
+    &:focus {
+      border-color: #45acb4;
+      box-shadow: 0 0 0 3px rgba(69, 172, 180, 0.15);
+    }
+  }
+
+  button {
+    border: 0;
+    border-radius: 999px;
+    background: #45acb4;
+    padding: 0.85rem 1.25rem;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+
+    &:hover {
+      filter: brightness(0.95);
+    }
+  }
+}
+
+.table-card {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.9rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  th {
+    background: #fafafa;
+    color: #061c34;
+    font-weight: 800;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.email {
+  font-weight: 700;
+}
+
+.address {
+  max-width: 320px;
+  white-space: normal;
+}
+
+.badge {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #fee2e2;
+  padding: 0.25rem 0.65rem;
+  color: #991b1b;
+  font-size: 0.85rem;
+  font-weight: 800;
+
+  &.ok {
+    background: #dcfce7;
+    color: #166534;
+  }
+}
+
+.state {
+  border-radius: 0.75rem;
+  background: #f3f4f6;
+  padding: 1rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.empty {
+  text-align: center;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .admin-customers-page {
+    padding: 1.25rem 1rem;
+  }
+
+  .admin-customers-header {
+    align-items: flex-start;
+    flex-direction: column;
+
+    h1 {
+      font-size: 1.7rem;
+    }
+  }
+
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+
+    input,
+    button {
+      width: 100%;
+    }
+  }
+}

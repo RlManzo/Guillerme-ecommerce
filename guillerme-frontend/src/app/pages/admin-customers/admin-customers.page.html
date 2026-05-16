@@ -1,0 +1,97 @@
+<section class="admin-customers-page" style="position: relative !important; top: 50px !important;">
+  <div class="admin-customers-header">
+    <div>
+      <p class="eyebrow">Mis compradores</p>
+      <h1>Usuarios registrados</h1>
+    </div>
+
+    <div class="counter">
+      {{ filteredCustomers().length }} usuarios
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      placeholder="Buscar por email, nombre, teléfono o documento..."
+      [value]="search()"
+      (input)="onSearch($any($event.target).value)"
+    />
+
+    <button type="button" (click)="loadCustomers()">
+      Actualizar
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="state">
+    Cargando usuarios...
+  </div>
+
+  <div *ngIf="error()" class="state error">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="!loading() && !error()" class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Documento</th>
+          <th>Dirección</th>
+          <th>Activo</th>
+          <th>Email verificado</th>
+          <th *ngIf="filteredCustomers()[0]?.createdAt">Registrado</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let customer of filteredCustomers()">
+
+          <td class="email">
+            {{ customer.email }}
+          </td>
+
+          <td>
+            {{ customer.nombre }} {{ customer.apellido }}
+          </td>
+
+          <td>
+            {{ customer.telefono || '-' }}
+          </td>
+
+          <td>
+            {{ customer.documento || '-' }}
+          </td>
+
+          <td class="address">
+            {{ customer.direccion || '-' }}
+          </td>
+
+          <td>
+            <span class="badge" [class.ok]="customer.enabled">
+              {{ customer.enabled ? 'Sí' : 'No' }}
+            </span>
+          </td>
+
+          <td>
+            <span class="badge" [class.ok]="customer.emailVerified">
+              {{ customer.emailVerified ? 'Sí' : 'No' }}
+            </span>
+          </td>
+
+          <td *ngIf="customer.createdAt">
+            {{ customer.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredCustomers().length === 0">
+          <td colspan="9" class="empty">
+            No se encontraron usuarios registrados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -278,4 +278,11 @@ export class Navbar {
     this.adminOpen.set(false);
     this.router.navigateByUrl('/admin');
   }
+
+  goAdminCustomers() {
+  this.closeUserMenu();
+  this.closeMenu();
+  this.adminOpen.set(false);
+  this.router.navigateByUrl('/admin/customers');
+}
 }
