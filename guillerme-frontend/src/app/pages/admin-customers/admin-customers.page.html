@@ -23,6 +23,39 @@
     </button>
   </div>
 
+  <!-- PAGINACIÓN ARRIBA -->
+  <div
+    class="pagination"
+    *ngIf="!loading() && !error() && filteredCustomers().length > pageSize"
+  >
+    <div class="pagination-info">
+      Mostrando {{ pageStart() }} - {{ pageEnd() }}
+      de {{ filteredCustomers().length }} usuarios
+    </div>
+
+    <div class="pagination-actions">
+      <button
+        type="button"
+        (click)="previousPage()"
+        [disabled]="currentPage() === 1"
+      >
+        Anterior
+      </button>
+
+      <span class="page-indicator">
+        Página {{ currentPage() }} de {{ totalPages() }}
+      </span>
+
+      <button
+        type="button"
+        (click)="nextPage()"
+        [disabled]="currentPage() === totalPages()"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+
   <div *ngIf="loading()" class="state">
     Cargando usuarios...
   </div>
@@ -92,37 +125,5 @@
         </tr>
       </tbody>
     </table>
-
-    <div
-      class="pagination"
-      *ngIf="filteredCustomers().length > pageSize"
-    >
-      <div class="pagination-info">
-        Mostrando {{ pageStart() }} - {{ pageEnd() }}
-        de {{ filteredCustomers().length }} usuarios
-      </div>
-
-      <div class="pagination-actions">
-        <button
-          type="button"
-          (click)="previousPage()"
-          [disabled]="currentPage() === 1"
-        >
-          Anterior
-        </button>
-
-        <span class="page-indicator">
-          Página {{ currentPage() }} de {{ totalPages() }}
-        </span>
-
-        <button
-          type="button"
-          (click)="nextPage()"
-          [disabled]="currentPage() === totalPages()"
-        >
-          Siguiente
-        </button>
-      </div>
-    </div>
   </div>
 </section>
