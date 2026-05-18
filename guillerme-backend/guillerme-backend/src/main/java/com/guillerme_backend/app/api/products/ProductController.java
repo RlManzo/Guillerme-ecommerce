@@ -17,8 +17,14 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> list() {
-        return productService.listAllActive().stream()
+    public List<ProductResponse> list(
+            @RequestParam(defaultValue = "false") boolean includeInactive
+    ) {
+        var products = includeInactive
+                ? productService.listAll()
+                : productService.listAllActive();
+
+        return products.stream()
                 .map(p -> ProductResponse.of(p, productService.getStock(p.getId())))
                 .toList();
     }

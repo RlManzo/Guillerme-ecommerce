@@ -18,6 +18,8 @@ import { Product } from '../../components/productos/product.model';
 type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
 type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA';
 
+type EstadoFilter = 'ACTIVOS' | 'INACTIVOS' | 'TODOS';
+
 @Component({
   standalone: true,
   selector: 'app-admin-products-page',
@@ -55,6 +57,8 @@ export class AdminProductsPage implements OnInit {
 
   keywordErrorCreate = signal<string | null>(null);
 keywordErrorEdit = signal<string | null>(null);
+
+estadoFilter = signal<EstadoFilter>('ACTIVOS');
 
   // ✅ OJO: NO private, así el HTML puede usar productsSig()
   readonly productsSig = toSignal(this.productsService.products$, {
@@ -118,6 +122,7 @@ clearSearch() {
   this.searchInput.set('');
   this.q.set('');
   this.categoriaFilter.set('ALL');
+  this.estadoFilter.set('ACTIVOS');
   this.sortBy.set('NEWEST');
   this.page.set(1);
 }
@@ -181,27 +186,38 @@ clearSearch() {
 
   // Lista filtrada (search + categoria)
   readonly filteredProducts = computed(() => {
-    const all = this.productsSig();
-    const q = this.norm(this.q());
-    const cat = this.categoriaFilter();
+  const all = this.productsSig();
+  const q = this.norm(this.q());
+  const cat = this.categoriaFilter();
+  const estado = this.estadoFilter();
 
-    const catNorm =
-      cat === 'ALL'
-        ? ''
-        : cat === 'LIBRERIA'
-          ? 'libreria'
-          : cat === 'COMBOS'
-            ? 'combos'
-            : cat === 'VARIOS'
-              ? 'varios'
-              : 'libreria';
+  const catNorm =
+    cat === 'ALL'
+      ? ''
+      : cat === 'LIBRERIA'
+        ? 'libreria'
+        : cat === 'COMBOS'
+          ? 'combos'
+          : cat === 'VARIOS'
+            ? 'varios'
+            : 'libreria';
 
-    return all.filter((p) => {
-      const okSearch = !q || this.productText(p).includes(q);
-      const okCat = !catNorm || this.productCategoria(p).includes(catNorm);
-      return okSearch && okCat;
-    });
+  return all.filter((p) => {
+    const okSearch = !q || this.productText(p).includes(q);
+    const okCat = !catNorm || this.productCategoria(p).includes(catNorm);
+
+    const isActive = this.isProductActive(p);
+
+    const okEstado =
+      estado === 'TODOS'
+        ? true
+        : estado === 'ACTIVOS'
+          ? isActive
+          : !isActive;
+
+    return okSearch && okCat && okEstado;
   });
+});
 
   // ✅ ordenado (se aplica sobre el filtrado)
   readonly sortedProducts = computed(() => {
@@ -280,7 +296,7 @@ clearSearch() {
   ngOnInit(): void {
     this.showProducts.set(true);
     this.showForm.set(false);
-    this.productsService.load().subscribe();
+    this.productsService.loadForAdmin().subscribe();
   }
 
   toggleForm() {
@@ -303,7 +319,7 @@ clearSearch() {
       this.showForm.set(false);
       // opcional: si querés asegurarte que no quede en bulk
       // this.tab.set('single');
-      this.productsService.refresh().subscribe();
+      this.productsService.refreshForAdmin().subscribe();
     }
 
     this.showProducts.set(next);
@@ -489,7 +505,7 @@ private validateEditKeyword(): boolean {
           this.keywordErrorCreate.set(null);
 
           this.showForm.set(false);
-          this.productsService.refresh().subscribe();
+          this.productsService.refreshForAdmin().subscribe();
           this.toggleProducts();
         },
         error: (e) => {
@@ -572,7 +588,7 @@ private validateEditKeyword(): boolean {
       next: (res) => {
         this.loading.set(false);
         this.toast.success(`Cargados ${res.ids.length} productos`);
-        this.productsService.refresh().subscribe();
+        this.productsService.refreshForAdmin().subscribe();
       },
       error: (e) => {
         this.loading.set(false);
@@ -676,7 +692,7 @@ private validateEditKeyword(): boolean {
           this.savingRow.set(false);
           this.toast.success('Producto actualizado');
           this.editingId.set(null);
-          this.productsService.refresh().subscribe();
+          this.productsService.refreshForAdmin().subscribe();
         },
         error: (e) => {
           console.error(e);
@@ -703,7 +719,7 @@ private validateEditKeyword(): boolean {
     this.adminApi.delete(id).subscribe({
       next: () => {
         this.toast.success('Producto eliminado');
-        this.productsService.refresh().subscribe();
+        this.productsService.refreshForAdmin().subscribe();
       },
       error: (e) => {
         console.error(e);
@@ -817,7 +833,7 @@ toggleEstado(p: Product) {
   this.adminApi.updateEstado(p.id, next).subscribe({
     next: () => {
       this.toast.success(`Producto ${next ? 'activado' : 'desactivado'}`);
-      this.productsService.refresh().subscribe();
+      this.productsService.refreshForAdmin().subscribe();
     },
     error: (e) => {
       console.error(e);
@@ -831,6 +847,21 @@ private normalizeText(value: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+}
+
+private isProductActive(p: Product): boolean {
+  const estado = (p as any)?.estado;
+
+  if (estado === null || estado === undefined) return true;
+  if (typeof estado === 'boolean') return estado;
+  if (typeof estado === 'number') return estado === 1;
+
+  if (typeof estado === 'string') {
+    const v = estado.toLowerCase();
+    return v === 'true' || v === '1' || v === 't';
+  }
+
+  return !!estado;
 }
 
 }

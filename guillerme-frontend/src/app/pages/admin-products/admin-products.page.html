@@ -48,6 +48,15 @@
   />
 
   <select
+  [ngModel]="estadoFilter()"
+  (ngModelChange)="estadoFilter.set($event); page.set(1)"
+>
+  <option value="ACTIVOS">Activos</option>
+  <option value="INACTIVOS">Inactivos</option>
+  <option value="TODOS">Todos</option>
+</select>
+
+  <select
     [ngModel]="categoriaFilter()"
     (ngModelChange)="onCategoriaChange($event)"
   >

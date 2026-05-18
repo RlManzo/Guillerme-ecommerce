@@ -9,22 +9,27 @@ export interface ProductVariant {
 export interface Product {
   id: number;
   nombre: string;
-  descripcionCorta: string;      // para cards o subtítulo del modal
-  infoModal?: string;            // texto adicional
-  img: string;                   // principal
-  imagenes?: string[];           // thumbs
-  colores?: ProductColor[];       // los 3 puntitos
-  servicios?: ProductServiceType[]; // tags para filtro y modal
-  variantes?: ProductVariant[];   // chips (talles/ml/etc)
-  categorias?: string[];          // "Tazas", "Remeras", etc
-  keywords?: string[];            // para buscador (sinónimos)
-  stock?: number;
-  precio?: number;
-   imgUrl: string;     // o img: string según estés usando
+  descripcionCorta?: string;
+  infoModal?: string;
+
+  img: string;
+  imgUrl?: string;
   imgUrl2?: string;
   imgUrl3?: string;
-  estado?: boolean;
-  barcode?: string | null;
-}
+  imagenes?: string[];
 
+  barcode?: string | null;
+  categorias?: string[];
+  servicios?: string[];
+  keywords?: string[];
+
+  stock?: number;
+  precio?: number;
+
+  activo?: boolean;
+  estado?: boolean;
+
+  colores?: any[];
+  variantes?: any[];
+}
 

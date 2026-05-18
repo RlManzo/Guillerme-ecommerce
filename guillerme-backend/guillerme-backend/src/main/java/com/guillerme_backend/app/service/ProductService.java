@@ -27,6 +27,10 @@ public class ProductService {
         return productRepository.findAll().stream().filter(Product::isActivo).toList();
     }
 
+    public List<Product> listAll() {
+        return productRepository.findAll();
+    }
+
     public Product getById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }

@@ -66,4 +66,32 @@ export class ProductsService implements OnDestroy {
   ngOnDestroy(): void {
     this.stopPolling();
   }
+
+loadForAdmin() {
+  this._loading$.next(true);
+  this._error$.next(null);
+
+  return this.http.get<ProductResponseDto[]>('/api/products', {
+    params: {
+      includeInactive: 'true',
+    },
+  }).pipe(
+    timeout(8000),
+    map((rows) => (rows ?? []).map(mapProductFromApi)),
+    tap((mapped) => {
+      this._products$.next(mapped);
+    }),
+    catchError((err) => {
+      console.error('ProductsService.loadForAdmin error', err);
+      this._error$.next('No se pudieron cargar los productos');
+      this._products$.next([]);
+      return of([] as Product[]);
+    }),
+    finalize(() => this._loading$.next(false))
+  );
+}
+
+refreshForAdmin() {
+  return this.loadForAdmin();
+}
 }
