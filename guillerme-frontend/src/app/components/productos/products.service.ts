@@ -1,5 +1,15 @@
 import { Injectable, inject, OnDestroy } from '@angular/core';
-import { BehaviorSubject, catchError, finalize, map, of, tap, timeout, interval, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  finalize,
+  map,
+  of,
+  tap,
+  timeout,
+  interval,
+  Subscription,
+} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { Product } from './product.model';
@@ -12,6 +22,10 @@ export class ProductsService implements OnDestroy {
 
   private readonly _products$ = new BehaviorSubject<Product[]>([]);
   readonly products$ = this._products$.asObservable();
+
+  // ✅ stream separado para admin
+  private readonly _adminProducts$ = new BehaviorSubject<Product[]>([]);
+  readonly adminProducts$ = this._adminProducts$.asObservable();
 
   private readonly _loading$ = new BehaviorSubject<boolean>(false);
   readonly loading$ = this._loading$.asObservable();
@@ -29,6 +43,7 @@ export class ProductsService implements OnDestroy {
       timeout(8000),
       map((rows) => (rows ?? []).map(mapProductFromApi)),
       tap((mapped) => {
+        // ✅ solo pisa productos públicos
         this._products$.next(mapped);
       }),
       catchError((err) => {
@@ -41,19 +56,41 @@ export class ProductsService implements OnDestroy {
     );
   }
 
-  // 👇 NUEVO: iniciar polling
+  loadForAdmin() {
+    this._loading$.next(true);
+    this._error$.next(null);
+
+    return this.http.get<ProductResponseDto[]>('/api/products', {
+      params: {
+        includeInactive: 'true',
+      },
+    }).pipe(
+      timeout(8000),
+      map((rows) => (rows ?? []).map(mapProductFromApi)),
+      tap((mapped) => {
+        // ✅ solo pisa productos admin
+        this._adminProducts$.next(mapped);
+      }),
+      catchError((err) => {
+        console.error('ProductsService.loadForAdmin error', err);
+        this._error$.next('No se pudieron cargar los productos admin');
+        this._adminProducts$.next([]);
+        return of([] as Product[]);
+      }),
+      finalize(() => this._loading$.next(false))
+    );
+  }
+
   startPolling(intervalMs = 15000) {
-    if (this.pollingSub) return; // evita duplicar
+    if (this.pollingSub) return;
 
     this.pollingSub = interval(intervalMs).subscribe(() => {
       this.load().subscribe();
     });
 
-    // primera carga inmediata
     this.load().subscribe();
   }
 
-  // 👇 opcional: detener polling
   stopPolling() {
     this.pollingSub?.unsubscribe();
     this.pollingSub = undefined;
@@ -63,35 +100,11 @@ export class ProductsService implements OnDestroy {
     return this.load();
   }
 
+  refreshForAdmin() {
+    return this.loadForAdmin();
+  }
+
   ngOnDestroy(): void {
     this.stopPolling();
   }
-
-loadForAdmin() {
-  this._loading$.next(true);
-  this._error$.next(null);
-
-  return this.http.get<ProductResponseDto[]>('/api/products', {
-    params: {
-      includeInactive: 'true',
-    },
-  }).pipe(
-    timeout(8000),
-    map((rows) => (rows ?? []).map(mapProductFromApi)),
-    tap((mapped) => {
-      this._products$.next(mapped);
-    }),
-    catchError((err) => {
-      console.error('ProductsService.loadForAdmin error', err);
-      this._error$.next('No se pudieron cargar los productos');
-      this._products$.next([]);
-      return of([] as Product[]);
-    }),
-    finalize(() => this._loading$.next(false))
-  );
-}
-
-refreshForAdmin() {
-  return this.loadForAdmin();
-}
 }

@@ -73,9 +73,9 @@ export class AdminProductsPage implements OnInit {
   // Por default muestra activos
   estadoFilter = signal<EstadoFilter>('ACTIVOS');
 
-  readonly productsSig = toSignal(this.productsService.products$, {
-    initialValue: [] as Product[],
-  });
+  readonly productsSig = toSignal(this.productsService.adminProducts$, {
+  initialValue: [] as Product[],
+});
 
   productsCount = computed(() => this.productsSig().length);
 
