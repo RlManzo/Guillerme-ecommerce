@@ -185,7 +185,7 @@ clearSearch() {
   }
 
   // Lista filtrada (search + categoria)
-  readonly filteredProducts = computed(() => {
+ readonly filteredProducts = computed(() => {
   const all = this.productsSig();
   const q = this.norm(this.q());
   const cat = this.categoriaFilter();
@@ -850,18 +850,18 @@ private normalizeText(value: string): string {
 }
 
 private isProductActive(p: Product): boolean {
-  const estado = (p as any)?.estado;
+  const activo = (p as any)?.activo;
 
-  if (estado === null || estado === undefined) return true;
-  if (typeof estado === 'boolean') return estado;
-  if (typeof estado === 'number') return estado === 1;
+  if (activo === null || activo === undefined) return false;
+  if (typeof activo === 'boolean') return activo;
+  if (typeof activo === 'number') return activo === 1;
 
-  if (typeof estado === 'string') {
-    const v = estado.toLowerCase();
+  if (typeof activo === 'string') {
+    const v = activo.toLowerCase();
     return v === 'true' || v === '1' || v === 't';
   }
 
-  return !!estado;
+  return !!activo;
 }
 
 }
