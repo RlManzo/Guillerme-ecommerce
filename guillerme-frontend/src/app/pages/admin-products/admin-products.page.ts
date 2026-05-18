@@ -13,11 +13,8 @@ import { ProductsService } from '../../components/productos/products.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../components/productos/product.model';
 
-
-
 type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
 type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA';
-
 type EstadoFilter = 'ACTIVOS' | 'INACTIVOS' | 'TODOS';
 
 @Component({
@@ -32,16 +29,31 @@ export class AdminProductsPage implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly toast = inject(ToastService);
 
-
   constructor() {
     effect(() => {
       const list = this.productsSig();
+
+      console.log('TOTAL PRODUCTS SIG:', list.length);
+
+      const cartulina = list.find((p) => p.id === 1136);
+      console.log('PRODUCTO 1136 EN FRONT:', cartulina);
+
       console.log(
-        'ESTADOS:',
-        list.map(p => ({ id: p.id, estado: (p as any).estado }))
+        'BUSQUEDA CARTULINA EN FRONT:',
+        list
+          .filter((p) => this.productText(p).includes('cartulina'))
+          .map((p) => ({
+            id: p.id,
+            nombre: p.nombre,
+            activo: (p as any).activo,
+            estado: (p as any).estado,
+            stock: p.stock,
+            text: this.productText(p),
+          }))
       );
     });
   }
+
   // tabs
   tab = signal<'single' | 'bulk'>('single');
 
@@ -56,16 +68,14 @@ export class AdminProductsPage implements OnInit {
   barcodeErrorEdit = signal<string | null>(null);
 
   keywordErrorCreate = signal<string | null>(null);
-keywordErrorEdit = signal<string | null>(null);
+  keywordErrorEdit = signal<string | null>(null);
 
-estadoFilter = signal<EstadoFilter>('ACTIVOS');
+  // Por default muestra activos
+  estadoFilter = signal<EstadoFilter>('ACTIVOS');
 
-  // ✅ OJO: NO private, así el HTML puede usar productsSig()
   readonly productsSig = toSignal(this.productsService.products$, {
     initialValue: [] as Product[],
   });
-
-  
 
   productsCount = computed(() => this.productsSig().length);
 
@@ -74,8 +84,8 @@ estadoFilter = signal<EstadoFilter>('ACTIVOS');
   );
 
   onCreateBarcodeChange(value: string) {
-  this.barcodeErrorCreate.set(null);
-  this.setField('barcode', value as any);
+    this.barcodeErrorCreate.set(null);
+    this.setField('barcode', value as any);
   }
 
   onEditBarcodeChange(value: string) {
@@ -84,11 +94,10 @@ estadoFilter = signal<EstadoFilter>('ACTIVOS');
   }
 
   // =========================
-  // Catálogos UI (alta simple)
+  // Catálogos UI
   // =========================
   readonly categoriasOpts = ['Libreria', 'combos', 'varios'] as const;
 
-  // ✅ Lista de keywords disponibles (editá cuando quieras)
   readonly keywordsOpts = [
     'Filgo',
     'Skycolor',
@@ -101,33 +110,32 @@ estadoFilter = signal<EstadoFilter>('ACTIVOS');
     'Laprida-Exito',
     'Bic',
     'Carpel',
-    'Otros'
-
+    'Otros',
   ] as const;
 
   // =========================
-  // ✅ Buscador + filtro + ORDEN + paginador (para la tabla)
+  // Buscador + filtros + orden + paginador
   // =========================
   q = signal<string>('');
   categoriaFilter = signal<CategoriaFilter>('ALL');
-
   searchInput = signal<string>('');
 
   applySearch() {
-  this.q.set(this.searchInput() ?? '');
-  this.page.set(1);
-}
+    this.q.set((this.searchInput() ?? '').trim());
+    this.page.set(1);
+  }
 
-clearSearch() {
-  this.searchInput.set('');
-  this.q.set('');
-  this.categoriaFilter.set('ALL');
-  this.estadoFilter.set('ACTIVOS');
-  this.sortBy.set('NEWEST');
-  this.page.set(1);
-}
+  clearSearch() {
+    this.searchInput.set('');
+    this.q.set('');
+    this.categoriaFilter.set('ALL');
+    this.estadoFilter.set('ACTIVOS');
+    this.sortBy.set('NEWEST');
+    this.page.set(1);
+  }
 
   sortBy = signal<SortBy>('NEWEST');
+
   onSortChange(v: SortBy) {
     this.sortBy.set((v ?? 'NEWEST') as SortBy);
     this.page.set(1);
@@ -136,38 +144,85 @@ clearSearch() {
   page = signal<number>(1);
   pageSize = signal<number>(10);
 
-  // Helpers de texto para filtrar
   private norm(s: any): string {
     return String(s ?? '')
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 
   private productCategoria(p: Product): string {
-    // tu FE: p.categorias es string[]
-    const cat = (p.categorias?.[0] ?? '').toString();
-    return this.norm(cat);
+    const categorias = (p as any).categorias;
+
+    if (Array.isArray(categorias)) {
+      return this.norm(categorias.join(' '));
+    }
+
+    return this.norm(categorias ?? '');
   }
 
   private productKeywordsText(p: Product): string {
-    return this.norm((p.keywords ?? []).join(' '));
+    const keywords = (p as any).keywords;
+
+    if (Array.isArray(keywords)) {
+      return this.norm(keywords.join(' '));
+    }
+
+    return this.norm(keywords ?? '');
   }
 
   private productText(p: Product): string {
-  return this.norm(
-    [
-      p.nombre,
-      p.descripcionCorta,
-      p.infoModal,
-      this.productKeywordsText(p),
-      (p.categorias ?? []).join(' '),
-      p.barcode ?? '',
-    ].join(' ')
-  );
-}
+    const categorias = Array.isArray((p as any).categorias)
+      ? (p as any).categorias.join(' ')
+      : ((p as any).categorias ?? '');
 
-  // ✅ para "más nuevo/antiguo": usa createdAt/created_at si existe; sino id
+    return this.norm(
+      [
+        p.id,
+        p.nombre,
+        p.descripcionCorta,
+        p.infoModal,
+        this.productKeywordsText(p),
+        categorias,
+        (p as any).barcode ?? '',
+      ].join(' ')
+    );
+  }
+
+  /**
+   * Búsqueda más flexible:
+   * - Divide por palabras.
+   * - Todas las palabras deben aparecer.
+   * - Soporta singular/plural simple.
+   *
+   * Ej:
+   * "cartulina estampada" encuentra "CARTULINA ESTAMPADAS X10".
+   */
+  private matchesSearch(p: Product, q: string): boolean {
+    const search = this.norm(q);
+
+    if (!search) return true;
+
+    const text = this.productText(p);
+
+    const terms = search
+      .split(/\s+/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+    return terms.every((term) => {
+      const singular = term.endsWith('s') ? term.slice(0, -1) : term;
+      const plural = term.endsWith('s') ? term : `${term}s`;
+
+      return (
+        text.includes(term) ||
+        text.includes(singular) ||
+        text.includes(plural)
+      );
+    });
+  }
+
   private getTimeOrId(p: any): number {
     const t =
       p?.createdAt ? new Date(p.createdAt).getTime()
@@ -175,51 +230,51 @@ clearSearch() {
       : 0;
 
     if (Number.isFinite(t) && t > 0) return t;
+
     return Number(p?.id ?? 0);
   }
 
   private compareNombre(a: Product, b: Product): number {
     const an = this.norm(a?.nombre ?? '');
     const bn = this.norm(b?.nombre ?? '');
+
     return an.localeCompare(bn);
   }
 
-  // Lista filtrada (search + categoria)
- readonly filteredProducts = computed(() => {
-  const all = this.productsSig();
-  const q = this.norm(this.q());
-  const cat = this.categoriaFilter();
-  const estado = this.estadoFilter();
+  readonly filteredProducts = computed(() => {
+    const all = this.productsSig();
+    const q = this.norm(this.q());
+    const cat = this.categoriaFilter();
+    const estado = this.estadoFilter();
 
-  const catNorm =
-    cat === 'ALL'
-      ? ''
-      : cat === 'LIBRERIA'
-        ? 'libreria'
-        : cat === 'COMBOS'
-          ? 'combos'
-          : cat === 'VARIOS'
-            ? 'varios'
-            : 'libreria';
+    const catNorm =
+      cat === 'ALL'
+        ? ''
+        : cat === 'LIBRERIA'
+          ? 'libreria'
+          : cat === 'COMBOS'
+            ? 'combos'
+            : cat === 'VARIOS'
+              ? 'varios'
+              : '';
 
-  return all.filter((p) => {
-    const okSearch = !q || this.productText(p).includes(q);
-    const okCat = !catNorm || this.productCategoria(p).includes(catNorm);
+    return all.filter((p) => {
+      const okSearch = this.matchesSearch(p, q);
+      const okCat = !catNorm || this.productCategoria(p).includes(catNorm);
 
-    const isActive = this.isProductActive(p);
+      const isActive = this.isProductActive(p);
 
-    const okEstado =
-      estado === 'TODOS'
-        ? true
-        : estado === 'ACTIVOS'
-          ? isActive
-          : !isActive;
+      const okEstado =
+        estado === 'TODOS'
+          ? true
+          : estado === 'ACTIVOS'
+            ? isActive
+            : !isActive;
 
-    return okSearch && okCat && okEstado;
+      return okSearch && okCat && okEstado;
+    });
   });
-});
 
-  // ✅ ordenado (se aplica sobre el filtrado)
   readonly sortedProducts = computed(() => {
     const list = [...this.filteredProducts()];
     const mode = this.sortBy();
@@ -246,28 +301,27 @@ clearSearch() {
     return list;
   });
 
-  // total filtrado (ya ordenado)
   totalFiltered = computed(() => this.sortedProducts().length);
 
-  // total de páginas
   totalPages = computed(() => {
     const total = this.totalFiltered();
     const size = Math.max(1, Number(this.pageSize() || 10));
+
     return Math.max(1, Math.ceil(total / size));
   });
 
-  // página actual recortada
   readonly pagedProducts = computed(() => {
     const size = Math.max(1, Number(this.pageSize() || 10));
     const pages = this.totalPages();
 
-    // clamp page
     let p = Number(this.page() || 1);
+
     if (p < 1) p = 1;
     if (p > pages) p = pages;
 
-    // si cambiamos por clamp, actualizamos el signal (sin romper)
-    if (p !== this.page()) this.page.set(p);
+    if (p !== this.page()) {
+      this.page.set(p);
+    }
 
     const start = (p - 1) * size;
     const end = start + size;
@@ -276,7 +330,7 @@ clearSearch() {
   });
 
   onSearchChange(v: string) {
-    this.q.set(v ?? '');
+    this.q.set((v ?? '').trim());
     this.page.set(1);
   }
 
@@ -302,7 +356,6 @@ clearSearch() {
   toggleForm() {
     const next = !this.showForm();
 
-    // si voy a mostrar el form, oculto la grilla
     if (next) {
       this.showProducts.set(false);
       this.tab.set('single');
@@ -314,43 +367,36 @@ clearSearch() {
   toggleProducts() {
     const next = !this.showProducts();
 
-    // si voy a mostrar productos, oculto el form
     if (next) {
       this.showForm.set(false);
-      // opcional: si querés asegurarte que no quede en bulk
-      // this.tab.set('single');
       this.productsService.refreshForAdmin().subscribe();
     }
 
     this.showProducts.set(next);
   }
 
-  /**
-   * Si tenés proxy para /uploads, podés dejarlo así (return path).
-   * Si no, prefijá con baseUrl del backend.
-   */
   fileUrl(path?: string | null) {
     return path ?? '';
   }
 
   // -----------------------------
-  // CREATE (alta simple) DTO real + precio
+  // CREATE
   // -----------------------------
   form = signal<CreateProductRequest>({
-  nombre: '',
-  descripcionCorta: '',
-  infoModal: '',
-  imgUrl: '',
-  imgUrl2: '',
-  imgUrl3: '',
-  barcode: '',
-  categorias: '',
-  servicios: '',
-  keywords: '',
-  activo: true,
-  stock: 0,
-  precio: 0,
-});
+    nombre: '',
+    descripcionCorta: '',
+    infoModal: '',
+    imgUrl: '',
+    imgUrl2: '',
+    imgUrl3: '',
+    barcode: '',
+    categorias: '',
+    servicios: '',
+    keywords: '',
+    activo: true,
+    stock: 0,
+    precio: 0,
+  });
 
   setField<K extends keyof CreateProductRequest>(
     key: K,
@@ -360,70 +406,76 @@ clearSearch() {
   }
 
   // =========================
-// Keyword única obligatoria
-// =========================
-private normalizeKeywordValue(input: string | null | undefined): string {
-  const value = String(input ?? '')
-    .split(/[,;|]/g)[0]
-    ?.trim();
+  // Keyword única obligatoria
+  // =========================
+  private normalizeKeywordValue(input: string | null | undefined): string {
+    const value = String(input ?? '')
+      .split(/[,;|]/g)[0]
+      ?.trim();
 
-  return value || '';
-}
-
-selectedKeyword(): string {
-  return this.normalizeKeywordValue(this.form().keywords);
-}
-
-selectKeyword(k: string) {
-  this.keywordErrorCreate.set(null);
-  this.setField('keywords', k as any);
-}
-
-selectedEditKeyword(): string {
-  return this.normalizeKeywordValue(this.editRow().keywords);
-}
-
-selectEditKeyword(k: string) {
-  this.keywordErrorEdit.set(null);
-  this.setEditField('keywords', k as any);
-}
-
-private validateCreateKeyword(): boolean {
-  const selected = this.selectedKeyword();
-  if (!selected) {
-    this.keywordErrorCreate.set('Tenés que seleccionar una marca.');
-    this.toast.error('Tenés que seleccionar una marca');
-    return false;
+    return value || '';
   }
 
-  this.keywordErrorCreate.set(null);
-  return true;
-}
-
-private validateEditKeyword(): boolean {
-  const selected = this.selectedEditKeyword();
-  if (!selected) {
-    this.keywordErrorEdit.set('Tenés que seleccionar una marca.');
-    this.toast.error('Tenés que seleccionar una marca');
-    return false;
+  selectedKeyword(): string {
+    return this.normalizeKeywordValue(this.form().keywords);
   }
 
-  this.keywordErrorEdit.set(null);
-  return true;
-}
+  selectKeyword(k: string) {
+    this.keywordErrorCreate.set(null);
+    this.setField('keywords', k as any);
+  }
+
+  selectedEditKeyword(): string {
+    return this.normalizeKeywordValue(this.editRow().keywords);
+  }
+
+  selectEditKeyword(k: string) {
+    this.keywordErrorEdit.set(null);
+    this.setEditField('keywords', k as any);
+  }
+
+  private validateCreateKeyword(): boolean {
+    const selected = this.selectedKeyword();
+
+    if (!selected) {
+      this.keywordErrorCreate.set('Tenés que seleccionar una marca.');
+      this.toast.error('Tenés que seleccionar una marca');
+      return false;
+    }
+
+    this.keywordErrorCreate.set(null);
+    return true;
+  }
+
+  private validateEditKeyword(): boolean {
+    const selected = this.selectedEditKeyword();
+
+    if (!selected) {
+      this.keywordErrorEdit.set('Tenés que seleccionar una marca.');
+      this.toast.error('Tenés que seleccionar una marca');
+      return false;
+    }
+
+    this.keywordErrorEdit.set(null);
+    return true;
+  }
 
   onFileSelected(evt: Event, slot: 1 | 2 | 3) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
+
     if (!file) return;
 
     this.uploadingImg.set(true);
+
     this.adminApi.uploadImage(file).subscribe({
       next: (res) => {
         this.uploadingImg.set(false);
+
         if (slot === 1) this.setField('imgUrl', res.url as any);
         if (slot === 2) this.setField('imgUrl2', res.url as any);
         if (slot === 3) this.setField('imgUrl3', res.url as any);
+
         this.toast.success(`Imagen ${slot} subida`);
       },
       error: () => {
@@ -436,15 +488,19 @@ private validateEditKeyword(): boolean {
   onEditFileSelected(evt: Event, slot: 1 | 2 | 3) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
+
     if (!file) return;
 
     this.uploadingImg.set(true);
+
     this.adminApi.uploadImage(file).subscribe({
       next: (res) => {
         this.uploadingImg.set(false);
+
         if (slot === 1) this.setEditField('imgUrl', res.url as any);
         if (slot === 2) this.setEditField('imgUrl2', res.url as any);
         if (slot === 3) this.setEditField('imgUrl3', res.url as any);
+
         this.toast.success(`Imagen ${slot} lista (guardá para confirmar)`);
       },
       error: () => {
@@ -457,23 +513,27 @@ private validateEditKeyword(): boolean {
   saveSingle() {
     const data = this.form();
 
-  if (!data.nombre?.trim()) {
-    this.toast.error('El nombre es obligatorio');
-    return;
-  }
-  if ((data.stock ?? 0) < 0) {
-    this.toast.error('Stock inválido');
-    return;
-  }
-  if ((data.precio ?? 0) < 0) {
-    this.toast.error('Precio inválido');
-    return;
-  }
-  if (!this.validateCreateKeyword()) {
-    return;
-  }
+    if (!data.nombre?.trim()) {
+      this.toast.error('El nombre es obligatorio');
+      return;
+    }
 
-  this.loading.set(true);
+    if ((data.stock ?? 0) < 0) {
+      this.toast.error('Stock inválido');
+      return;
+    }
+
+    if ((data.precio ?? 0) < 0) {
+      this.toast.error('Precio inválido');
+      return;
+    }
+
+    if (!this.validateCreateKeyword()) {
+      return;
+    }
+
+    this.loading.set(true);
+
     this.adminApi
       .create({
         ...data,
@@ -505,8 +565,8 @@ private validateEditKeyword(): boolean {
           this.keywordErrorCreate.set(null);
 
           this.showForm.set(false);
+          this.showProducts.set(true);
           this.productsService.refreshForAdmin().subscribe();
-          this.toggleProducts();
         },
         error: (e) => {
           this.loading.set(false);
@@ -528,7 +588,7 @@ private validateEditKeyword(): boolean {
   }
 
   // -----------------------------
-  // BULK (DTO real + precio)  (si dejaste la sección bulk comentada en HTML, igual no molesta)
+  // BULK
   // -----------------------------
   bulkText = signal(
     `[
@@ -549,9 +609,13 @@ private validateEditKeyword(): boolean {
 
   saveBulk() {
     let items: CreateProductRequest[] = [];
+
     try {
       items = JSON.parse(this.bulkText());
-      if (!Array.isArray(items)) throw new Error('bulk must be array');
+
+      if (!Array.isArray(items)) {
+        throw new Error('bulk must be array');
+      }
     } catch {
       this.toast.error('JSON inválido');
       return;
@@ -567,10 +631,12 @@ private validateEditKeyword(): boolean {
         this.toast.error('Hay items sin nombre');
         return;
       }
+
       if ((it.stock ?? 0) < 0) {
         this.toast.error('Hay items con stock inválido');
         return;
       }
+
       if ((it.precio ?? 0) < 0) {
         this.toast.error('Hay items con precio inválido');
         return;
@@ -584,6 +650,7 @@ private validateEditKeyword(): boolean {
     }));
 
     this.loading.set(true);
+
     this.adminApi.bulkCreate({ items: normalized }).subscribe({
       next: (res) => {
         this.loading.set(false);
@@ -599,7 +666,7 @@ private validateEditKeyword(): boolean {
   }
 
   // -----------------------------
-  // EDIT INLINE (tabla) + precio
+  // EDIT INLINE
   // -----------------------------
   editingId = signal<number | null>(null);
   savingRow = signal(false);
@@ -637,8 +704,12 @@ private validateEditKeyword(): boolean {
       imgUrl2: p.imgUrl2 ?? '',
       imgUrl3: p.imgUrl3 ?? '',
       barcode: (p as any).barcode ?? '',
-      categorias: (p.categorias ?? []).join(', '),
-      servicios: (p.servicios ?? []).join(', '),
+      categorias: Array.isArray(p.categorias)
+        ? p.categorias.join(', ')
+        : ((p as any).categorias ?? ''),
+      servicios: Array.isArray(p.servicios)
+        ? p.servicios.join(', ')
+        : ((p as any).servicios ?? ''),
       keywords: this.normalizeKeywordValue(
         Array.isArray(p.keywords) ? p.keywords.join(', ') : (p.keywords as any)
       ),
@@ -649,10 +720,10 @@ private validateEditKeyword(): boolean {
   }
 
   cancelEdit() {
-  this.barcodeErrorEdit.set(null);
-  this.keywordErrorEdit.set(null);
-  this.editingId.set(null);
-}
+    this.barcodeErrorEdit.set(null);
+    this.keywordErrorEdit.set(null);
+    this.editingId.set(null);
+  }
 
   setEditField<K extends keyof CreateProductRequest>(
     key: K,
@@ -668,19 +739,23 @@ private validateEditKeyword(): boolean {
       this.toast.error('El nombre es obligatorio');
       return;
     }
+
     if ((r.stock ?? 0) < 0 || Number.isNaN(Number(r.stock))) {
       this.toast.error('Stock inválido');
       return;
     }
+
     if ((r.precio ?? 0) < 0 || Number.isNaN(Number(r.precio))) {
       this.toast.error('Precio inválido');
       return;
     }
+
     if (!this.validateEditKeyword()) {
-  return;
-}
+      return;
+    }
 
     this.savingRow.set(true);
+
     this.adminApi
       .update(id, {
         ...r,
@@ -740,6 +815,7 @@ private validateEditKeyword(): boolean {
 
   private isVideoUrl(url?: string | null): boolean {
     const u = (url ?? '').toLowerCase();
+
     return (
       u.endsWith('.mp4') ||
       u.endsWith('.webm') ||
@@ -749,14 +825,13 @@ private validateEditKeyword(): boolean {
     );
   }
 
-  // para usar desde el HTML
   isVideo(url?: string | null) {
     return this.isVideoUrl(url);
   }
 
   private uploadMedia(file: File, onDone: (url: string) => void) {
-    // reusamos el mismo endpoint; backend lo hará "media"
     this.uploadingImg.set(true);
+
     this.adminApi.uploadImage(file).subscribe({
       next: (res) => {
         this.uploadingImg.set(false);
@@ -766,7 +841,6 @@ private validateEditKeyword(): boolean {
       error: (err) => {
         this.uploadingImg.set(false);
 
-        // si backend devuelve {message: "..."}
         const msg =
           err?.error?.message ||
           (err?.status === 413 ? 'El archivo es demasiado grande para subirlo' : null) ||
@@ -780,10 +854,11 @@ private validateEditKeyword(): boolean {
   onMediaSelected(evt: Event, slot: 1 | 2 | 3) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
+
     if (!file) return;
 
-    // opcional: límite distinto para video
     const maxMb = file.type.startsWith('video/') ? 50 : 8;
+
     if (file.size > maxMb * 1024 * 1024) {
       this.toast.error(`El archivo supera ${maxMb}MB`);
       input.value = '';
@@ -800,9 +875,11 @@ private validateEditKeyword(): boolean {
   onEditMediaSelected(evt: Event, slot: 1 | 2 | 3) {
     const input = evt.target as HTMLInputElement;
     const file = input.files?.[0];
+
     if (!file) return;
 
     const maxMb = file.type.startsWith('video/') ? 50 : 8;
+
     if (file.size > maxMb * 1024 * 1024) {
       this.toast.error(`El archivo supera ${maxMb}MB`);
       input.value = '';
@@ -816,52 +893,57 @@ private validateEditKeyword(): boolean {
     });
   }
 
+  // El switch visual sigue leyendo estado
+  isEstadoOn(p: Product): boolean {
+    const v = (p as any)?.estado;
 
-// helper: lee estado sin romper tipos
-isEstadoOn(p: Product): boolean {
-  const v = (p as any)?.estado;
-  if (v === null || v === undefined) return true;
-  if (typeof v === 'number') return v === 1;
-  if (typeof v === 'string') return v === '1' || v.toLowerCase() === 'true';
-  return !!v;
-}
+    if (v === null || v === undefined) return true;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'number') return v === 1;
 
-
-toggleEstado(p: Product) {
-  const next = !this.isEstadoOn(p);
-
-  this.adminApi.updateEstado(p.id, next).subscribe({
-    next: () => {
-      this.toast.success(`Producto ${next ? 'activado' : 'desactivado'}`);
-      this.productsService.refreshForAdmin().subscribe();
-    },
-    error: (e) => {
-      console.error(e);
-      this.toast.error('No se pudo cambiar el estado');
+    if (typeof v === 'string') {
+      const value = v.toLowerCase();
+      return value === '1' || value === 'true' || value === 't';
     }
-  });
-}
 
-private normalizeText(value: string): string {
-  return String(value ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
-
-private isProductActive(p: Product): boolean {
-  const activo = (p as any)?.activo;
-
-  if (activo === null || activo === undefined) return false;
-  if (typeof activo === 'boolean') return activo;
-  if (typeof activo === 'number') return activo === 1;
-
-  if (typeof activo === 'string') {
-    const v = activo.toLowerCase();
-    return v === 'true' || v === '1' || v === 't';
+    return !!v;
   }
 
-  return !!activo;
-}
+  toggleEstado(p: Product) {
+    const next = !this.isEstadoOn(p);
 
+    this.adminApi.updateEstado(p.id, next).subscribe({
+      next: () => {
+        this.toast.success(`Producto ${next ? 'activado' : 'desactivado'}`);
+        this.productsService.refreshForAdmin().subscribe();
+      },
+      error: (e) => {
+        console.error(e);
+        this.toast.error('No se pudo cambiar el estado');
+      },
+    });
+  }
+
+  private normalizeText(value: string): string {
+    return String(value ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  // El filtro Activos/Inactivos/Todos usa activo
+  private isProductActive(p: Product): boolean {
+    const activo = (p as any)?.activo;
+
+    if (activo === null || activo === undefined) return false;
+    if (typeof activo === 'boolean') return activo;
+    if (typeof activo === 'number') return activo === 1;
+
+    if (typeof activo === 'string') {
+      const value = activo.toLowerCase();
+      return value === 'true' || value === '1' || value === 't';
+    }
+
+    return !!activo;
+  }
 }
