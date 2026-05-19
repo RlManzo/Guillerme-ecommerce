@@ -933,17 +933,17 @@ export class AdminProductsPage implements OnInit {
 
   // El filtro Activos/Inactivos/Todos usa activo
   private isProductActive(p: Product): boolean {
-    const activo = (p as any)?.activo;
+  const estado = (p as any)?.estado;
 
-    if (activo === null || activo === undefined) return false;
-    if (typeof activo === 'boolean') return activo;
-    if (typeof activo === 'number') return activo === 1;
+  if (estado === null || estado === undefined) return false;
+  if (typeof estado === 'boolean') return estado;
+  if (typeof estado === 'number') return estado === 1;
 
-    if (typeof activo === 'string') {
-      const value = activo.toLowerCase();
-      return value === 'true' || value === '1' || value === 't';
-    }
-
-    return !!activo;
+  if (typeof estado === 'string') {
+    const value = estado.toLowerCase();
+    return value === 'true' || value === '1' || value === 't';
   }
+
+  return !!estado;
+}
 }
