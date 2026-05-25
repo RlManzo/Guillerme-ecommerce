@@ -63,21 +63,26 @@ export class Header {
     this.filteredProducts = [];
   }
 
-  onInput(ev: Event) {
+onInput(ev: Event) {
   const value = (ev.target as HTMLInputElement).value ?? '';
   this.query = value;
 
   const q = value.trim();
+
   if (!q) {
     this.filteredProducts = [];
     this.resultsOpen = false;
     return;
   }
 
-  const visibles = this.productsSig().filter((p) => (p.estado ?? true) === true);
+  const visibles = this.productsSig().filter(
+    (p) => (p.estado ?? true) === true
+  );
 
   this.resultsOpen = true;
-  this.filteredProducts = filterProducts(visibles, q).slice(0, 10);
+
+  // ✅ Sin límite: trae todos los productos que coincidan
+  this.filteredProducts = filterProducts(visibles, q);
 }
 
   openResults() {
