@@ -288,37 +288,48 @@ export class AdminCartPage implements OnInit {
     });
   }
 
-  addToCart(p: any) {
-    this.cart.update((list) => {
-      const existing = list.find((i) => i.productId === p.id);
+addToCart(p: any) {
+  this.cart.update((list) => {
+    const existing = list.find((i) => i.productId === p.id);
 
-      if (existing) {
-        if (existing.qty + 1 > existing.stock) {
-          this.toast.error(`Sin stock suficiente para ${p.nombre}`);
-          return list;
-        }
-
-        existing.qty += 1;
-        this.flashAdded(p.id);
-        return [...list];
+    if (existing) {
+      if (existing.qty + 1 > existing.stock) {
+        this.toast.error(`Sin stock suficiente para ${p.nombre}`);
+        return list;
       }
 
-      const next = [
-        ...list,
-        {
-          productId: p.id,
-          nombre: p.nombre,
-          barcode: p.barcode,
-          precio: Number(p.precio ?? 0),
-          stock: Number(p.stock ?? 0),
-          qty: 1,
-        },
-      ];
+      const updatedItem: CartItem = {
+        ...existing,
+        qty: existing.qty + 1,
+      };
 
       this.flashAdded(p.id);
-      return next;
-    });
-  }
+
+      // ✅ Si ya existía, lo actualiza y también lo mueve arriba
+      return [
+        updatedItem,
+        ...list.filter((i) => i.productId !== p.id),
+      ];
+    }
+
+    const newItem: CartItem = {
+      productId: p.id,
+      nombre: p.nombre,
+      barcode: p.barcode,
+      precio: Number(p.precio ?? 0),
+      stock: Number(p.stock ?? 0),
+      qty: 1,
+    };
+
+    this.flashAdded(p.id);
+
+    // ✅ Si es nuevo, se agrega arriba de todo
+    return [
+      newItem,
+      ...list,
+    ];
+  });
+}
 
   flashAdded(productId: number) {
     this.lastAddedId.set(productId);
