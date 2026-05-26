@@ -3305,3 +3305,133 @@ nav { height: 127px; }
 .buscadorContainer { margin-left: 60px; padding-left: 23px; }
 .productosTitle { width: 600px; margin-left: 140px; }
 .modalContainer { left: 455px; }
+
+/* =========================================================
+   FIX REAL OVERFLOW MOBILE
+   Pegar último en src/styles.scss
+========================================================= */
+
+@media (max-width: 768px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    position: relative !important;
+  }
+
+  app-root {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: clip !important;
+  }
+
+  body > * {
+    max-width: 100vw !important;
+  }
+
+  main,
+  main.container-fluid,
+  .container-fluid,
+  .container,
+  .row,
+  section,
+  app-home,
+  app-carousel-servicios,
+  app-productos-destacados {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  .row {
+    --bs-gutter-x: 0 !important;
+  }
+
+  [class*="col-"] {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Neutralizar offsets viejos que rompen mobile */
+  .iconInput,
+  .textBuscador,
+  .buscadorContainer,
+  .productosTitle,
+  .modalContainer,
+  .imgModal,
+  .closeModal,
+  .botonesDetalleModal,
+  .buttonCategoria,
+  .caracteristicaColor {
+    left: auto !important;
+    right: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .productosTitle {
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .inputBusqueda {
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100% !important;
+  }
+
+  /* Navbar nueva */
+  nav.navbar-fixed.navbar-mobile {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .topbar,
+  nav.navbar-fixed.navbar-mobile .topbar-inner,
+  nav.navbar-fixed.navbar-mobile .mainbar,
+  nav.navbar-fixed.navbar-mobile .mainbar-inner,
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock,
+  nav.navbar-fixed.navbar-mobile .menu-items {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  
+
+  nav.navbar-fixed.navbar-mobile .mainbar-inner {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  nav.navbar-fixed.navbar-mobile .mobileSearchBlock {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
