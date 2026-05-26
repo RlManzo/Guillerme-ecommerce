@@ -3239,3 +3239,12 @@ footer{
   max-width: 800px;
   border-bottom: 2px dashed #3aa7b3; /* mismo tono que el de marcas */
 }
+
+@media (max-width: 768px) {
+  main.container-fluid {
+    position: relative !important;
+    top: 70px !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+}

@@ -1,15 +1,37 @@
 <nav class="navbar-fixed navbar-mobile">
 
-  <!-- TOP BAR REDES -->
+  <!-- TOP BAR NEGRA -->
   <div class="topbar">
     <div class="topbar-inner">
+
       <div class="topbar-left">
-        <!-- opcional: texto / promo -->
-        <!-- <span class="topbar-text">Envíos a todo el país</span> -->
+        <a class="topbar-icon-link" routerLink="/" aria-label="Inicio">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5L12 3zm0 2.6 7 5.8V19h-2v-6H7v6H5v-7.6l7-5.8z"/>
+          </svg>
+        </a>
+
+        <button type="button" class="topbar-icon-link" (click)="goContactoForm()" aria-label="Contacto">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 5h18v14H3V5zm2 2v.4l7 5 7-5V7H5zm14 10V9.8l-7 5-7-5V17h14z"/>
+          </svg>
+        </button>
+
+        <button type="button" class="topbar-icon-link" (click)="goFaq('como-compro')" aria-label="Ayuda">
+          <svg viewBox="0 0 24 24">
+            <path d="M11 18h2v-2h-2v2zm1-16a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-14a3.2 3.2 0 0 0-3.3 3.2h2A1.3 1.3 0 0 1 12 8a1.2 1.2 0 0 1 1.3 1.2c0 .7-.4 1.1-1.2 1.7-1 .8-1.8 1.5-1.8 3.1h2c0-.8.4-1.2 1.2-1.8 1-.8 1.8-1.5 1.8-3A3.2 3.2 0 0 0 12 6z"/>
+          </svg>
+        </button>
+
+        <button type="button" class="topbar-icon-link" (click)="goFaq('metodos-envio')" aria-label="Envíos">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 6a1 1 0 0 1 1-1h10v4h3l4 5v5h-2a3 3 0 0 1-6 0H9a3 3 0 0 1-6 0H2V7a1 1 0 0 1 1-1zm2 2v8.2A3 3 0 0 1 8.8 18H13V8H5zm10 3v5h4v-1.3L16.5 11H15zM6 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          </svg>
+        </button>
       </div>
 
-      <div class="topbar-right">
-        <!-- Redes -->
+      <!-- REDES SOCIALES -->
+      <div class="topbar-center social-center">
         <a
           class="social-link"
           href="https://www.instagram.com/guillerme.guillerme.589"
@@ -60,365 +82,23 @@
             <path d="M16.6 13.9c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1l-.7.8c-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.3-.7-.6-1.1-1.4-1.2-1.6-.1-.2 0-.4.1-.5l.5-.6c.1-.1.1-.3.1-.4l-.1-.4c-.1-.2-.5-1.2-.7-1.6-.2-.4-.4-.3-.5-.3h-.4c-.1 0-.4.1-.6.3-.2.2-.8.8-.8 2 0 1.2.8 2.3.9 2.4.1.1 1.6 2.5 3.9 3.4.6.3 1 .4 1.4.5.6.2 1.1.2 1.5.1.5-.1 1.3-.5 1.5-1 .2-.5.2-1 .2-1.1 0-.1-.2-.2-.4-.3z"/>
           </svg>
         </a>
-
-        <!-- USER SOLO MOBILE TOP -->
-        <div class="user-menu user-menu--mobileTop" (click)="$event.stopPropagation()">
-          <ng-container *ngIf="!isLogged()">
-            <a class="userTopLink" routerLink="/login" aria-label="Ingresar">
-              <span class="userIcon" aria-hidden="true">
-                <svg class="userIconSvg" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="12"></circle>
-                  <circle cx="12" cy="9" r="4"></circle>
-                  <path d="M4.5 20.2c1.9-3.6 4.6-5.2 7.5-5.2s5.6 1.6 7.5 5.2"></path>
-                </svg>
-              </span>
-              <span class="userTopText">Ingresar</span>
-            </a>
-          </ng-container>
-
-          <ng-container *ngIf="isLogged()">
-            <button
-              type="button"
-              class="user-trigger user-trigger--top"
-              (click)="toggleUserMenu()"
-              aria-label="Abrir menú de usuario"
-              [attr.aria-expanded]="userMenuOpen()"
-            >
-              <span class="userIcon" aria-hidden="true">
-                <svg class="userIconSvg" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="12"></circle>
-                  <circle cx="12" cy="9" r="4"></circle>
-                  <path d="M4.5 20.2c1.9-3.6 4.6-5.2 7.5-5.2s5.6 1.6 7.5 5.2"></path>
-                </svg>
-              </span>
-            </button>
-
-            <div class="user-dropdown user-dropdown--top" *ngIf="userMenuOpen()">
-              <div class="user-dropdown-head user-dropdown-head--top">
-                <div class="user-name">{{ email() }}</div>
-              </div>
-
-              <div class="user-dropdown-sep"></div>
-
-              <button
-                *ngIf="!isAdmin() && !isOperador()"
-                class="user-item"
-                type="button"
-                (click)="goOrders()"
-              >
-                Ver pedidos
-              </button>
-
-              <button
-                class="user-item danger"
-                type="button"
-                (click)="logout()"
-              >
-                Salir
-              </button>
-            </div>
-          </ng-container>
-        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- NAV PRINCIPAL -->
-  <div class="row">
-    <div
-      class="navbar col-12 d-flex align-items-center mobile"
-      [ngClass]="{
-        'navbar-operador': isOnlyOperador(),
-        'justify-content-around': !isOnlyOperador()
-      }"
-    >
-
-      <!-- LOGO -->
-      <a
-        class="logo d-flex justify-content-center align-items-center mobile logo-link"
-        routerLink="/"
-        (click)="closeAllMenus()"
-        aria-label="Ir al inicio"
-      >
-        <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
-      </a>
-
-      <ng-content></ng-content>
-
-      <!-- ITEMS MENÚ -->
-      <div
-        class="menu-items d-flex justify-content-around align-items-center"
-        [ngClass]="{ 'open': menuOpen() }"
-      >
+      <!-- LOGIN -->
+      <div class="topbar-right">
         <a
-          *ngIf="!isOnlyOperador()"
-          class="all sm-mini-phone all-colour"
-          href="#servicios"
-          (click)="closeMenu()"
-        >
-          INICIO
-        </a>
-
-        <!-- PRODUCTOS -->
-        <div
-          *ngIf="!isOnlyOperador()"
-          class="nav-item dropdown"
-          [class.open]="productsOpen()"
-          (mouseenter)="openProductsMenu()"
-          (mouseleave)="closeProductsMenu()"
-        >
-          <button
-            type="button"
-            class="all nav-link-btn"
-            (click)="toggleProductsMenu($event)"
-            aria-haspopup="true"
-            [attr.aria-expanded]="productsOpen()"
-          >
-            PRODUCTOS <span class="user-plus">▾</span>
-          </button>
-
-          <div class="dropdown-menu-custom">
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goProducts('all')"
-            >
-              Todos los productos
-            </button>
-
-            <!-- LIBRERÍA -->
-            <div class="dropdown-submenu-inline">
-              <button
-                type="button"
-                class="dropdown-item dropdown-item-with-arrow"
-                (click)="isDesktop() ? goProducts('libreria') : toggleLibraryMenu($event)"
-              >
-                <span>Librería</span>
-                <span class="user-plus">
-                  {{ isDesktop() ? '▸' : (libraryOpen() ? '▾' : '▸') }}
-                </span>
-              </button>
-
-              <!-- MOBILE: submenu inline -->
-              <div
-                class="dropdown-submenu-inline-menu"
-                *ngIf="!isDesktop() && libraryOpen()"
-              >
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Filgo')"
-                >
-                  Filgo
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Skycolor')"
-                >
-                  Skycolor
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Olami')"
-                >
-                  Olami
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('C-B-X')"
-                >
-                  C-B-X
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('FW')"
-                >
-                  FW
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Keyroad')"
-                >
-                  Keyroad
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Ibicraft')"
-                >
-                  Ibicraft
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Wero')"
-                >
-                  Wero
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Laprida-Exito')"
-                >
-                  Laprida-Exito
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Bic')"
-                >
-                  Bic
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Carpel')"
-                >
-                  Carpel
-                </button>
-
-                <button
-                  type="button"
-                  class="dropdown-subitem"
-                  (click)="goProductsByBrand('Otros')"
-                >
-                  Otros
-                </button>
-              </div>
-
-              <!-- DESKTOP: submenu lateral -->
-              <div class="dropdown-submenu-menu" *ngIf="isDesktop()">
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Filgo')">Filgo</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Skycolor')">Skycolor</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Olami')">Olami</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('C-B-X')">C-B-X</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('FW')">FW</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Keyroad')">Keyroad</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Ibicraft')">Ibicraft</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Wero')">Wero</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Laprida-Exito')">Laprida-Exito</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Bic')">Bic</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Carpel')">Carpel</button>
-                <button type="button" class="dropdown-item" (click)="goProductsByBrand('Otros')">Otros</button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goProducts('combos')"
-            >
-              Combos
-            </button>
-
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goProducts('varios')"
-            >
-              Varios
-            </button>
-          </div>
-        </div>
-
-        <!-- CONTACTO -->
-        <a
-          *ngIf="!isOnlyOperador() && (!isAdmin() || !isDesktop())"
-          class="all sm-mini-phone all-colour"
-          routerLink="/contacto"
-          (click)="closeMenu()"
-        >
-          CONTACTO
-        </a>
-
-        <!-- ADMINISTRAR SOLO DESKTOP -->
-        <div
-          *ngIf="isAdmin() && isDesktop()"
-          class="nav-item dropdown"
-          [class.open]="adminOpen()"
-          (mouseenter)="openAdminMenu()"
-          (mouseleave)="closeAdminMenu()"
-        >
-          <button
-            type="button"
-            class="all nav-link-btn"
-            (click)="toggleAdminMenu($event)"
-            aria-haspopup="true"
-            [attr.aria-expanded]="adminOpen()"
-          >
-            ADMINISTRAR <span class="user-plus">▾</span>
-          </button>
-
-          <div class="dropdown-menu-custom">
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goAdminHome()"
-            >
-              Principal
-            </button>
-
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goAdminProducts()"
-            >
-              Admin productos
-            </button>
-
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goOrders()"
-            >
-              Pedidos WEB
-            </button>
-
-            <button
-              type="button"
-              class="dropdown-item"
-              (click)="goLocalSales()"
-            >
-              Ventas LOCAL
-            </button>
-          </div>
-        </div>
-
-        <!-- LOGIN SOLO DESKTOP -->
-        <a
+          class="topbar-user-link"
           *ngIf="!isLogged()"
-          class="all nav-login--desktop"
           routerLink="/login"
-          (click)="closeMenu()"
         >
-          INGRESAR
+          <span class="topbar-user-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/>
+            </svg>
+          </span>
+          Ingresar
         </a>
 
-        <!-- BUSCADOR SOLO DESKTOP -->
-        <div
-          *ngIf="!isOnlyOperador()"
-          class="nav-search nav-search--desktop"
-          (click)="$event.stopPropagation()"
-        >
-          <app-header></app-header>
-        </div>
-
-        <!-- USER SOLO DESKTOP -->
         <div
           *ngIf="isLogged()"
           class="user-menu user-menu--desktop"
@@ -426,11 +106,18 @@
         >
           <button
             type="button"
-            class="user-trigger"
+            class="topbar-user-link user-trigger"
             (click)="toggleUserMenu()"
             aria-label="Abrir menú de usuario"
           >
-            <span class="user-email">{{ email() }}</span>
+            <span class="topbar-user-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5z"/>
+              </svg>
+            </span>
+
+            {{ email() }}
+
             <span class="user-plus">▾</span>
           </button>
 
@@ -473,102 +160,225 @@
         </div>
       </div>
 
-      <!-- ACCIONES DERECHA: solo usuarios no admin -->
+    </div>
+  </div>
+
+  <!-- FILA BLANCA: LOGO + BUSCADOR + CARRITO -->
+  <div class="mainbar">
+    <div
+      class="mainbar-inner"
+      [ngClass]="{
+        'navbar-operador': isOnlyOperador()
+      }"
+    >
+
+      <!-- LOGO -->
+      <a
+        class="logo logo-link"
+        routerLink="/"
+        (click)="closeAllMenus()"
+        aria-label="Ir al inicio"
+      >
+        <img class="logo-img" src="assets/sinfondo-guillerme.png" alt="Guillerme" />
+      </a>
+
+      <!-- BUSCADOR DESKTOP -->
       <div
-        class="carrito d-flex justify-content-center align-items-center gap-3"
+        *ngIf="!isOnlyOperador()"
+        class="nav-search nav-search--desktop"
+        (click)="$event.stopPropagation()"
+      >
+        <app-header></app-header>
+      </div>
+
+      <!-- ACCIONES DERECHA: CARRITO + HAMBURGER MOBILE -->
+      <div
+        class="main-actions"
         *ngIf="!isAdminOrOperador()"
       >
-        <!-- CARRITO -->
-        <div class="container-cart">
-          <button
-            class="botonCarrito"
-            type="button"
-            (click)="$event.stopPropagation(); openCart()"
-          >
-            <svg
-              width="57"
-              height="57"
-              viewBox="0 0 57 57"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M9.95499 40.4516C11.0522 45.9355 11.6009 48.6763 13.5697 50.2912C15.541 51.9062 18.3364 51.9062 23.9295 51.9062H33.8142C39.4074 51.9062 42.2027 51.9062 44.1716 50.2912C46.1429 48.6763 46.6891 45.9355 47.7887 40.4516L49.2137 33.3266C50.7907 25.4416 51.5792 21.4991 49.4417 18.889C47.3042 16.2812 43.281 16.2812 35.2392 16.2812H22.5069C14.4651 16.2812 10.4419 16.2812 8.30437 18.889C6.16687 21.4968 6.95537 25.4392 8.53237 33.3266L9.95499 40.4516Z"
-                fill="#45ACB4"
-              />
-              <path
-                d="M35.9961 25.7812C37.3078 25.7812 38.3711 24.7179 38.3711 23.4062C38.3711 22.0946 37.3078 21.0312 35.9961 21.0312C34.6844 21.0312 33.6211 22.0946 33.6211 23.4062C33.6211 24.7179 34.6844 25.7812 35.9961 25.7812Z"
-                fill="#EDDA6A"
-              />
-              <path
-                d="M21.7461 25.7812C23.0578 25.7812 24.1211 24.7179 24.1211 23.4062C24.1211 22.0946 23.0578 21.0312 21.7461 21.0312C20.4344 21.0312 19.3711 22.0946 19.3711 23.4062C19.3711 24.7179 20.4344 25.7812 21.7461 25.7812Z"
-                fill="#EDDA6A"
-              />
-              <path
-                d="M23.5273 13.9063C23.5273 12.489 24.0903 11.1298 25.0925 10.1276C26.0946 9.1255 27.4538 8.5625 28.8711 8.5625C30.2883 8.5625 31.6475 9.1255 32.6497 10.1276C33.6518 11.1298 34.2148 12.489 34.2148 13.9063V16.2813H35.2385C36.1338 16.2813 36.9793 16.2813 37.7773 16.286V13.9063C37.7773 11.5442 36.839 9.27883 35.1688 7.60858C33.4985 5.93833 31.2332 5 28.8711 5C26.509 5 24.2437 5.93833 22.5734 7.60858C20.9032 9.27883 19.9648 11.5442 19.9648 13.9063V16.286C20.7628 16.2813 21.6083 16.2813 22.5037 16.2813H23.5273V13.9063Z"
-                fill="#EDDA6A"
-              />
-            </svg>
-          </button>
+        <button
+          class="main-cart-btn"
+          type="button"
+          (click)="$event.stopPropagation(); openCart()"
+          aria-label="Abrir carrito"
+        >
+          <span class="main-cart-count">{{ store.cartCount() }}</span>
 
-          <p class="numeroCarrito">{{ store.cartCount() }}</p>
-        </div>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM6.2 6l.7 4h10.8l1.2-4H6.2zm-.4-2H21l-2.4 8H7.2l.4 2H19v2H6L3.8 4H1V2h4.4l.4 2z"/>
+          </svg>
+        </button>
 
-        <!-- HAMBURGER -->
         <button
           class="hamburger hamburger--spring"
           type="button"
           (click)="$event.stopPropagation(); toggleMenu()"
+          aria-label="Abrir menú"
         >
           <span class="hamburger-box">
             <span class="hamburger-inner"></span>
           </span>
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- BLOQUE BUSCADOR SOLO MOBILE -->
+  <!-- BUSCADOR SOLO MOBILE -->
   <div class="mobileSearchBlock" *ngIf="!isOnlyOperador()">
     <app-header></app-header>
   </div>
 
-  <!-- SUBNAV FAQ -->
-  <div class="subnav" *ngIf="!isAdminOrOperador()">
-    <div class="subnav-inner">
-      <div class="subnav-right">
+  <!-- BARRA ROJA DE NAVEGACIÓN -->
+  <div
+    class="menu-items"
+    [ngClass]="{ 'open': menuOpen() }"
+  >
+    <a
+      *ngIf="!isOnlyOperador()"
+      class="all all-colour"
+      routerLink="/"
+      (click)="closeMenu()"
+    >
+      Inicio
+    </a>
+
+    <!-- PRODUCTOS -->
+    <div
+      *ngIf="!isOnlyOperador()"
+      class="nav-item dropdown"
+      [class.open]="productsOpen()"
+      (mouseenter)="openProductsMenu()"
+      (mouseleave)="closeProductsMenu()"
+    >
+      <button
+        type="button"
+        class="all nav-link-btn"
+        (click)="toggleProductsMenu($event)"
+        aria-haspopup="true"
+        [attr.aria-expanded]="productsOpen()"
+      >
+        Productos <span class="user-plus">▾</span>
+      </button>
+
+      <div class="dropdown-menu-custom">
         <button
           type="button"
-          class="subnav-link subnav-link--ghost subnav-link--faq"
-          (click)="goFaq('como-compro')"
+          class="dropdown-item"
+          (click)="goProducts('all')"
         >
-          <span class="subnav-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 9V7a5 5 0 0 1 10 0v2h2a1 1 0 0 1 .99 1.14l-1.5 10A2 2 0 0 1 15.51 22h-7a2 2 0 0 1-1.98-1.86l-1.5-10A1 1 0 0 1 5 9h2zm2 0h6V7a3 3 0 0 0-6 0v2z"/>
-            </svg>
-          </span>
-          <span class="subnav-copy">
-            <span class="subnav-kicker">¿Cómo compro?</span>
-            <span class="subnav-text">Consultá acá</span>
-          </span>
+          Todos los productos
+        </button>
+
+        <div class="dropdown-submenu-inline">
+          <button
+            type="button"
+            class="dropdown-item dropdown-item-with-arrow"
+            (click)="isDesktop() ? goProducts('libreria') : toggleLibraryMenu($event)"
+          >
+            <span>Librería</span>
+            <span class="user-plus">
+              {{ isDesktop() ? '▸' : (libraryOpen() ? '▾' : '▸') }}
+            </span>
+          </button>
+
+          <!-- MOBILE -->
+          <div
+            class="dropdown-submenu-inline-menu"
+            *ngIf="!isDesktop() && libraryOpen()"
+          >
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Filgo')">Filgo</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Skycolor')">Skycolor</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Olami')">Olami</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('C-B-X')">C-B-X</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('FW')">FW</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Keyroad')">Keyroad</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Ibicraft')">Ibicraft</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Wero')">Wero</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Laprida-Exito')">Laprida-Exito</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Bic')">Bic</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Carpel')">Carpel</button>
+            <button type="button" class="dropdown-subitem" (click)="goProductsByBrand('Otros')">Otros</button>
+          </div>
+
+          <!-- DESKTOP -->
+          <div class="dropdown-submenu-menu" *ngIf="isDesktop()">
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Filgo')">Filgo</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Skycolor')">Skycolor</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Olami')">Olami</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('C-B-X')">C-B-X</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('FW')">FW</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Keyroad')">Keyroad</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Ibicraft')">Ibicraft</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Wero')">Wero</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Laprida-Exito')">Laprida-Exito</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Bic')">Bic</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Carpel')">Carpel</button>
+            <button type="button" class="dropdown-item" (click)="goProductsByBrand('Otros')">Otros</button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="dropdown-item"
+          (click)="goProducts('combos')"
+        >
+          Combos
         </button>
 
         <button
           type="button"
-          class="subnav-link subnav-link--ghost subnav-link--faq"
-          (click)="goFaq('metodos-envio')"
+          class="dropdown-item"
+          (click)="goProducts('varios')"
         >
-          <span class="subnav-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 6a1 1 0 0 1 1-1h9v9H3V6zm11 0h3.5a1 1 0 0 1 .8.4l2.7 3.6a1 1 0 0 1 .2.6V14h-7V6zm-8 9a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm10 0a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>
-            </svg>
-          </span>
-          <span class="subnav-copy">
-            <span class="subnav-kicker">Métodos de envío.</span>
-            <span class="subnav-text">Conocer más</span>
-          </span>
+          Varios
         </button>
       </div>
     </div>
+
+    <a
+      *ngIf="!isOnlyOperador() && (!isAdmin() || !isDesktop())"
+      class="all all-colour"
+      routerLink="/contacto"
+      (click)="closeMenu()"
+    >
+      Contacto
+    </a>
+
+    <!-- ADMINISTRAR -->
+    <div
+      *ngIf="isAdmin() && isDesktop()"
+      class="nav-item dropdown"
+      [class.open]="adminOpen()"
+      (mouseenter)="openAdminMenu()"
+      (mouseleave)="closeAdminMenu()"
+    >
+      <button
+        type="button"
+        class="all nav-link-btn"
+        (click)="toggleAdminMenu($event)"
+        aria-haspopup="true"
+        [attr.aria-expanded]="adminOpen()"
+      >
+        Administrar <span class="user-plus">▾</span>
+      </button>
+
+      <div class="dropdown-menu-custom">
+        <button type="button" class="dropdown-item" (click)="goAdminHome()">Principal</button>
+        <button type="button" class="dropdown-item" (click)="goAdminProducts()">Admin productos</button>
+        <button type="button" class="dropdown-item" (click)="goOrders()">Pedidos WEB</button>
+        <button type="button" class="dropdown-item" (click)="goLocalSales()">Ventas LOCAL</button>
+      </div>
+    </div>
+
+    <a
+      *ngIf="!isLogged()"
+      class="all nav-login--mobile"
+      routerLink="/login"
+      (click)="closeMenu()"
+    >
+      Ingresar
+    </a>
   </div>
+
 </nav>

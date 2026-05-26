@@ -182,4 +182,24 @@ toggleResults() {
     this.openResults();
   }
 }
+
+submitSearch() {
+  const q = this.query.trim();
+
+  if (!q) {
+    this.filteredProducts = [];
+    this.resultsOpen = false;
+    this.qInput?.nativeElement?.focus();
+    return;
+  }
+
+  const visibles = this.productsSig().filter(
+    (p) => (p.estado ?? true) === true
+  );
+
+  this.filteredProducts = filterProducts(visibles, q);
+  this.resultsOpen = true;
+
+  setTimeout(() => this.qInput?.nativeElement?.focus(), 0);
+}
 }
