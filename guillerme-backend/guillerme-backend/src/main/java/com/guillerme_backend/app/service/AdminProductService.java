@@ -120,10 +120,7 @@ public class AdminProductService {
         Product p = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado id=" + id));
 
-        p.setActivo(false);
-        productRepository.save(p);
-
-        setStock(id, 0);
+        productRepository.delete(p);
     }
 
     @Transactional
