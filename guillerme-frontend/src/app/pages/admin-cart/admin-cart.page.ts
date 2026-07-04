@@ -67,6 +67,7 @@ export class AdminCartPage implements OnInit {
   historyRows = signal<LocalSaleSummaryDto[]>([]);
   selectedSale = signal<LocalSaleDetailDto | null>(null);
   
+  manualTypingMode = signal(false);
 
   page = signal(0);
   size = signal(10);
@@ -120,6 +121,7 @@ export class AdminCartPage implements OnInit {
     this.cart.set([]);
     this.lastAddedId.set(null);
     this.editingSaleId.set(null);
+    this.manualTypingMode.set(false);
     this.scannerBuffer = '';
     this.clearScannerTimer();
     this.focusInput();
@@ -135,6 +137,7 @@ export class AdminCartPage implements OnInit {
       this.cart.set([]);
       this.lastAddedId.set(null);
       this.editingSaleId.set(null);
+      this.manualTypingMode.set(false);
       this.scannerBuffer = '';
       this.clearScannerTimer();
       return;
@@ -162,6 +165,7 @@ export class AdminCartPage implements OnInit {
         this.cart.set([]);
         this.lastAddedId.set(null);
         this.editingSaleId.set(null);
+        this.manualTypingMode.set(false);
         this.scannerBuffer = '';
         this.clearScannerTimer();
 
@@ -187,59 +191,68 @@ export class AdminCartPage implements OnInit {
   }
 
   @HostListener('document:keydown', ['$event'])
-  onGlobalKeydown(event: KeyboardEvent) {
-    if (!this.orderStarted()) return;
-    if (this.loading() || this.sending()) return;
+onGlobalKeydown(event: KeyboardEvent) {
+  if (!this.orderStarted()) return;
+  if (this.loading() || this.sending()) return;
 
-    const target = event.target as HTMLElement | null;
-    const tag = target?.tagName?.toLowerCase();
-
-    // No interceptar si el usuario está escribiendo en otro campo distinto del input de escaneo
-    if (
-      target &&
-      (
-        tag === 'textarea' ||
-        tag === 'select' ||
-        (tag === 'input' && target !== this.scanInputEl?.nativeElement)
-      )
-    ) {
-      return;
-    }
-
-    // Ignorar combinaciones tipo Ctrl/Cmd/Alt
-    if (event.ctrlKey || event.metaKey || event.altKey) {
-      return;
-    }
-
-    // Enter => procesar buffer
-    if (event.key === 'Enter') {
-      const code = this.scannerBuffer.trim() || this.scanInput().trim();
-      if (!code) return;
-
-      event.preventDefault();
-      this.scanInput.set(code);
-      this.scannerBuffer = '';
-      this.clearScannerTimer();
-      this.scanCode();
-      return;
-    }
-
-    // Backspace para edición manual
-    if (event.key === 'Backspace') {
-      this.scannerBuffer = this.scannerBuffer.slice(0, -1);
-      this.scanInput.set(this.scannerBuffer);
-      return;
-    }
-
-    // Ignorar teclas especiales
-    if (event.key.length !== 1) {
-      return;
-    }
-
-    this.scannerBuffer += event.key;
-    this.scanInput.set(this.scannerBuffer);
-    this.restartScannerTimer();
+  /**
+   * Si está activado el modo escritura manual,
+   * no interceptamos teclas globales.
+   * El usuario escribe en el input y agrega con botón o Enter.
+   */
+  if (this.manualTypingMode()) {
+    return;
   }
+
+  const target = event.target as HTMLElement | null;
+  const tag = target?.tagName?.toLowerCase();
+
+  // No interceptar si el usuario está escribiendo en otro campo distinto del input de escaneo
+  if (
+    target &&
+    (
+      tag === 'textarea' ||
+      tag === 'select' ||
+      (tag === 'input' && target !== this.scanInputEl?.nativeElement)
+    )
+  ) {
+    return;
+  }
+
+  // Ignorar combinaciones tipo Ctrl/Cmd/Alt
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return;
+  }
+
+  // Enter => procesar buffer
+  if (event.key === 'Enter') {
+    const code = this.scannerBuffer.trim() || this.scanInput().trim();
+    if (!code) return;
+
+    event.preventDefault();
+    this.scanInput.set(code);
+    this.scannerBuffer = '';
+    this.clearScannerTimer();
+    this.scanCode();
+    return;
+  }
+
+  // Backspace para edición manual
+  if (event.key === 'Backspace') {
+    this.scannerBuffer = this.scannerBuffer.slice(0, -1);
+    this.scanInput.set(this.scannerBuffer);
+    return;
+  }
+
+  // Ignorar teclas especiales
+  if (event.key.length !== 1) {
+    return;
+  }
+
+  this.scannerBuffer += event.key;
+  this.scanInput.set(this.scannerBuffer);
+  this.restartScannerTimer();
+}
 
   private restartScannerTimer() {
     this.clearScannerTimer();
@@ -369,6 +382,7 @@ addToCart(p: any) {
     this.cart.set([]);
     this.scanInput.set('');
     this.lastAddedId.set(null);
+    this.manualTypingMode.set(false);
     this.scannerBuffer = '';
     this.clearScannerTimer();
     this.focusInput();
@@ -435,6 +449,7 @@ addToCart(p: any) {
             this.orderStarted.set(false);
             this.customerName.set('');
             this.editingSaleId.set(null);
+            this.manualTypingMode.set(false);
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -459,6 +474,7 @@ addToCart(p: any) {
             this.orderStarted.set(false);
             this.customerName.set('');
             this.editingSaleId.set(null);
+            this.manualTypingMode.set(false);
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -585,6 +601,7 @@ addToCart(p: any) {
             this.customerName.set(d.customerName ?? '');
             this.scanInput.set('');
             this.lastAddedId.set(null);
+            this.manualTypingMode.set(false);
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -703,5 +720,36 @@ scrollToCart() {
       block: 'start'
     });
   }, 0);
+}
+
+toggleManualTypingMode() {
+  this.manualTypingMode.update((v) => !v);
+
+  this.scannerBuffer = '';
+  this.clearScannerTimer();
+  this.scanInput.set('');
+
+  this.focusInput();
+}
+
+onScanInputChange(value: string): void {
+  this.scanInput.set(value);
+
+  /**
+   * En modo escritura manual no usamos buffer de scanner.
+   */
+  if (this.manualTypingMode()) {
+    this.scannerBuffer = '';
+    this.clearScannerTimer();
+  }
+}
+
+scanCodeManual(event?: Event): void {
+  event?.preventDefault();
+
+  this.scannerBuffer = '';
+  this.clearScannerTimer();
+
+  this.scanCode();
 }
 }

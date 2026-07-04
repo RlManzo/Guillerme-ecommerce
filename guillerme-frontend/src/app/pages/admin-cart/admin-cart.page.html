@@ -104,20 +104,34 @@
   </div>
 
   <div class="scan-box pos-scan-box">
+    <label class="switch-mode">
+  <input
+    type="checkbox"
+    [ngModel]="manualTypingMode()"
+    (ngModelChange)="toggleManualTypingMode()"
+    [disabled]="loading() || sending()"
+  />
+
+  <span class="switch-slider"></span>
+
+  <span class="switch-text">
+    {{ manualTypingMode() ? 'Escritura manual' : 'Lector' }}
+  </span>
+</label>
     <div class="scan-row">
       <input
         #scanInputEl
-        placeholder="Escaneá o ingresá código"
+        [placeholder]="manualTypingMode() ? 'Ingresá código manualmente' : 'Escaneá código con lector'"
         [ngModel]="scanInput()"
-        (ngModelChange)="scanInput.set($event)"
-        (keydown.enter)="scanCode()"
+        (ngModelChange)="onScanInputChange($event)"
+        (keydown.enter)="manualTypingMode() ? scanCodeManual($event) : null"
         [disabled]="loading() || sending()"
       />
 
       <button
         type="button"
-        (click)="scanCode()"
-        [disabled]="loading() || sending()"
+        (click)="scanCodeManual()"
+        [disabled]="loading() || sending() || !scanInput().trim()"
       >
         {{ loading() ? 'Buscando...' : 'Agregar' }}
       </button>
