@@ -3,11 +3,11 @@
 ========================= */
 
 .navbar-fixed {
-  position: sticky;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: auto;
+  left: auto;
   width: 100%;
-  z-index: 999;
+  z-index: auto;
   background: #ffffff;
 }
 
