@@ -1,4 +1,11 @@
-import { Component, inject, signal, HostListener, computed } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
@@ -24,17 +31,25 @@ type ProductsBrand =
   | 'Laprida-Exito'
   | 'Bic'
   | 'Carpel'
+  | 'Nupro'
+  | 'Avíos'
   | 'Otros';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, NgClass, RouterLink, Header],
+  imports: [
+    CommonModule,
+    NgClass,
+    RouterLink,
+    Header,
+  ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
-export class Navbar {
+export class Navbar implements OnDestroy {
   readonly store = inject(ShopStore);
+
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -43,15 +58,23 @@ export class Navbar {
   readonly productsOpen = signal(false);
   readonly adminOpen = signal(false);
   readonly libraryOpen = signal(false);
-  readonly isDesktop = signal(window.innerWidth > 768);
 
-  isLogged = this.auth.isLogged;
-  email = this.auth.email;
-  isAdmin = this.auth.isAdmin;
-  isOperador = this.auth.isOperador;
+  readonly isDesktop = signal(
+    window.innerWidth > 768
+  );
 
-  isAdminOrOperador = computed(() => this.isAdmin() || this.isOperador());
-  isOnlyOperador = computed(() => this.isOperador() && !this.isAdmin());
+  readonly isLogged = this.auth.isLogged;
+  readonly email = this.auth.email;
+  readonly isAdmin = this.auth.isAdmin;
+  readonly isOperador = this.auth.isOperador;
+
+  readonly isAdminOrOperador = computed(
+    () => this.isAdmin() || this.isOperador()
+  );
+
+  readonly isOnlyOperador = computed(
+    () => this.isOperador() && !this.isAdmin()
+  );
 
   readonly libraryBrands: ProductsBrand[] = [
     'Filgo',
@@ -65,224 +88,396 @@ export class Navbar {
     'Bic',
     'Laprida-Exito',
     'Carpel',
+    'Nupro',
+    'Avíos',
     'Otros',
   ];
 
-  toggleMenu() {
-    this.menuOpen.update((v) => !v);
-
-    if (!this.menuOpen()) {
-      this.productsOpen.set(false);
-      this.adminOpen.set(false);
-      this.libraryOpen.set(false);
-    }
+  ngOnDestroy(): void {
+    document.body.style.removeProperty('overflow');
   }
 
-  closeMenu() {
+  // =========================================================
+  // MENÚ MOBILE
+  // =========================================================
+
+  toggleMenu(event?: Event): void {
+    event?.stopPropagation();
+
+    const nextValue = !this.menuOpen();
+
+    this.menuOpen.set(nextValue);
+
+    if (nextValue) {
+      this.userMenuOpen.set(false);
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
+    this.closeMobileMenuState();
+  }
+
+  closeMenu(): void {
     this.menuOpen.set(false);
+    this.closeMobileMenuState();
+  }
+
+  private closeMobileMenuState(): void {
     this.productsOpen.set(false);
     this.adminOpen.set(false);
     this.libraryOpen.set(false);
+
+    document.body.style.removeProperty('overflow');
   }
 
-  openCart() {
+  closeAllMenus(): void {
+    this.productsOpen.set(false);
+    this.adminOpen.set(false);
+    this.userMenuOpen.set(false);
+    this.menuOpen.set(false);
+    this.libraryOpen.set(false);
+
+    document.body.style.removeProperty('overflow');
+  }
+
+  // =========================================================
+  // CARRITO
+  // =========================================================
+
+  openCart(): void {
     this.store.openCart();
   }
 
-  toggleUserMenu() {
-    this.userMenuOpen.update((v) => !v);
+  // =========================================================
+  // USUARIO
+  // =========================================================
+
+  toggleUserMenu(event?: Event): void {
+    event?.stopPropagation();
+
+    this.userMenuOpen.update(
+      (value) => !value
+    );
   }
 
-  closeUserMenu() {
+  closeUserMenu(): void {
     this.userMenuOpen.set(false);
   }
 
-  logout() {
+  logout(): void {
     this.auth.logout();
+
     this.closeUserMenu();
     this.closeMenu();
+
     this.router.navigateByUrl('/');
   }
 
-  goProfile() {
+  goProfile(): void {
     this.closeUserMenu();
     this.closeMenu();
+
     this.router.navigateByUrl('/perfil');
   }
 
-  goOrders() {
+  goOrders(): void {
     this.closeUserMenu();
     this.closeMenu();
     this.adminOpen.set(false);
 
-    const role = (this.auth.session()?.role ?? '').toUpperCase();
-    const target = role === 'ADMIN' ? '/admin/orders' : '/orders';
+    const role = (
+      this.auth.session()?.role ?? ''
+    ).toUpperCase();
+
+    const target =
+      role === 'ADMIN'
+        ? '/admin/orders'
+        : '/orders';
 
     this.router.navigateByUrl(target);
   }
 
-  goAdminProducts() {
+  // =========================================================
+  // ADMINISTRACIÓN
+  // =========================================================
+
+  goAdminHome(): void {
     this.closeUserMenu();
     this.closeMenu();
     this.adminOpen.set(false);
-    this.router.navigateByUrl('/admin/products');
+
+    this.router.navigateByUrl('/admin');
   }
 
-  goLocalSales() {
+  goAdminProducts(): void {
     this.closeUserMenu();
     this.closeMenu();
     this.adminOpen.set(false);
-    this.router.navigateByUrl('/admin/cartOrders');
+
+    this.router.navigateByUrl(
+      '/admin/products'
+    );
   }
 
-  goManagePurchases() {
+  goAdminCustomers(): void {
     this.closeUserMenu();
     this.closeMenu();
     this.adminOpen.set(false);
-    this.router.navigateByUrl('/admin/purchases');
+
+    this.router.navigateByUrl(
+      '/admin/customers'
+    );
   }
 
-  openProductsMenu() {
-    if (window.innerWidth > 768) {
-      this.productsOpen.set(true);
-    }
+  goLocalSales(): void {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+
+    this.router.navigateByUrl(
+      '/admin/cartOrders'
+    );
   }
 
-  closeProductsMenu() {
-    if (window.innerWidth > 768) {
-      this.productsOpen.set(false);
-      this.libraryOpen.set(false);
-    }
+  goManagePurchases(): void {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+
+    this.router.navigateByUrl(
+      '/admin/purchases'
+    );
   }
 
-  toggleProductsMenu(ev: MouseEvent) {
-    if (window.innerWidth > 768) return;
-
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.productsOpen.update((v) => !v);
-
-    if (!this.productsOpen()) {
-      this.libraryOpen.set(false);
-    }
-  }
-
-  toggleLibraryMenu(ev?: Event) {
-    if (window.innerWidth > 768) return;
-
-    ev?.preventDefault();
-    ev?.stopPropagation();
-
-    this.libraryOpen.update((v) => !v);
-  }
-
-  closeLibraryMenu() {
-    this.libraryOpen.set(false);
-  }
-
-  openAdminMenu() {
+  openAdminMenu(): void {
     if (window.innerWidth > 768) {
       this.adminOpen.set(true);
     }
   }
 
-  closeAdminMenu() {
+  closeAdminMenu(): void {
     if (window.innerWidth > 768) {
       this.adminOpen.set(false);
     }
   }
 
-  toggleAdminMenu(ev: MouseEvent) {
-    if (window.innerWidth > 768) return;
+  toggleAdminMenu(
+    event: MouseEvent
+  ): void {
+    if (window.innerWidth > 768) {
+      return;
+    }
 
-    ev.preventDefault();
-    ev.stopPropagation();
-    this.adminOpen.update((v) => !v);
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.adminOpen.update(
+      (value) => !value
+    );
+
+    if (this.adminOpen()) {
+      this.productsOpen.set(false);
+      this.libraryOpen.set(false);
+    }
   }
 
-  closeAllMenus() {
-    this.productsOpen.set(false);
-    this.adminOpen.set(false);
-    this.userMenuOpen.set(false);
-    this.menuOpen.set(false);
+  // =========================================================
+  // PRODUCTOS
+  // =========================================================
+
+  openProductsMenu(): void {
+    if (window.innerWidth > 768) {
+      this.productsOpen.set(true);
+    }
+  }
+
+  closeProductsMenu(): void {
+    if (window.innerWidth > 768) {
+      this.productsOpen.set(false);
+      this.libraryOpen.set(false);
+    }
+  }
+
+  toggleProductsMenu(
+    event: MouseEvent
+  ): void {
+    if (window.innerWidth > 768) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.productsOpen.update(
+      (value) => !value
+    );
+
+    if (!this.productsOpen()) {
+      this.libraryOpen.set(false);
+    }
+
+    if (this.productsOpen()) {
+      this.adminOpen.set(false);
+    }
+  }
+
+  toggleLibraryMenu(
+    event?: Event
+  ): void {
+    if (window.innerWidth > 768) {
+      return;
+    }
+
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this.libraryOpen.update(
+      (value) => !value
+    );
+  }
+
+  closeLibraryMenu(): void {
     this.libraryOpen.set(false);
   }
 
   private goToProductsRoute(
     category: ProductsCategory = 'all',
     brand: ProductsBrand = 'all'
-  ) {
-    this.router.navigate(['/productos'], {
+  ): void {
+    this.router
+      .navigate(['/productos'], {
+        queryParams: {
+          cat:
+            category !== 'all'
+              ? category
+              : null,
+
+          brand:
+            brand !== 'all'
+              ? brand
+              : null,
+        },
+      })
+      .then(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      });
+  }
+
+  goProducts(
+    category: ProductsCategory
+  ): void {
+    this.closeAllMenus();
+
+    this.goToProductsRoute(
+      category,
+      'all'
+    );
+  }
+
+  goProductsByBrand(
+    brand: ProductsBrand
+  ): void {
+    this.closeAllMenus();
+
+    this.goToProductsRoute(
+      'libreria',
+      brand
+    );
+  }
+
+  resetProductsFilters(): void {
+    this.closeAllMenus();
+
+    this.goToProductsRoute(
+      'all',
+      'all'
+    );
+  }
+
+  // =========================================================
+  // PREGUNTAS FRECUENTES Y CONTACTO
+  // =========================================================
+
+  goFaq(
+    code: 'como-compro' | 'metodos-envio'
+  ): void {
+    this.closeAllMenus();
+
+    this.router.navigate(['/'], {
+      fragment: 'faq',
       queryParams: {
-        cat: category !== 'all' ? category : null,
-        brand: brand !== 'all' ? brand : null,
+        faq: code,
       },
-    }).then(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
-  goProducts(cat: ProductsCategory) {
-    this.closeAllMenus();
-    this.goToProductsRoute(cat, 'all');
+  goContactoForm(): void {
+    this.closeUserMenu();
+    this.closeMenu();
+
+    this.router.navigateByUrl('/contacto');
   }
 
-  goProductsByBrand(brand: ProductsBrand) {
-    this.closeAllMenus();
-    this.goToProductsRoute('libreria', brand);
-  }
+  // =========================================================
+  // EVENTOS GLOBALES
+  // =========================================================
 
-  resetProductsFilters() {
-    this.closeAllMenus();
-    this.goToProductsRoute('all', 'all');
-  }
+  @HostListener(
+    'document:click',
+    ['$event']
+  )
+  onDocClick(event: MouseEvent): void {
+    /*
+     * El drawer mobile se cierra mediante:
+     * - backdrop;
+     * - botón X;
+     * - navegación.
+     *
+     * No se cierra ante cualquier clic interno.
+     */
+    if (!this.isDesktop()) {
+      this.closeUserMenu();
+      return;
+    }
 
-  @HostListener('document:click')
-  onDocClick() {
     this.productsOpen.set(false);
     this.adminOpen.set(false);
     this.libraryOpen.set(false);
     this.closeUserMenu();
   }
 
-  goFaq(code: 'como-compro' | 'metodos-envio') {
-    this.closeAllMenus();
-
-    this.router.navigate(['/'], {
-      fragment: 'faq',
-      queryParams: { faq: code },
-    });
-  }
-
-  goContactoForm() {
-    this.closeUserMenu();
-    this.closeMenu();
-    this.router.navigateByUrl('/contacto');
-  }
-
   @HostListener('window:resize')
-  onResize() {
-    this.isDesktop.set(window.innerWidth > 768);
+  onResize(): void {
+    const desktop =
+      window.innerWidth > 768;
 
-    if (!this.isDesktop()) {
-      this.adminOpen.set(false);
-      this.userMenuOpen.set(false);
-    } else {
+    this.isDesktop.set(desktop);
+
+    if (desktop) {
+      this.menuOpen.set(false);
       this.libraryOpen.set(false);
+      document.body.style.removeProperty(
+        'overflow'
+      );
+
+      return;
     }
-  }
 
-  goAdminHome() {
-    this.closeUserMenu();
-    this.closeMenu();
     this.adminOpen.set(false);
-    this.router.navigateByUrl('/admin');
+    this.userMenuOpen.set(false);
   }
 
-  goAdminCustomers() {
-  this.closeUserMenu();
-  this.closeMenu();
-  this.adminOpen.set(false);
-  this.router.navigateByUrl('/admin/customers');
-}
+  @HostListener(
+    'document:keydown.escape'
+  )
+  onEscape(): void {
+    if (this.menuOpen()) {
+      this.closeMenu();
+    }
+
+    this.closeUserMenu();
+  }
 }

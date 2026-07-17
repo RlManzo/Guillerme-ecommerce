@@ -1,6 +1,11 @@
 import { Injectable, computed, signal } from '@angular/core';
 
-export type ProductsCategory = 'all' | 'libreria' | 'combos' | 'varios';
+export type ProductsCategory =
+  | 'all'
+  | 'libreria'
+  | 'juguetes'
+  | 'combos'
+  | 'varios';
 
 export type ProductsBrand =
   | 'all'

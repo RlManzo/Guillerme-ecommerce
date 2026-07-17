@@ -2,264 +2,621 @@
   class="col-12 ps-0 pe-0 d-flex flex-column justify-content-center align-items-center sectionProd"
   id="producto"
 >
-  <div class="box-title-contact text-center d-flex justify-content-center align-items-center">
-  <h4 data-aos="fade-up" class="sectionProd-title">Nuestros Productos</h4>
-  <img src="assets/logo-textos.png" alt="icono" data-aos="zoom-in" class="title-logo-guillerme"/>
-</div>
+  <!-- ===================================================== -->
+  <!-- CATÁLOGO -->
+  <!-- ===================================================== -->
+  <div class="catalog-layout">
 
-  <div class="sectionProd">
+    <!-- =================================================== -->
+    <!-- FILTROS DESKTOP -->
+    <!-- =================================================== -->
+    <aside class="catalog-sidebar">
 
-    <div class="d-flex selectStyles text-center" data-aos="fade-right">
-  <h5
-    class="selectText all"
-    [ngClass]="{ 'all-colour': filtro() === 'all' }"
-    (click)="setFilter('all')"
-  >
-    TODOS
-  </h5>
-
-  <h5
-    class="selectText all"
-    [ngClass]="{ 'all-colour': filtro() === 'libreria' }"
-    (click)="setFilter('libreria')"
-  >
-    LIBRERÍA
-  </h5>
-
-  <h5
-    class="selectText all"
-    [ngClass]="{ 'all-colour': filtro() === 'combos' }"
-    (click)="setFilter('combos')"
-  >
-    COMBOS
-  </h5>
-
-  <h5
-    class="selectText all"
-    [ngClass]="{ 'all-colour': filtro() === 'varios' }"
-    (click)="setFilter('varios')"
-  >
-    VARIOS
-  </h5>
-</div>
-
-<!-- PANEL FILTROS (nuevo) -->
-<div class="lks-filters">
-  <!-- Buscar -->
-  <div class="lks-field">
-    <label class="lks-label">Buscar</label>
-    <input
-      class="lks-input"
-      placeholder="Buscar por nombre, descripción, keywords..."
-      [ngModel]="q()"
-      (ngModelChange)="onSearchChange($event)"
-    />
-  </div>
-
-  <!-- Ordenar -->
-  <div class="lks-field">
-    <label class="lks-label">Ordenar</label>
-    <select class="lks-input" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
-      <option value="NEWEST">Más nuevo</option>
-      <option value="OLDEST">Más antiguo</option>
-      <option value="AZ">A → Z</option>
-      <option value="ZA">Z → A</option>
-      <option value="CHEAPEST">Más barato</option>
-      <option value="EXPENSIVE">Más caro</option>
-    </select>
-  </div>
-
-  <!-- Marca -->
-<div class="lks-field">
-  <label class="lks-label">Marca</label>
-  <select
-    class="lks-input"
-    [ngModel]="brand()"
-    (ngModelChange)="onBrandChange($event)"
-  >
-    <option value="all">Todas</option>
-    <option value="Filgo">Filgo</option>
-    <option value="Skycolor">Skycolor</option>
-    <option value="Olami">Olami</option>
-    <option value="C-B-X">C-B-X</option>
-    <option value="FW">FW</option>
-    <option value="Keyroad">Keyroad</option>
-    <option value="Ibicraft">Ibicraft</option>
-    <option value="Wero">Wero</option>
-    <option value="Laprida-Exito">Laprida-Exito</option>
-    <option value="Bic">Bic</option>
-    <option value="Carpel">Carpel</option>
-    <option value="Otros">Otros</option>
-  </select>
-</div>
-
-  <!-- Precio (dropdown) -->
-  <div class="lks-field price-field" (clickOutside)="priceOpen=false">
-    <label class="lks-label">Precio</label>
-
-    <!-- “input” único (botón) -->
-    <button
-      type="button"
-      class="lks-input lks-price-trigger"
-      (click)="priceOpen = !priceOpen; $event.stopPropagation()"
-      aria-haspopup="dialog"
-      [attr.aria-expanded]="priceOpen"
-    >
-      <span class="lks-price-text">
-        {{
-          (minPrice() != null || maxPrice() != null)
-            ? ('$ ' + (minPrice() ?? 0) + ' — $ ' + (maxPrice() ?? '∞'))
-            : 'Filtrar por precio'
-        }}
-      </span>
-      <span class="lks-caret">▾</span>
-    </button>
-
-    <!-- dropdown con rango -->
-    <div class="lks-price-pop" *ngIf="priceOpen" (click)="$event.stopPropagation()">
-      <div class="lks-price-row">
-        <div class="lks-field mini">
-          <label class="lks-label">Desde</label>
-          <input
-            class="lks-input"
-            type="number"
-            min="0"
-            [ngModel]="minPrice() ?? ''"
-            (ngModelChange)="onMinPriceChange($event)"
-          />
-        </div>
-
-        <div class="lks-field mini">
-          <label class="lks-label">Hasta</label>
-          <input
-            class="lks-input"
-            type="number"
-            min="0"
-            [ngModel]="maxPrice() ?? ''"
-            (ngModelChange)="onMaxPriceChange($event)"
-          />
-        </div>
-      </div>
-
-      <div class="lks-price-actions">
+      <nav
+        class="catalog-breadcrumb"
+        aria-label="Ruta de navegación"
+      >
         <button
           type="button"
-          class="lks-btn ghost"
-          (click)="minPrice.set(null); maxPrice.set(null); page.set(0)"
+          class="breadcrumb-link"
+          (click)="setFilter('all')"
+        >
+          Inicio
+        </button>
+
+        <span aria-hidden="true">›</span>
+
+        <span>{{ categoryTitle() }}</span>
+      </nav>
+
+      <div class="category-heading">
+        <h2>{{ categoryTitle() }}</h2>
+
+        <span>
+          {{ productosFiltrados().length }}
+          {{
+            productosFiltrados().length === 1
+              ? 'producto'
+              : 'productos'
+          }}
+        </span>
+      </div>
+
+      <!-- BUSCAR -->
+      <section class="sidebar-section">
+        <h3>Buscar</h3>
+
+        <input
+          type="search"
+          class="sidebar-search"
+          placeholder="Nombre, descripción o palabra clave..."
+          aria-label="Buscar productos"
+          [ngModel]="q()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+      </section>
+
+      <!-- MARCAS: SOLO LIBRERÍA -->
+      <section
+        class="sidebar-section"
+        *ngIf="filtro() === 'libreria'"
+      >
+        <div class="sidebar-section-title">
+          <h3>Marca</h3>
+          <span aria-hidden="true">⌃</span>
+        </div>
+
+        <div class="brands-list">
+          <label
+            class="brand-option"
+            *ngFor="let brandOption of visibleBrands"
+          >
+            <input
+              type="checkbox"
+              [checked]="brand() === brandOption"
+              (change)="selectBrandFromSidebar(brandOption)"
+            />
+
+            <span>{{ brandOption }}</span>
+          </label>
+        </div>
+
+        <button
+          *ngIf="brand() !== 'all'"
+          type="button"
+          class="clear-brand"
+          (click)="selectBrandFromSidebar('all')"
+        >
+          Limpiar marca
+        </button>
+      </section>
+
+      <!-- PRECIO -->
+      <section class="sidebar-section">
+        <h3>Rango de precio</h3>
+
+        <div class="price-inputs">
+          <label>
+            <span>Desde</span>
+
+            <input
+              type="number"
+              min="0"
+              placeholder="$ 0"
+              [ngModel]="minPrice() ?? ''"
+              (ngModelChange)="onMinPriceChange($event)"
+            />
+          </label>
+
+          <label>
+            <span>Hasta</span>
+
+            <input
+              type="number"
+              min="0"
+              placeholder="Sin límite"
+              [ngModel]="maxPrice() ?? ''"
+              (ngModelChange)="onMaxPriceChange($event)"
+            />
+          </label>
+        </div>
+
+        <button
+          *ngIf="minPrice() !== null || maxPrice() !== null"
+          type="button"
+          class="clear-price"
+          (click)="clearPriceFilter()"
         >
           Limpiar precio
         </button>
+      </section>
+
+      <button
+        type="button"
+        class="clear-all-filters"
+        (click)="clearCatalogFilters()"
+      >
+        Limpiar filtros
+      </button>
+    </aside>
+
+    <!-- =================================================== -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- =================================================== -->
+    <div class="catalog-content">
+
+      <!-- ================================================= -->
+      <!-- TOOLBAR -->
+      <!-- ================================================= -->
+      <div class="catalog-toolbar">
+
+        <div class="mobile-category-title">
+          <h2>{{ categoryTitle() }}</h2>
+
+          <span>
+            {{ productosFiltrados().length }}
+            {{
+              productosFiltrados().length === 1
+                ? 'producto'
+                : 'productos'
+            }}
+          </span>
+        </div>
+
+        <!-- BARRA MOBILE -->
+        <div class="mobile-catalog-actions">
+          <button
+            type="button"
+            class="mobile-filter-trigger"
+            (click)="openMobileFilters()"
+          >
+            <span class="material-icons">tune</span>
+            <span>Filtrar</span>
+
+            <span
+              class="mobile-filter-count"
+              *ngIf="activeFiltersCount() > 0"
+            >
+              {{ activeFiltersCount() }}
+            </span>
+          </button>
+
+          <label class="mobile-sort-control">
+            <span>Ordenar por</span>
+
+            <select
+              aria-label="Ordenar productos"
+              [ngModel]="sortBy()"
+              (ngModelChange)="onSortChange($event)"
+            >
+              <option value="NEWEST">Más nuevo</option>
+              <option value="OLDEST">Más antiguo</option>
+              <option value="AZ">Nombre A → Z</option>
+              <option value="ZA">Nombre Z → A</option>
+              <option value="CHEAPEST">Menor precio</option>
+              <option value="EXPENSIVE">Mayor precio</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- ORDENAMIENTO DESKTOP -->
+        <label class="sort-control desktop-sort-control">
+          <span>Ordenar por</span>
+
+          <select
+            aria-label="Ordenar productos"
+            [ngModel]="sortBy()"
+            (ngModelChange)="onSortChange($event)"
+          >
+            <option value="NEWEST">Más nuevo</option>
+            <option value="OLDEST">Más antiguo</option>
+            <option value="AZ">Nombre A → Z</option>
+            <option value="ZA">Nombre Z → A</option>
+            <option value="CHEAPEST">Menor precio</option>
+            <option value="EXPENSIVE">Mayor precio</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- PRODUCTOS -->
+      <!-- ================================================= -->
+      <ng-container
+        *ngIf="productosPaginados().length > 0; else noProducts"
+      >
+        <div id="contenedorProductos">
+          <div
+            id="cardsProductos"
+            class="divProductos catalog-products-grid"
+            data-aos="fade-right"
+          >
+            <article
+              class="product-card"
+              *ngFor="let p of productosPaginados()"
+            >
+              <button
+                type="button"
+                class="product-media"
+                (click)="openDetalle(p)"
+                data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop"
+                [attr.aria-label]="'Ver detalle de ' + p.nombre"
+              >
+                <ng-container
+                  *ngIf="!isVideo(p.img); else cardVideo"
+                >
+                  <img
+                    class="product-img"
+                    [src]="p.img"
+                    [alt]="p.nombre"
+                    loading="lazy"
+                  />
+                </ng-container>
+
+                <ng-template #cardVideo>
+                  <video
+                    class="product-img"
+                    [src]="p.img"
+                    muted
+                    playsinline
+                    preload="metadata"
+                  ></video>
+                </ng-template>
+              </button>
+
+              <div class="product-divider"></div>
+
+              <div class="product-body">
+                <h5 class="product-title">
+                  {{ p.nombre }}
+                </h5>
+
+                <p class="product-subtitle">
+                  {{ p.descripcionCorta }}
+                </p>
+              </div>
+
+              <div class="product-footer">
+                <div class="product-price">
+                  {{ formatPrice(p.precio) }}
+                </div>
+
+                <button
+                  class="btnAdd"
+                  type="button"
+                  [disabled]="!hasStock(p)"
+                  [class.is-disabled]="!hasStock(p)"
+                  (click)="add(p)"
+                >
+                  {{
+                    hasStock(p)
+                      ? 'AGREGAR'
+                      : 'SIN STOCK'
+                  }}
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="catalog-pagination">
+            <button
+              type="button"
+              (click)="prevPage()"
+              [disabled]="page() === 0"
+            >
+              Anterior
+            </button>
+
+            <span>
+              Página {{ page() + 1 }}
+              de {{ totalPages() }}
+            </span>
+
+            <button
+              type="button"
+              (click)="nextPage()"
+              [disabled]="page() + 1 >= totalPages()"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ================================================= -->
+      <!-- SIN RESULTADOS -->
+      <!-- ================================================= -->
+      <ng-template #noProducts>
+        <div class="empty-products">
+          <h3>No encontramos productos</h3>
+
+          <p>
+            Probá modificando la búsqueda o quitando alguno
+            de los filtros seleccionados.
+          </p>
+
+          <button
+            type="button"
+            (click)="clearCatalogFilters()"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- BACKDROP FILTROS MOBILE -->
+  <!-- ===================================================== -->
+  <div
+    class="mobile-filter-backdrop"
+    [class.is-open]="mobileFiltersOpen()"
+    (click)="closeMobileFilters()"
+  ></div>
+
+  <!-- ===================================================== -->
+  <!-- DRAWER FILTROS MOBILE -->
+  <!-- ===================================================== -->
+  <aside
+    class="mobile-filter-drawer"
+    [class.is-open]="mobileFiltersOpen()"
+    [attr.aria-hidden]="!mobileFiltersOpen()"
+  >
+    <header class="mobile-filter-header">
+      <button
+        *ngIf="mobileFilterView() !== 'main'"
+        type="button"
+        class="mobile-filter-back"
+        (click)="backMobileFilters()"
+        aria-label="Volver"
+      >
+        ‹
+      </button>
+
+      <div class="mobile-filter-heading">
+        <strong>Filtros</strong>
+
+        <ng-container [ngSwitch]="mobileFilterView()">
+          <span *ngSwitchCase="'search'">
+            › Buscar
+          </span>
+
+          <span *ngSwitchCase="'brand'">
+            › Marca
+          </span>
+
+          <span *ngSwitchCase="'price'">
+            › Rango de precio
+          </span>
+        </ng-container>
+      </div>
+
+      <button
+        type="button"
+        class="mobile-filter-close"
+        (click)="closeMobileFilters()"
+        aria-label="Cerrar filtros"
+      >
+        ×
+      </button>
+    </header>
+
+    <div class="mobile-filter-body">
+
+      <!-- MENÚ PRINCIPAL -->
+      <ng-container
+        *ngIf="mobileFilterView() === 'main'"
+      >
+        <button
+          type="button"
+          class="mobile-filter-menu-item"
+          (click)="openMobileFilterView('search')"
+        >
+          <div>
+            <strong>Buscar</strong>
+
+            <small *ngIf="q().trim()">
+              {{ q() }}
+            </small>
+          </div>
+
+          <span>›</span>
+        </button>
+
+        <button
+          *ngIf="filtro() === 'libreria'"
+          type="button"
+          class="mobile-filter-menu-item"
+          (click)="openMobileFilterView('brand')"
+        >
+          <div>
+            <strong>Marca</strong>
+
+            <small *ngIf="brand() !== 'all'">
+              {{ brand() }}
+            </small>
+          </div>
+
+          <span>›</span>
+        </button>
 
         <button
           type="button"
-          class="lks-btn primary"
-          (click)="priceOpen=false"
+          class="mobile-filter-menu-item"
+          (click)="openMobileFilterView('price')"
         >
-          Aplicar
+          <div>
+            <strong>Rango de precio</strong>
+
+            <small
+              *ngIf="
+                minPrice() !== null ||
+                maxPrice() !== null
+              "
+            >
+              {{ priceFilterLabel() }}
+            </small>
+          </div>
+
+          <span>›</span>
         </button>
-      </div>
-    </div>
-  </div>
+      </ng-container>
 
-  <!-- Acciones -->
-  <div class="lks-actions">
-    <button type="button" class="lks-btn btnAdd" (click)="applyFilters()">
-      Buscar
-    </button>
+      <!-- BUSCADOR -->
+      <ng-container
+        *ngIf="mobileFilterView() === 'search'"
+      >
+        <div class="mobile-filter-panel">
+          <label for="mobileProductSearch">
+            Buscar productos
+          </label>
 
-    <button type="button" class="lks-btn ghost" (click)="clearFilters()">
-      Limpiar
-    </button>
-  </div>
-</div>
+          <input
+            id="mobileProductSearch"
+            type="search"
+            class="mobile-filter-input"
+            placeholder="Nombre, descripción o palabra clave..."
+            [ngModel]="q()"
+            (ngModelChange)="onSearchChange($event)"
+          />
 
-
-
-    <div id="contenedorProductos">
-      <div id="cardsProductos" class="divProductos" data-aos="fade-right">
-        <div class="product-card" *ngFor="let p of productosPaginados()">
-          <!-- zona media -->
           <button
+            *ngIf="q().trim()"
             type="button"
-            class="product-media"
-            (click)="openDetalle(p)"
-            data-bs-toggle="modal"
-            data-bs-target="#staticBackdrop"
-            aria-label="Ver detalle"
+            class="mobile-clear-option"
+            (click)="onSearchChange('')"
           >
-            <!-- ✅ si es video, renderiza video -->
-            <ng-container *ngIf="!isVideo(p.img); else cardVideo">
-              <img class="product-img" [src]="p.img" [alt]="p.nombre" loading="lazy" />
-            </ng-container>
-
-            <ng-template #cardVideo>
-              <video
-                class="product-img"
-                [src]="p.img"
-                muted
-                playsinline
-                preload="metadata"
-              ></video>
-            </ng-template>
+            Limpiar búsqueda
           </button>
-
-          <div class="product-divider"></div>
-
-          <!-- textos -->
-          <div class="product-body">
-            <h5 class="product-title">{{ p.nombre }}</h5>
-            <p class="product-subtitle">{{ p.descripcionCorta }}</p>
-          </div>
-
-          <!-- footer -->
-          <div class="product-footer">
-            <div class="product-price">{{ formatPrice(p.precio) }}</div>
-
-            <button
-            class="btnAdd"
-            type="button"
-            [disabled]="!hasStock(p)"
-            [class.is-disabled]="!hasStock(p)"
-            (click)="add(p)"
-          >
-            {{ hasStock(p) ? 'AGREGAR' : 'SIN STOCK' }}
-          </button>
-          </div>
         </div>
-      </div>
+      </ng-container>
 
-      <div class="d-flex justify-content-center align-items-center gap-2 mt-3" style="bottom: 20px;">
-        <button class="btn btn-sm btn-outline-secondary"
-                type="button"
-                (click)="prevPage()"
-                [disabled]="page() === 0">
-          Anterior
-        </button>
+      <!-- MARCAS -->
+      <ng-container
+        *ngIf="
+          mobileFilterView() === 'brand' &&
+          filtro() === 'libreria'
+        "
+      >
+        <div class="mobile-brand-list">
+          <label class="mobile-brand-option">
+            <input
+              type="radio"
+              name="mobileBrand"
+              [checked]="brand() === 'all'"
+              (change)="onBrandChange('all')"
+            />
 
-        <span class="small text-muted">
-          Página {{ page() + 1 }} / {{ totalPages() }}
-        </span>
+            <span>Todas las marcas</span>
+          </label>
 
-        <button class="btn btn-sm btn-outline-secondary"
-                type="button"
-                (click)="nextPage()"
-                [disabled]="page() + 1 >= totalPages()">
-          Siguiente
-        </button>
-      </div>
+          <label
+            class="mobile-brand-option"
+            *ngFor="let brandOption of visibleBrands"
+          >
+            <input
+              type="radio"
+              name="mobileBrand"
+              [checked]="brand() === brandOption"
+              (change)="onBrandChange(brandOption)"
+            />
+
+            <span>{{ brandOption }}</span>
+          </label>
+        </div>
+      </ng-container>
+
+      <!-- PRECIO -->
+      <ng-container
+        *ngIf="mobileFilterView() === 'price'"
+      >
+        <div class="mobile-filter-panel">
+          <label for="mobileMinPrice">
+            Precio desde
+          </label>
+
+          <input
+            id="mobileMinPrice"
+            type="number"
+            min="0"
+            class="mobile-filter-input"
+            placeholder="$ 0"
+            [ngModel]="minPrice() ?? ''"
+            (ngModelChange)="onMinPriceChange($event)"
+          />
+
+          <label for="mobileMaxPrice">
+            Precio hasta
+          </label>
+
+          <input
+            id="mobileMaxPrice"
+            type="number"
+            min="0"
+            class="mobile-filter-input"
+            placeholder="Sin límite"
+            [ngModel]="maxPrice() ?? ''"
+            (ngModelChange)="onMaxPriceChange($event)"
+          />
+
+          <button
+            *ngIf="
+              minPrice() !== null ||
+              maxPrice() !== null
+            "
+            type="button"
+            class="mobile-clear-option"
+            (click)="clearPriceFilter()"
+          >
+            Limpiar precio
+          </button>
+        </div>
+      </ng-container>
     </div>
-  </div>
 
-  <!-- Modal detalle producto -->
-  <div class="modal fade" id="staticBackdrop" tabindex="-1">
+    <footer class="mobile-filter-footer">
+      <button
+        type="button"
+        class="mobile-filter-clear"
+        (click)="clearMobileFilters()"
+      >
+        Limpiar
+      </button>
+
+      <button
+        type="button"
+        class="mobile-filter-apply"
+        (click)="applyMobileFilters()"
+      >
+        Ver {{ productosFiltrados().length }}
+        {{
+          productosFiltrados().length === 1
+            ? 'producto'
+            : 'productos'
+        }}
+      </button>
+    </footer>
+  </aside>
+
+  <!-- ===================================================== -->
+  <!-- MODAL DETALLE PRODUCTO -->
+  <!-- ===================================================== -->
+  <div
+    class="modal fade"
+    id="staticBackdrop"
+    tabindex="-1"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
         <button
           type="button"
           class="btn-close lks-modal-close"
           data-bs-dismiss="modal"
-          aria-label="Close"
+          aria-label="Cerrar"
         ></button>
+
         <div class="modal-body">
           <app-producto-modal></app-producto-modal>
         </div>

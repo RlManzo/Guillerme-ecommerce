@@ -29,6 +29,12 @@ export const routes: Routes = [
  {path: 'reset-password', component:ResetPasswordPage},
  {path: 'perfil', component:ProfilePage},
  { path: 'productos', component: Productos },
+ {
+    path: 'checkout',
+    loadComponent: () =>
+      import('./pages/checkout/checkout.component')
+        .then((component) => component.CheckoutComponent),
+  },
  { path: 'contacto', component: Presupuesto},
  { path: 'admin/customers', component: AdminCustomersPage, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' }, // SIEMPRE al final

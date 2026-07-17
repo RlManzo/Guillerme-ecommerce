@@ -477,6 +477,20 @@ a {
   background: rgba(234, 85, 52, 0.18);
 }
 
+
+/* =========================================================
+   ELEMENTOS EXCLUSIVOS DEL DRAWER MOBILE
+========================================================= */
+
+.mobile-nav-backdrop,
+.mobile-nav-drawer {
+  display: none;
+}
+
+.menu-items--desktop {
+  display: flex;
+}
+
 /* =========================
    MOBILE
 ========================= */
@@ -1391,3 +1405,302 @@ a {
     font-size: 14px !important;
   }
 }
+
+/* =========================================================
+   DRAWER MOBILE DEL NAVBAR
+   Este bloque debe quedar al FINAL del archivo.
+========================================================= */
+
+@media (max-width: 768px) {
+  /*
+   * El menú desktop nunca se reutiliza como menú mobile.
+   * Esto neutraliza .menu-items.open y todas las reglas viejas.
+   */
+  .menu-items,
+  .menu-items.open,
+  .menu-items--desktop {
+    display: none !important;
+  }
+
+  /*
+   * El botón hamburguesa permanece sobre el header,
+   * pero el cierre principal está dentro del drawer.
+   */
+  .hamburger {
+    display: inline-flex !important;
+  }
+
+  .mobile-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 3990;
+
+    display: block;
+
+    background: rgba(0, 0, 0, 0.44);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+
+    &.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  .mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4000;
+
+    display: flex;
+    flex-direction: column;
+
+    width: min(88vw, 390px);
+    height: 100vh;
+    height: 100dvh;
+
+    overflow: hidden;
+
+    background: #ffffff;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+
+    transform: translateX(105%);
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      transform 0.28s ease,
+      visibility 0.28s ease;
+
+    &.is-open {
+      transform: translateX(0);
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  .mobile-nav-header {
+    display: flex;
+    flex: 0 0 62px;
+    justify-content: space-between;
+    align-items: center;
+
+    min-height: 62px;
+    padding: 0 16px;
+
+    background: #2f95bf;
+    color: #ffffff;
+  }
+
+  .mobile-nav-title {
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .mobile-nav-close {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+    color: #ffffff;
+
+    font-size: 38px;
+    font-weight: 200;
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+  .mobile-nav-body {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+
+    background: #ffffff;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    min-height: 58px;
+    margin: 0;
+    padding: 12px 20px;
+
+    border: 0;
+    border-bottom: 1px solid #e8e8e8;
+    border-radius: 0;
+
+    background: #ffffff;
+    color: #262626;
+
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    > span:first-child {
+      min-width: 0;
+    }
+
+    > span:last-child {
+      flex: 0 0 auto;
+      margin-left: 12px;
+      font-size: 25px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    &.is-open {
+      color: var(--ladrillo, #ea5534);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: #f8f8f8;
+      color: var(--ladrillo, #ea5534);
+      outline: none;
+    }
+  }
+
+  .mobile-nav-submenu {
+    width: 100%;
+    background: #f7f8f9;
+  }
+
+  .mobile-nav-subitem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    min-height: 50px;
+    margin: 0;
+    padding: 10px 20px 10px 34px;
+
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 0;
+
+    background: #f7f8f9;
+    color: #444444;
+
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: #eef0f2;
+      color: var(--ladrillo, #ea5534);
+      outline: none;
+    }
+  }
+
+  .mobile-nav-subitem-parent {
+    font-weight: 700;
+  }
+
+  .mobile-nav-brands {
+    width: 100%;
+    background: #eef1f3;
+  }
+
+  .mobile-nav-brand {
+    display: block;
+
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 9px 20px 9px 50px;
+
+    border: 0;
+    border-bottom: 1px solid #dde1e4;
+    border-radius: 0;
+
+    background: #eef1f3;
+    color: #555555;
+
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: #e2e7ea;
+      color: var(--ladrillo, #ea5534);
+      outline: none;
+    }
+  }
+
+  .mobile-nav-logout {
+    color: #b3261e;
+
+    &:hover,
+    &:focus-visible {
+      color: #8f1c16;
+      background: #fff4f3;
+    }
+  }
+}
+
+@media (max-width: 390px) {
+  .mobile-nav-drawer {
+    width: 92vw;
+  }
+
+  .mobile-nav-header {
+    padding: 0 14px;
+  }
+
+  .mobile-nav-item {
+    min-height: 55px;
+    padding-right: 17px;
+    padding-left: 17px;
+    font-size: 15px;
+  }
+
+  .mobile-nav-subitem {
+    padding-left: 30px;
+  }
+
+  .mobile-nav-brand {
+    padding-left: 44px;
+  }
+}
+

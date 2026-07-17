@@ -13,7 +13,12 @@ import { ProductsService } from '../../components/productos/products.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../components/productos/product.model';
 
-type CategoriaFilter = 'ALL' | 'LIBRERIA' | 'COMBOS' | 'VARIOS';
+type CategoriaFilter =
+  | 'ALL'
+  | 'LIBRERIA'
+  | 'JUGUETES'
+  | 'COMBOS'
+  | 'VARIOS';
 type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA';
 type EstadoFilter = 'ACTIVOS' | 'INACTIVOS' | 'TODOS';
 
@@ -96,7 +101,12 @@ export class AdminProductsPage implements OnInit {
   // =========================
   // Catálogos UI
   // =========================
-  readonly categoriasOpts = ['Libreria', 'combos', 'varios'] as const;
+  readonly categoriasOpts = [
+  'libreria',
+  'juguetes',
+  'combos',
+  'varios',
+] as const;
 
   readonly keywordsOpts = [
     'Filgo',
@@ -110,6 +120,8 @@ export class AdminProductsPage implements OnInit {
     'Laprida-Exito',
     'Bic',
     'Carpel',
+    'Nupro',
+    'Avíos',
     'Otros',
   ] as const;
 
@@ -252,11 +264,13 @@ export class AdminProductsPage implements OnInit {
         ? ''
         : cat === 'LIBRERIA'
           ? 'libreria'
-          : cat === 'COMBOS'
-            ? 'combos'
-            : cat === 'VARIOS'
-              ? 'varios'
-              : '';
+          : cat === 'JUGUETES'
+            ? 'juguetes'
+            : cat === 'COMBOS'
+              ? 'combos'
+              : cat === 'VARIOS'
+                ? 'varios'
+                : '';
 
     return all.filter((p) => {
       const okSearch = this.matchesSearch(p, q);

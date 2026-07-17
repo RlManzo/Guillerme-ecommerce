@@ -1,0 +1,252 @@
+<main class="checkout-page">
+  <div class="checkout-container">
+
+    <div class="checkout-heading">
+  <button
+    type="button"
+    class="back-button"
+    [disabled]="sending()"
+    (click)="volverAlCarrito()"
+  >
+    ← Volver al carrito
+  </button>
+
+  <div class="checkout-title">
+    <span class="checkout-step">Finalizar compra</span>
+
+    <h1>Revisá y confirmá tu pedido</h1>
+
+    <p>
+      Verificá los productos y las cantidades antes de enviar el pedido.
+    </p>
+  </div>
+</div>
+
+    @if (validatingStock()) {
+      <div class="stock-message">
+        Actualizando disponibilidad de los productos...
+      </div>
+    }
+
+    @if (hasItems()) {
+      <div class="checkout-layout">
+
+        <section class="checkout-products">
+          <div class="section-header">
+            <h2>Productos</h2>
+
+            <span>
+              {{ totalItems() }}
+              {{ totalItems() === 1 ? 'unidad' : 'unidades' }}
+            </span>
+          </div>
+
+          <div class="product-list">
+            <article
+              class="checkout-product"
+              *ngFor="let item of store.cart()"
+            >
+              <div class="product-image-wrapper">
+                <img
+                  class="product-image"
+                  [src]="item.producto.img"
+                  [alt]="item.producto.nombre"
+                />
+              </div>
+
+              <div class="product-information">
+                <h3>{{ item.producto.nombre }}</h3>
+
+                <div class="unit-price">
+                  Precio unitario:
+                  <strong>
+                    {{
+                      (item.producto.precio ?? 0)
+                        | currency:'$':'symbol':'1.0-0'
+                    }}
+                  </strong>
+                </div>
+
+                <div
+                  class="stock-available"
+                  *ngIf="(item.producto.stock ?? 0) > 0"
+                >
+                  {{ item.producto.stock }} disponibles
+                </div>
+
+                <div
+                  class="stock-error"
+                  *ngIf="(item.producto.stock ?? 0) <= 0"
+                >
+                  Producto sin stock
+                </div>
+              </div>
+
+              <div class="product-actions">
+                <div class="quantity-label">Cantidad</div>
+
+                <div
+                  class="quantity-control"
+                  *ngIf="(item.producto.stock ?? 0) > 0"
+                >
+                  <button
+                    type="button"
+                    aria-label="Disminuir cantidad"
+                    [disabled]="sending() || validatingStock()"
+                    (click)="dec(item.producto.id)"
+                  >
+                    −
+                  </button>
+
+                  <span>{{ item.cantidad }}</span>
+
+                  <button
+                    type="button"
+                    aria-label="Aumentar cantidad"
+                    [disabled]="
+                      sending() ||
+                      validatingStock() ||
+                      !store.canInc(item.producto.id)
+                    "
+                    (click)="inc(item.producto.id)"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  class="remove-button"
+                  [disabled]="sending()"
+                  (click)="remove(item.producto.id)"
+                >
+                  Eliminar
+                </button>
+              </div>
+
+              <div class="product-total">
+                <span>Subtotal</span>
+
+                <strong>
+                  {{
+                    lineTotal(item)
+                      | currency:'$':'symbol':'1.0-0'
+                  }}
+                </strong>
+              </div>
+            </article>
+          </div>
+
+          <div class="comment-container">
+            <label for="orderComment">
+              Comentario del pedido
+              <span>Opcional</span>
+            </label>
+
+            <textarea
+              id="orderComment"
+              rows="4"
+              maxlength="500"
+              placeholder="Podés agregar una aclaración sobre tu pedido..."
+              [value]="comment()"
+              [disabled]="sending()"
+              (input)="updateComment($event)"
+            ></textarea>
+
+            <div class="character-count">
+              {{ comment().length }}/500
+            </div>
+          </div>
+        </section>
+
+        <aside class="checkout-summary">
+          <h2>Resumen del pedido</h2>
+
+          <div class="summary-row">
+            <span>Productos</span>
+            <strong>{{ totalItems() }}</strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Subtotal</span>
+
+            <strong>
+              {{
+                totalPrice()
+                  | currency:'$':'symbol':'1.0-0'
+              }}
+            </strong>
+          </div>
+
+          <div class="summary-row">
+            <span>Envío</span>
+            <strong>A coordinar</strong>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span>Total</span>
+
+            <strong>
+              {{
+                totalPrice()
+                  | currency:'$':'symbol':'1.0-0'
+              }}
+            </strong>
+          </div>
+
+          <div class="checkout-notice">
+            <span class="material-icons">info</span>
+
+            <p>
+              Después de confirmar el pedido, nos comunicaremos por
+              WhatsApp para coordinar el pago y el envío.
+            </p>
+          </div>
+
+          <div
+            class="invalid-stock-warning"
+            *ngIf="hasInvalidItems()"
+          >
+            Hay productos sin stock o con una cantidad mayor a la
+            disponible. Revisá el pedido antes de continuar.
+          </div>
+
+          <button
+            type="button"
+            class="confirm-button"
+            [disabled]="
+              sending() ||
+              validatingStock() ||
+              hasInvalidItems()
+            "
+            (click)="confirmarPedido()"
+          >
+            {{
+              sending()
+                ? 'Enviando pedido...'
+                : 'Confirmar pedido'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="sending()"
+            (click)="volverAlCarrito()"
+          >
+            Modificar carrito
+          </button>
+        </aside>
+
+      </div>
+    }
+  </div>
+</main>
+
+<app-order-progress-overlay
+  *ngIf="showProgress()"
+  [step]="progressStep()"
+>
+</app-order-progress-overlay>

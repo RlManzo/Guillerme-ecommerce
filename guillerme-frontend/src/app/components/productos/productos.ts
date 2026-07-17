@@ -1,4 +1,12 @@
-import { Component, computed, signal, inject, effect, AfterViewInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -8,13 +16,28 @@ import { ProductsService } from './products.service';
 import { filterProducts } from './search.util';
 import { Product } from './product.model';
 
-import { ShopStore, Producto } from '../../shared/store/shop.store';
+import {
+  Producto,
+  ShopStore,
+} from '../../shared/store/shop.store';
 import { ProductoModal } from '../producto-modal/producto-modal';
 import { ToastService } from '../../shared/service/toast.service';
 import { SearchStateService } from '../../shared/search-state.service';
 
-type FilterKey = 'all' | 'libreria' | 'combos' | 'varios';
-type SortBy = 'NEWEST' | 'OLDEST' | 'AZ' | 'ZA' | 'CHEAPEST' | 'EXPENSIVE';
+type FilterKey =
+  | 'all'
+  | 'libreria'
+  | 'juguetes'
+  | 'combos'
+  | 'varios';
+
+type SortBy =
+  | 'NEWEST'
+  | 'OLDEST'
+  | 'AZ'
+  | 'ZA'
+  | 'CHEAPEST'
+  | 'EXPENSIVE';
 
 type BrandKey =
   | 'all'
@@ -29,30 +52,62 @@ type BrandKey =
   | 'Laprida-Exito'
   | 'Bic'
   | 'Carpel'
+  | 'Nupro'
+  | 'Avíos'
   | 'Otros';
+
+type MobileFilterView =
+  | 'main'
+  | 'search'
+  | 'brand'
+  | 'price';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, NgClass, FormsModule, ProductoModal],
+  imports: [
+    CommonModule,
+    NgClass,
+    FormsModule,
+    ProductoModal,
+  ],
   templateUrl: './productos.html',
   styleUrl: './productos.scss',
 })
-export class Productos implements AfterViewInit {
+export class Productos implements AfterViewInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
-  public readonly store = inject(ShopStore);
   private readonly toast = inject(ToastService);
   private readonly searchState = inject(SearchStateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  public readonly store = inject(ShopStore);
+
+  /*
+   * Estado general de filtros.
+   */
   readonly filtro = signal<FilterKey>('all');
   readonly q = signal<string>('');
-  readonly page = signal(0);
-  readonly pageSize = signal(10);
+  readonly page = signal<number>(0);
+  readonly pageSize = signal<number>(10);
   readonly sortBy = signal<SortBy>('NEWEST');
   readonly brand = signal<BrandKey>('all');
 
+  readonly minPrice = signal<number | null>(null);
+  readonly maxPrice = signal<number | null>(null);
+
+  readonly mobileFiltersOpen = signal(false);
+  readonly mobileFilterView = signal<MobileFilterView>('main');
+
+  /*
+   * Se mantiene por compatibilidad con el filtro anterior.
+   * Con el nuevo diseño lateral ya no debería utilizarse.
+   */
+  priceOpen = false;
+
+  /*
+   * Catálogo completo de marcas.
+   */
   readonly brands: BrandKey[] = [
     'all',
     'Filgo',
@@ -66,28 +121,148 @@ export class Productos implements AfterViewInit {
     'Laprida-Exito',
     'Bic',
     'Carpel',
-    'Otros'
+    'Nupro',
+    'Avíos',
+    'Otros',
   ];
 
-  readonly minPrice = signal<number | null>(null);
-  readonly maxPrice = signal<number | null>(null);
+  /*
+   * Marcas que se muestran en el sidebar.
+   * No incluye "all", porque se limpia con un botón separado.
+   */
+  readonly visibleBrands: Exclude<BrandKey, 'all'>[] = [
+    'Filgo',
+    'Skycolor',
+    'Olami',
+    'C-B-X',
+    'FW',
+    'Keyroad',
+    'Ibicraft',
+    'Wero',
+    'Laprida-Exito',
+    'Bic',
+    'Carpel',
+    'Nupro',
+    'Avíos',
+    'Otros',
+  ];
 
-  priceOpen = false;
+  /*
+   * Productos cargados desde el servicio.
+   */
+  private readonly productsSig = toSignal(
+    this.productsService.products$,
+    {
+      initialValue: [] as Product[],
+    }
+  );
+
+  /*
+   * Título que se muestra en el lateral y en mobile.
+   */
+  readonly categoryTitle = computed(() => {
+    switch (this.filtro()) {
+      case 'libreria':
+        return 'LIBRERÍA';
+
+      case 'juguetes':
+        return 'JUGUETES';
+
+      case 'combos':
+        return 'COMBOS';
+
+      case 'varios':
+        return 'VARIOS';
+
+      case 'all':
+      default:
+        return 'TODOS LOS PRODUCTOS';
+    }
+  });
+
+  readonly priceFilterLabel = computed(() => {
+    const minimum = this.minPrice();
+    const maximum = this.maxPrice();
+
+    if (minimum === null && maximum === null) {
+      return 'Sin aplicar';
+    }
+
+    const minimumLabel =
+      minimum !== null
+        ? this.formatPrice(minimum)
+        : '$ 0';
+
+    const maximumLabel =
+      maximum !== null
+        ? this.formatPrice(maximum)
+        : 'Sin límite';
+
+    return `${minimumLabel} — ${maximumLabel}`;
+  });
+
+  readonly activeFiltersCount = computed(() => {
+    let count = 0;
+
+    if (this.q().trim()) {
+      count++;
+    }
+
+    if (
+      this.filtro() === 'libreria' &&
+      this.brand() !== 'all'
+    ) {
+      count++;
+    }
+
+    if (
+      this.minPrice() !== null ||
+      this.maxPrice() !== null
+    ) {
+      count++;
+    }
+
+    return count;
+  });
 
   constructor() {
+    /*
+     * Sincroniza el buscador global con el buscador
+     * de la pantalla de productos.
+     */
     effect(() => {
-      this.q.set(this.searchState.query());
+      const search = this.searchState.query();
+
+      this.q.set(search);
       this.page.set(0);
     });
 
+    /*
+     * Lee los query params disponibles al crear el componente.
+     */
     this.applyRouteFilters();
 
+    /*
+     * Reacciona a cambios posteriores en:
+     *
+     * /productos?cat=juguetes
+     * /productos?cat=libreria&brand=Filgo
+     */
     this.route.queryParamMap.subscribe((params) => {
-      const cat = this.parseFilterKey(params.get('cat'));
-      const brand = this.parseBrandKey(params.get('brand'));
+      const category = this.parseFilterKey(
+        params.get('cat')
+      );
 
-      this.filtro.set(cat);
-      this.brand.set(cat === 'libreria' ? brand : 'all');
+      const selectedBrand = this.parseBrandKey(
+        params.get('brand')
+      );
+
+      this.filtro.set(category);
+      this.brand.set(
+        category === 'libreria'
+          ? selectedBrand
+          : 'all'
+      );
       this.page.set(0);
     });
 
@@ -95,421 +270,893 @@ export class Productos implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const el = document.getElementById('staticBackdrop');
-    if (!el) return;
+    const modalElement =
+      document.getElementById('staticBackdrop');
 
-    el.addEventListener('hidden.bs.modal', () => {
-      this.store.selectProducto(null);
+    if (!modalElement) {
+      return;
+    }
 
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
+    modalElement.addEventListener(
+      'hidden.bs.modal',
+      () => {
+        this.store.selectProducto(null);
 
-      document.querySelectorAll('.modal-backdrop').forEach((b) => b.remove());
-    });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty(
+          'padding-right'
+        );
+
+        document
+          .querySelectorAll('.modal-backdrop')
+          .forEach((backdrop) => backdrop.remove());
+      }
+    );
   }
 
-  private readonly productsSig = toSignal(this.productsService.products$, {
-    initialValue: [] as Product[],
-  });
+  ngOnDestroy(): void {
+    document.body.style.removeProperty('overflow');
+  }
 
-  private applyRouteFilters() {
-    const params = this.route.snapshot.queryParamMap;
-    const cat = this.parseFilterKey(params.get('cat'));
-    const brand = this.parseBrandKey(params.get('brand'));
+  // =========================================================
+  // QUERY PARAMS
+  // =========================================================
 
-    this.filtro.set(cat);
-    this.brand.set(cat === 'libreria' ? brand : 'all');
+  private applyRouteFilters(): void {
+    const params =
+      this.route.snapshot.queryParamMap;
+
+    const category = this.parseFilterKey(
+      params.get('cat')
+    );
+
+    const selectedBrand = this.parseBrandKey(
+      params.get('brand')
+    );
+
+    this.filtro.set(category);
+    this.brand.set(
+      category === 'libreria'
+        ? selectedBrand
+        : 'all'
+    );
     this.page.set(0);
   }
 
-  private parseFilterKey(value: string | null): FilterKey {
-    const v = this.norm(value);
-    if (v === 'libreria') return 'libreria';
-    if (v === 'combos') return 'combos';
-    if (v === 'varios') return 'varios';
+  private parseFilterKey(
+    value: string | null
+  ): FilterKey {
+    const normalized = this.norm(value);
+
+    if (normalized === 'libreria') {
+      return 'libreria';
+    }
+
+    if (normalized === 'juguetes') {
+      return 'juguetes';
+    }
+
+    if (normalized === 'combos') {
+      return 'combos';
+    }
+
+    if (normalized === 'varios') {
+      return 'varios';
+    }
+
     return 'all';
   }
 
-  private parseBrandKey(value: string | null): BrandKey {
-    const brands: BrandKey[] = [
-      'all',
-      'Filgo',
-      'Skycolor',
-      'Olami',
-      'C-B-X',
-      'FW',
-      'Keyroad',
-      'Ibicraft',
-      'Wero',
-      'Laprida-Exito',
-      'Bic',
-      'Carpel',
-      'Otros'
-    ];
+  private parseBrandKey(
+    value: string | null
+  ): BrandKey {
+    const match = this.brands.find(
+      (availableBrand) =>
+        this.norm(availableBrand) ===
+        this.norm(value)
+    );
 
-    const match = brands.find((b) => this.norm(b) === this.norm(value));
     return match ?? 'all';
   }
 
-  private updateRouteFilters(cat: FilterKey, brand: BrandKey) {
+  /*
+   * La marca se conserva en cualquier categoría.
+   *
+   * Ejemplos:
+   *
+   * /productos?cat=libreria&brand=Filgo
+   * /productos?cat=juguetes&brand=Nupro
+   */
+  private updateRouteFilters(
+    category: FilterKey,
+    selectedBrand: BrandKey
+  ): void {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        cat: cat !== 'all' ? cat : null,
-        brand: cat === 'libreria' && brand !== 'all' ? brand : null,
+        cat:
+          category !== 'all'
+            ? category
+            : null,
+
+        brand:
+          category === 'libreria' &&
+          selectedBrand !== 'all'
+            ? selectedBrand
+            : null,
       },
       queryParamsHandling: '',
       replaceUrl: true,
     });
   }
 
-  // -------------------------
-  // Helpers comunes
-  // -------------------------
-  private norm = (s: any) =>
-    String(s ?? '')
+  // =========================================================
+  // HELPERS GENERALES
+  // =========================================================
+
+  private norm(value: unknown): string {
+    return String(value ?? '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
-
-  private toNumber(v: any): number | null {
-    if (v == null || v === '') return null;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
   }
 
-  private priceOf(p: Product): number {
-    const n = Number((p as any).precio ?? 0);
-    return Number.isFinite(n) ? n : 0;
+  private toNumber(value: unknown): number | null {
+    if (
+      value === null ||
+      value === undefined ||
+      value === ''
+    ) {
+      return null;
+    }
+
+    const numberValue = Number(value);
+
+    return Number.isFinite(numberValue)
+      ? numberValue
+      : null;
   }
 
-  private createdKey(p: Product): number {
-    const anyP = p as any;
-    const dt =
-      anyP.createdAt ||
-      anyP.created_at ||
-      anyP.fechaAlta ||
-      anyP.fechaCreacion ||
-      anyP.created;
-    const t = dt ? new Date(dt).getTime() : NaN;
-    if (Number.isFinite(t)) return t;
-    return Number(anyP.id ?? 0);
+  private priceOf(product: Product): number {
+    const value = Number(
+      (product as any).precio ?? 0
+    );
+
+    return Number.isFinite(value)
+      ? value
+      : 0;
   }
 
-  private sortProducts(list: Product[], s: SortBy): Product[] {
-    const arr = [...list];
+  private createdKey(product: Product): number {
+    const source = product as any;
 
-    switch (s) {
+    const dateValue =
+      source.createdAt ||
+      source.created_at ||
+      source.fechaAlta ||
+      source.fechaCreacion ||
+      source.created;
+
+    const timestamp = dateValue
+      ? new Date(dateValue).getTime()
+      : Number.NaN;
+
+    if (Number.isFinite(timestamp)) {
+      return timestamp;
+    }
+
+    return Number(source.id ?? 0);
+  }
+
+  private sortProducts(
+    products: Product[],
+    sort: SortBy
+  ): Product[] {
+    const result = [...products];
+
+    switch (sort) {
       case 'NEWEST':
-        return arr.sort((a, b) => this.createdKey(b) - this.createdKey(a));
+        return result.sort(
+          (a, b) =>
+            this.createdKey(b) -
+            this.createdKey(a)
+        );
+
       case 'OLDEST':
-        return arr.sort((a, b) => this.createdKey(a) - this.createdKey(b));
+        return result.sort(
+          (a, b) =>
+            this.createdKey(a) -
+            this.createdKey(b)
+        );
+
       case 'AZ':
-        return arr.sort((a, b) =>
-          this.norm(a.nombre).localeCompare(this.norm(b.nombre))
+        return result.sort((a, b) =>
+          this.norm(a.nombre).localeCompare(
+            this.norm(b.nombre)
+          )
         );
+
       case 'ZA':
-        return arr.sort((a, b) =>
-          this.norm(b.nombre).localeCompare(this.norm(a.nombre))
+        return result.sort((a, b) =>
+          this.norm(b.nombre).localeCompare(
+            this.norm(a.nombre)
+          )
         );
+
       case 'CHEAPEST':
-        return arr.sort((a, b) => this.priceOf(a) - this.priceOf(b));
+        return result.sort(
+          (a, b) =>
+            this.priceOf(a) -
+            this.priceOf(b)
+        );
+
       case 'EXPENSIVE':
-        return arr.sort((a, b) => this.priceOf(b) - this.priceOf(a));
+        return result.sort(
+          (a, b) =>
+            this.priceOf(b) -
+            this.priceOf(a)
+        );
+
       default:
-        return arr;
+        return result;
     }
   }
 
-  // -------------------------
-  // Helpers de categoría / marca
-  // -------------------------
-  private getCategoriasNormalized(p: Product): string[] {
-    const raw: any = (p as any).categorias;
+  // =========================================================
+  // CATEGORÍAS Y MARCAS
+  // =========================================================
+
+  private getCategoriasNormalized(
+    product: Product
+  ): string[] {
+    const raw = (product as any).categorias;
 
     if (Array.isArray(raw)) {
-      return raw.map((c) => this.norm(c)).filter(Boolean);
+      return raw
+        .map((category) => this.norm(category))
+        .filter(Boolean);
     }
 
     if (typeof raw === 'string') {
       return raw
         .split(',')
-        .map((s) => this.norm(s))
+        .map((category) => this.norm(category))
         .filter(Boolean);
     }
 
     return [];
   }
 
-  private getKeywordsNormalized(p: Product): string[] {
-    const raw: any = (p as any).keywords;
+  private getKeywordsNormalized(
+    product: Product
+  ): string[] {
+    const raw = (product as any).keywords;
 
     if (Array.isArray(raw)) {
-      return raw.map((k) => this.norm(k)).filter(Boolean);
+      return raw
+        .map((keyword) => this.norm(keyword))
+        .filter(Boolean);
     }
 
     if (typeof raw === 'string') {
       return raw
         .split(',')
-        .map((s) => this.norm(s))
+        .map((keyword) => this.norm(keyword))
         .filter(Boolean);
     }
 
     return [];
   }
 
-  private hasBrand(p: Product, brand: string): boolean {
-  const wanted = this.norm(brand);
-  if (!wanted || wanted === 'all') return true;
+  private hasBrand(
+    product: Product,
+    selectedBrand: string
+  ): boolean {
+    const wanted = this.norm(selectedBrand);
 
-  const keywords = this.getKeywordsNormalized(p);
+    if (!wanted || wanted === 'all') {
+      return true;
+    }
 
-  return keywords.some((k) => k === wanted);
-}
+    const keywords =
+      this.getKeywordsNormalized(product);
 
-  private hasCat(p: Product, wanted: string) {
-    const w = this.norm(wanted);
-    const cats = this.getCategoriasNormalized(p);
-    return cats.some((c) => c === w || c.includes(w));
+    /*
+     * Comparación exacta para evitar que una marca
+     * coincida parcialmente con otra.
+     */
+    return keywords.some(
+      (keyword) => keyword === wanted
+    );
   }
 
-  private readonly tabFilter: Record<FilterKey, (p: Product) => boolean> = {
+  private hasCat(
+    product: Product,
+    selectedCategory: string
+  ): boolean {
+    const wanted =
+      this.norm(selectedCategory);
+
+    const categories =
+      this.getCategoriasNormalized(product);
+
+    return categories.some(
+      (category) =>
+        category === wanted ||
+        category.includes(wanted)
+    );
+  }
+
+  private readonly tabFilter: Record<
+    FilterKey,
+    (product: Product) => boolean
+  > = {
     all: () => true,
-    libreria: (p) => this.hasCat(p, 'libreria'),
-    combos: (p) => this.hasCat(p, 'combos'),
-    varios: (p) => this.hasCat(p, 'varios'),
+
+    libreria: (product) =>
+      this.hasCat(product, 'libreria'),
+
+    juguetes: (product) =>
+      this.hasCat(product, 'juguetes'),
+
+    combos: (product) =>
+      this.hasCat(product, 'combos'),
+
+    varios: (product) =>
+      this.hasCat(product, 'varios'),
   };
 
-  // -------------------------
-  // Filtro final
-  // -------------------------
+  // =========================================================
+  // FILTRADO FINAL
+  // =========================================================
+
   readonly productosFiltrados = computed(() => {
-    const all = this.productsSig();
-    const f = this.filtro();
-    const q = this.q();
-    const s = this.sortBy();
-    const minP = this.minPrice();
-    const maxP = this.maxPrice();
-    const brand = this.brand();
+    const allProducts = this.productsSig();
 
-    const activos = all.filter((p) => (p.estado ?? true) === true);
+    const selectedCategory = this.filtro();
+    const search = this.q();
+    const selectedSort = this.sortBy();
+    const minimumPrice = this.minPrice();
+    const maximumPrice = this.maxPrice();
+    const selectedBrand = this.brand();
 
-    const byTab = activos.filter(this.tabFilter[f]);
+    /*
+     * Solo muestra productos activos.
+     *
+     * Si estado no viene informado, conserva
+     * el comportamiento anterior y lo considera activo.
+     */
+    const activeProducts = allProducts.filter(
+      (product) =>
+        (product.estado ?? true) === true
+    );
 
-    const byBrand = byTab.filter((p) => this.hasBrand(p, brand));
+    const productsByCategory =
+      activeProducts.filter(
+        this.tabFilter[selectedCategory]
+      );
 
-    const byText = filterProducts(byBrand, q);
+    const productsByBrand =
+      productsByCategory.filter((product) =>
+        this.hasBrand(
+          product,
+          selectedBrand
+        )
+      );
 
-    const byPrice = byText.filter((p) => {
-      const price = this.priceOf(p);
-      const okMin = minP == null || price >= minP;
-      const okMax = maxP == null || price <= maxP;
-      return okMin && okMax;
-    });
+    const productsByText = filterProducts(
+      productsByBrand,
+      search
+    );
 
-    const sorted = this.sortProducts(byPrice, s);
+    const productsByPrice =
+      productsByText.filter((product) => {
+        const price = this.priceOf(product);
 
-    const tp = Math.max(1, Math.ceil(sorted.length / this.pageSize()));
-    if (this.page() > tp - 1) this.page.set(0);
+        const validMinimum =
+          minimumPrice === null ||
+          price >= minimumPrice;
 
-    return sorted;
+        const validMaximum =
+          maximumPrice === null ||
+          price <= maximumPrice;
+
+        return validMinimum && validMaximum;
+      });
+
+    const sortedProducts = this.sortProducts(
+      productsByPrice,
+      selectedSort
+    );
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(
+        sortedProducts.length /
+        this.pageSize()
+      )
+    );
+
+    /*
+     * Si un filtro reduce la cantidad de páginas,
+     * vuelve automáticamente a la primera.
+     */
+    if (this.page() > totalPages - 1) {
+      this.page.set(0);
+    }
+
+    return sortedProducts;
   });
 
-  onBrandChange(v: BrandKey) {
-    const nextBrand = (v ?? 'all') as BrandKey;
-    this.brand.set(nextBrand);
-    this.filtro.set('libreria');
-    this.page.set(0);
-    this.updateRouteFilters('libreria', nextBrand);
-  }
+  // =========================================================
+  // PAGINACIÓN
+  // =========================================================
 
-  // -------------------------
-  // Paginación
-  // -------------------------
   readonly totalPages = computed(() => {
-    const total = this.productosFiltrados().length;
-    return Math.max(1, Math.ceil(total / this.pageSize()));
+    const total =
+      this.productosFiltrados().length;
+
+    return Math.max(
+      1,
+      Math.ceil(total / this.pageSize())
+    );
   });
 
   readonly productosPaginados = computed(() => {
-    const all = this.productosFiltrados();
-    const start = this.page() * this.pageSize();
-    return all.slice(start, start + this.pageSize());
+    const products =
+      this.productosFiltrados();
+
+    const start =
+      this.page() * this.pageSize();
+
+    const end =
+      start + this.pageSize();
+
+    return products.slice(start, end);
   });
 
-  prevPage() {
-    this.page.update((p) => Math.max(0, p - 1));
+  prevPage(): void {
+    this.page.update((currentPage) =>
+      Math.max(0, currentPage - 1)
+    );
+
+    this.scrollToProducts();
   }
 
-  nextPage() {
-    this.page.update((p) => Math.min(this.totalPages() - 1, p + 1));
+  nextPage(): void {
+    this.page.update((currentPage) =>
+      Math.min(
+        this.totalPages() - 1,
+        currentPage + 1
+      )
+    );
+
+    this.scrollToProducts();
   }
 
-  // -------------------------
-  // UI Actions
-  // -------------------------
-  setFilter(f: FilterKey) {
-    this.filtro.set(f);
+  private scrollToProducts(): void {
+    window.setTimeout(() => {
+      document
+        .getElementById('contenedorProductos')
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+    });
+  }
 
-    if (f !== 'libreria') {
+  // =========================================================
+  // ACCIONES DE FILTROS
+  // =========================================================
+
+  /*
+   * Se conserva porque puede utilizarse desde:
+   *
+   * - breadcrumb;
+   * - botones antiguos;
+   * - navegación interna.
+   */
+  setFilter(category: FilterKey): void {
+    this.filtro.set(category);
+    this.page.set(0);
+
+    if (category !== 'libreria') {
       this.brand.set('all');
-      this.updateRouteFilters(f, 'all');
+      this.updateRouteFilters(category, 'all');
     } else {
-      this.updateRouteFilters('libreria', this.brand());
+      this.updateRouteFilters(
+        category,
+        this.brand()
+      );
     }
 
+    this.closeMobileFilters();
+  }
+
+  onSearchChange(value: string): void {
+    const search = value ?? '';
+
+    this.q.set(search);
+    this.searchState.setQuery(search);
     this.page.set(0);
   }
 
-  onSearchChange(value: string) {
-    const v = value ?? '';
-    this.q.set(v);
-    this.searchState.setQuery(v);
+  onSortChange(value: SortBy): void {
+    this.sortBy.set(
+      (value ?? 'NEWEST') as SortBy
+    );
+
     this.page.set(0);
   }
 
-  onSortChange(v: SortBy) {
-    this.sortBy.set((v ?? 'NEWEST') as SortBy);
+  /*
+   * Ahora seleccionar una marca no fuerza
+   * automáticamente la categoría Librería.
+   */
+  onBrandChange(value: BrandKey): void {
+    const selectedBrand =
+      this.filtro() === 'libreria'
+        ? ((value ?? 'all') as BrandKey)
+        : 'all';
+
+    this.brand.set(selectedBrand);
+    this.page.set(0);
+
+    this.updateRouteFilters(
+      this.filtro(),
+      selectedBrand
+    );
+  }
+
+  /*
+   * Permite utilizar checkboxes con selección única.
+   *
+   * Si se vuelve a tocar la marca activa,
+   * se desmarca y vuelve a "all".
+   */
+  selectBrandFromSidebar(
+    value: BrandKey
+  ): void {
+    const selectedBrand =
+      this.brand() === value &&
+      value !== 'all'
+        ? 'all'
+        : value;
+
+    this.onBrandChange(selectedBrand);
+  }
+
+  onMinPriceChange(value: unknown): void {
+    const parsedValue =
+      this.toNumber(value);
+
+    this.minPrice.set(
+      parsedValue !== null &&
+      parsedValue >= 0
+        ? parsedValue
+        : null
+    );
+
     this.page.set(0);
   }
 
-  onMinPriceChange(v: any) {
-    this.minPrice.set(this.toNumber(v));
+  onMaxPriceChange(value: unknown): void {
+    const parsedValue =
+      this.toNumber(value);
+
+    this.maxPrice.set(
+      parsedValue !== null &&
+      parsedValue >= 0
+        ? parsedValue
+        : null
+    );
+
     this.page.set(0);
   }
 
-  onMaxPriceChange(v: any) {
-    this.maxPrice.set(this.toNumber(v));
+  clearPriceFilter(): void {
+    this.minPrice.set(null);
+    this.maxPrice.set(null);
     this.page.set(0);
   }
 
-  onPageSizeChange(v: number) {
-    const n = Number(v);
-    this.pageSize.set(Number.isFinite(n) && n > 0 ? n : 10);
+  onPageSizeChange(value: number): void {
+    const pageSize = Number(value);
+
+    this.pageSize.set(
+      Number.isFinite(pageSize) &&
+      pageSize > 0
+        ? pageSize
+        : 10
+    );
+
     this.page.set(0);
   }
 
-  applyFilters() {
-    // reactivo
+  /*
+   * Los filtros son reactivos.
+   * Se conserva el método por compatibilidad
+   * con botones existentes.
+   */
+  applyFilters(): void {
+    this.page.set(0);
   }
 
-  clearFilters() {
+  /*
+   * Limpia búsqueda, marca, precio y orden,
+   * pero conserva la categoría actual.
+   *
+   * Si el usuario está en Juguetes, continúa
+   * en /productos?cat=juguetes.
+   */
+  clearCatalogFilters(): void {
     this.q.set('');
     this.searchState.setQuery('');
+
     this.sortBy.set('NEWEST');
     this.brand.set('all');
     this.minPrice.set(null);
     this.maxPrice.set(null);
     this.pageSize.set(10);
-    this.filtro.set('all');
     this.page.set(0);
-    this.updateRouteFilters('all', 'all');
-  }
 
-  openDetalle(p: Product) {
-    this.store.selectProducto(this.toProducto(p));
-  }
-
-  add(p: Product) {
-  if (!this.hasStock(p)) {
-    this.toast.error('Producto sin stock');
-    return;
-  }
-
-  this.store.addToCart(this.toProducto(p));
-  this.toast.success('Producto agregado al carrito');
-}
-
-  whatsappInfoLink(p: Product) {
-    const phone = '543513721017';
-    const categorias = Array.isArray(p.categorias)
-      ? p.categorias.join(', ')
-      : String(p.categorias ?? '-');
-
-    const servicios = Array.isArray(p.servicios)
-      ? p.servicios.join(', ')
-      : String(p.servicios ?? '-');
-
-    const text =
-      `Hola LKS! Me gustaria saber mas sobre el siguiente articulo:\n\n` +
-      `${p.nombre}.\n\n` +
-      `Categoria:\n${categorias || '-'}.\n\n` +
-      `Servicios:\n${servicios || '-'}.\n\n` +
-      `Detalle:\n${p.infoModal ?? p.descripcionCorta ?? ''}`;
-
-    return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
-      text
-    )}`;
-  }
-
-  // =========================
-  // VIDEO helper
-  // =========================
-  private isVideoUrl(url?: string | null): boolean {
-    const u = (url ?? '').toLowerCase().trim();
-    return (
-      u.endsWith('.mp4') ||
-      u.endsWith('.webm') ||
-      u.endsWith('.mov') ||
-      u.endsWith('.m4v') ||
-      u.includes('video')
+    this.updateRouteFilters(
+      this.filtro(),
+      'all'
     );
   }
 
-  isVideo(url?: string | null) {
+  /*
+   * Alias para no romper el HTML anterior.
+   */
+  clearFilters(): void {
+    this.clearCatalogFilters();
+  }
+
+  // =========================================================
+  // FILTROS MOBILE
+  // =========================================================
+
+  openMobileFilters(): void {
+    this.mobileFilterView.set('main');
+    this.mobileFiltersOpen.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeMobileFilters(): void {
+    this.mobileFiltersOpen.set(false);
+    this.mobileFilterView.set('main');
+    document.body.style.removeProperty('overflow');
+  }
+
+  openMobileFilterView(
+    view: MobileFilterView
+  ): void {
+    if (
+      view === 'brand' &&
+      this.filtro() !== 'libreria'
+    ) {
+      return;
+    }
+
+    this.mobileFilterView.set(view);
+  }
+
+  backMobileFilters(): void {
+    this.mobileFilterView.set('main');
+  }
+
+  applyMobileFilters(): void {
+    this.page.set(0);
+    this.closeMobileFilters();
+
+    window.setTimeout(() => {
+      document
+        .getElementById('contenedorProductos')
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+    });
+  }
+
+  clearMobileFilters(): void {
+    this.clearCatalogFilters();
+    this.mobileFilterView.set('main');
+  }
+
+  // =========================================================
+  // PRODUCTOS
+  // =========================================================
+
+  openDetalle(product: Product): void {
+    this.store.selectProducto(
+      this.toProducto(product)
+    );
+  }
+
+  add(product: Product): void {
+    if (!this.hasStock(product)) {
+      this.toast.error('Producto sin stock');
+      return;
+    }
+
+    this.store.addToCart(
+      this.toProducto(product)
+    );
+
+    this.toast.success(
+      'Producto agregado al carrito'
+    );
+  }
+
+  whatsappInfoLink(product: Product): string {
+    const phone = '543513721017';
+
+    const categories =
+      Array.isArray(product.categorias)
+        ? product.categorias.join(', ')
+        : String(product.categorias ?? '-');
+
+    const services =
+      Array.isArray(product.servicios)
+        ? product.servicios.join(', ')
+        : String(product.servicios ?? '-');
+
+    const text =
+      `Hola LKS! Me gustaría saber más sobre el siguiente artículo:\n\n` +
+      `${product.nombre}.\n\n` +
+      `Categoría:\n${categories || '-'}.\n\n` +
+      `Servicios:\n${services || '-'}.\n\n` +
+      `Detalle:\n${
+        product.infoModal ??
+        product.descripcionCorta ??
+        ''
+      }`;
+
+    return (
+      'https://api.whatsapp.com/send' +
+      `?phone=${phone}` +
+      `&text=${encodeURIComponent(text)}`
+    );
+  }
+
+  // =========================================================
+  // IMÁGENES Y VIDEOS
+  // =========================================================
+
+  private isVideoUrl(
+    url?: string | null
+  ): boolean {
+    const normalizedUrl =
+      (url ?? '').toLowerCase().trim();
+
+    return (
+      normalizedUrl.endsWith('.mp4') ||
+      normalizedUrl.endsWith('.webm') ||
+      normalizedUrl.endsWith('.mov') ||
+      normalizedUrl.endsWith('.m4v') ||
+      normalizedUrl.includes('video')
+    );
+  }
+
+  isVideo(url?: string | null): boolean {
     return this.isVideoUrl(url);
   }
 
-  private buildMedias(p: any): string[] {
-    const raw = [
-      ...(Array.isArray(p?.imagenes) ? p.imagenes : []),
-      p?.imgUrl,
-      p?.imgUrl2,
-      p?.imgUrl3,
-      p?.img,
+  private buildMedias(
+    product: any
+  ): string[] {
+    const medias = [
+      ...(
+        Array.isArray(product?.imagenes)
+          ? product.imagenes
+          : []
+      ),
+      product?.imgUrl,
+      product?.imgUrl2,
+      product?.imgUrl3,
+      product?.img,
     ]
-      .map((x: any) => String(x ?? '').trim())
+      .map((value: unknown) =>
+        String(value ?? '').trim()
+      )
       .filter(Boolean);
 
-    return Array.from(new Set(raw));
+    return Array.from(new Set(medias));
   }
 
-  private toProducto(p: Product): Producto {
-    const medias = this.buildMedias(p as any);
-    const principal = medias[0] ?? (p.img ?? '');
+  private toProducto(
+    product: Product
+  ): Producto {
+    const medias =
+      this.buildMedias(product as any);
+
+    const principalImage =
+      medias[0] ??
+      product.img ??
+      '';
 
     return {
-      id: p.id,
-      nombre: p.nombre,
-      img: principal,
-      info: p.descripcionCorta ?? '',
-      infoModal: p.infoModal ?? p.descripcionCorta ?? '',
+      id: product.id,
+      nombre: product.nombre,
+      img: principalImage,
+
+      info:
+        product.descripcionCorta ?? '',
+
+      infoModal:
+        product.infoModal ??
+        product.descripcionCorta ??
+        '',
+
       cat: 'all',
-      categoria1: (p.servicios?.[0] as any) ?? '',
-      categoria2: (p.servicios?.[1] as any) ?? '',
-      detalle1: p.variantes?.[0]?.label ?? '',
-      detalle2: p.variantes?.[1]?.label ?? '',
-      categorias: p.categorias ?? [],
-      keywords: p.keywords ?? [],
-      stock: p.stock ?? 0,
-      precio: p.precio ?? 0,
-      imagenes: medias.length ? medias : [principal].filter(Boolean),
+
+      categoria1:
+        (product.servicios?.[0] as any) ??
+        '',
+
+      categoria2:
+        (product.servicios?.[1] as any) ??
+        '',
+
+      detalle1:
+        product.variantes?.[0]?.label ??
+        '',
+
+      detalle2:
+        product.variantes?.[1]?.label ??
+        '',
+
+      categorias:
+        product.categorias ?? [],
+
+      keywords:
+        product.keywords ?? [],
+
+      stock:
+        product.stock ?? 0,
+
+      precio:
+        product.precio ?? 0,
+
+      imagenes:
+        medias.length
+          ? medias
+          : [principalImage].filter(Boolean),
     };
   }
 
-  formatPrice(value: number | string | null | undefined): string {
-    const n = typeof value === 'string' ? Number(value) : value;
-    if (n == null || Number.isNaN(n)) return '';
+  // =========================================================
+  // PRESENTACIÓN
+  // =========================================================
+
+  formatPrice(
+    value: number | string | null | undefined
+  ): string {
+    const numberValue =
+      typeof value === 'string'
+        ? Number(value)
+        : value;
+
+    if (
+      numberValue === null ||
+      numberValue === undefined ||
+      Number.isNaN(numberValue)
+    ) {
+      return '';
+    }
+
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
       maximumFractionDigits: 0,
-    }).format(n);
+    }).format(numberValue);
   }
 
-  hasStock(p: Product): boolean {
-  return Number(p.stock ?? 0) > 0;
-}
+  hasStock(product: Product): boolean {
+    return Number(product.stock ?? 0) > 0;
+  }
 }
