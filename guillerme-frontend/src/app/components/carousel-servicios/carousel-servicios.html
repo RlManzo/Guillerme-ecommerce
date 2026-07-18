@@ -4,10 +4,12 @@
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()"
 >
-  <section class="carousel">
+  <section
+    class="carousel"
     (touchstart)="onTouchStart($event)"
-  (touchmove)="onTouchMove($event)"
-  (touchend)="onTouchEnd()"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
+  >
     <!-- Slides -->
     <article
       class="carousel-image"
