@@ -347,6 +347,18 @@
       Juguetes
     </a>
 
+    <!-- VENTA MAYORISTA -->
+    <a
+      *ngIf="!isOnlyOperador()"
+      class="all all-colour"
+      role="button"
+      tabindex="0"
+      (click)="goWholesale()"
+      (keydown.enter)="goWholesale()"
+    >
+      Venta mayorista
+    </a>
+
     <!-- CONTACTO -->
     <a
       *ngIf="!isOnlyOperador() && (!isAdmin() || !isDesktop())"
@@ -390,6 +402,14 @@
           (click)="goAdminProducts()"
         >
           Admin productos
+        </button>
+
+        <button
+          type="button"
+          class="dropdown-item"
+          (click)="goAdminBanners()"
+        >
+          Banners del home
         </button>
 
         <button
@@ -477,7 +497,7 @@
         class="mobile-nav-submenu"
         *ngIf="!isOnlyOperador() && productsOpen()"
       >
-    
+
 
         <!-- LIBRERÍA -->
         <button
@@ -535,6 +555,17 @@
         <span aria-hidden="true">›</span>
       </button>
 
+      <!-- VENTA MAYORISTA -->
+      <button
+        *ngIf="!isOnlyOperador()"
+        type="button"
+        class="mobile-nav-item"
+        (click)="goWholesale()"
+      >
+        <span>Venta mayorista</span>
+        <span aria-hidden="true">›</span>
+      </button>
+
       <!-- CONTACTO -->
       <a
         *ngIf="!isOnlyOperador()"
@@ -546,7 +577,7 @@
         <span aria-hidden="true">›</span>
       </a>
 
-      
+
 
       <!-- LOGIN MOBILE -->
       <ng-template #mobileLogin>

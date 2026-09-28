@@ -70,6 +70,7 @@ export function mapProductFromApi(p: ProductResponseDto): Product {
     // ✅ importante para filtros admin
     activo: (p as any).activo ?? true,
     estado: (p as any).estado ?? true,
+    mayorista: p.mayorista ?? false,
 
     colores: [],
     variantes: [],

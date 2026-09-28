@@ -410,6 +410,7 @@ export class AdminProductsPage implements OnInit {
     activo: true,
     stock: 0,
     precio: 0,
+    mayorista: false,
   });
 
   setField<K extends keyof CreateProductRequest>(
@@ -573,6 +574,7 @@ export class AdminProductsPage implements OnInit {
             activo: true,
             stock: 0,
             precio: 0,
+            mayorista: false,
           });
 
           this.barcodeErrorCreate.set(null);
@@ -616,7 +618,8 @@ export class AdminProductsPage implements OnInit {
     "keywords": "regalo, personalizado",
     "activo": true,
     "stock": 10,
-    "precio": 0
+    "precio": 0,
+    "mayorista": false
   }
 ]`
   );
@@ -699,6 +702,7 @@ export class AdminProductsPage implements OnInit {
     activo: true,
     stock: 0,
     precio: 0,
+    mayorista: false,
   });
 
   isEditing(id: number) {
@@ -730,6 +734,7 @@ export class AdminProductsPage implements OnInit {
       activo: (p as any).activo ?? true,
       stock: Number(p.stock ?? 0),
       precio: Number((p as any).precio ?? 0),
+      mayorista: p.mayorista ?? false,
     });
   }
 

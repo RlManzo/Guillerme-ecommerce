@@ -219,6 +219,16 @@ export class Navbar implements OnDestroy {
     );
   }
 
+  goAdminBanners(): void {
+    this.closeUserMenu();
+    this.closeMenu();
+    this.adminOpen.set(false);
+
+    this.router.navigateByUrl(
+      '/admin/banners'
+    );
+  }
+
   goAdminCustomers(): void {
     this.closeUserMenu();
     this.closeMenu();
@@ -395,6 +405,21 @@ export class Navbar implements OnDestroy {
       'all',
       'all'
     );
+  }
+
+  goWholesale(): void {
+    this.closeAllMenus();
+
+    this.router
+      .navigate(['/productos'], {
+        queryParams: { mayorista: 'true' },
+      })
+      .then(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      });
   }
 
   // =========================================================

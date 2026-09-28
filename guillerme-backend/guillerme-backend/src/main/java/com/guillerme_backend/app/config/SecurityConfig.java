@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
+                        .requestMatchers("/api/banners/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/auth/verify-email").permitAll()
 
@@ -74,7 +75,7 @@ public class SecurityConfig {
         ));
 
         // Si también probás desde localhost:
-         //config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com", "http://localhost:4300"));
+        //config.setAllowedOrigins(List.of("https://libreriaguillermeguillerme.com", "http://localhost:4300"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

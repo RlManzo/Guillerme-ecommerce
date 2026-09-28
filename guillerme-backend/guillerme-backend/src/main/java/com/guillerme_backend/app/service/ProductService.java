@@ -60,6 +60,7 @@ public class ProductService {
         p.setPrecio(req.precio == null ? BigDecimal.ZERO : req.precio);
         if (req.activo != null) p.setActivo(req.activo);
         if (req.estado != null) p.setEstado(req.estado);
+        if (req.mayorista != null) p.setMayorista(req.mayorista);
 
         p = productRepository.save(p);
 

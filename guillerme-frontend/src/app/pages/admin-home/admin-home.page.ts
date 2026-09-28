@@ -95,4 +95,8 @@ export class AdminHomePage {
   goOrders() {
     this.router.navigateByUrl('/admin/orders');
   }
+
+  goBanners() {
+    this.router.navigateByUrl('/admin/banners');
+  }
 }

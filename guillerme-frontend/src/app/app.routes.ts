@@ -14,6 +14,7 @@ import { ResetPasswordPage } from './pages/login/reset-password.page';
 import { ForgotPasswordPage } from './pages/forgot-password/forgot-password.page';
 import { ProfilePage } from './pages/profile/profile.page';
 import { AdminCustomersPage } from './pages/admin-customers/admin-customers.page';
+import { AdminBannersPage } from './pages/admin-banners/admin-banners.page';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterPage },
  { path: 'orders', component: OrdersPage },
  { path: 'admin/products', component: AdminProductsPage, canActivate: [adminGuard] },
+ { path: 'admin/banners', component: AdminBannersPage, canActivate: [adminGuard] },
  { path: 'admin/orders', component: AdminOrdersPage },
  {path: 'admin', component:AdminHomePage,},
  {path: 'admin/cartOrders', component:AdminCartPage,},

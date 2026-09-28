@@ -28,6 +28,7 @@ export interface Product {
 
   activo?: boolean;
   estado?: boolean;
+  mayorista?: boolean;
 
   colores?: any[];
   variantes?: any[];

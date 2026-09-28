@@ -20,6 +20,7 @@ public class ProductResponse {
     public int stock;
     public BigDecimal precio;
     public Boolean estado;
+    public boolean mayorista;
 
     public static ProductResponse of(
             com.guillerme_backend.app.domain.product.Product p,
@@ -41,6 +42,7 @@ public class ProductResponse {
         r.stock = stock;
         r.precio = p.getPrecio();
         r.estado = p.isEstado();
+        r.mayorista = p.isMayorista();
 
         return r;
     }

@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 
-import { AdminProductsApi } from '../../shared/admin/admin-products.api';
+import { AdminProductsApi, ProductResponse } from '../../shared/admin/admin-products.api';
 import {
   LocalSalesApi,
   LocalSaleSummaryDto,
@@ -23,7 +23,6 @@ import { AuthService } from '../../shared/auth/auth.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { downloadLocalSalePdf } from '../../shared/pdf/local-sale-receipt.pdf';
 import { AdminStockLookupComponent } from '../admin-stock-lookup/admin-stock-lookup.component';
-import { AdminProductSearchPickerComponent } from '../admin-product-search/admin-product-search-picker.component';
 
 type CartItem = {
   productId: number;
@@ -37,7 +36,7 @@ type CartItem = {
 @Component({
   standalone: true,
   selector: 'app-admin-purchases',
-  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe, AdminStockLookupComponent, AdminProductSearchPickerComponent],
+  imports: [CommonModule, FormsModule, NgIf, NgFor, DatePipe, DecimalPipe, AdminStockLookupComponent],
   templateUrl: './admin-cart.page.html',
   styleUrl: './admin-cart.page.scss',
 })
@@ -66,7 +65,7 @@ export class AdminCartPage implements OnInit {
   historyLoading = signal(false);
   historyRows = signal<LocalSaleSummaryDto[]>([]);
   selectedSale = signal<LocalSaleDetailDto | null>(null);
-  
+
   manualTypingMode = signal(false);
 
   page = signal(0);
@@ -79,12 +78,15 @@ export class AdminCartPage implements OnInit {
   // number = venta reabierta en edición
   editingSaleId = signal<number | null>(null);
 
-  manualSearchVisible = signal(false);
+  manualSearchResults = signal<ProductResponse[]>([]);
+  manualSearchLoading = signal(false);
   @ViewChild('cartSection') cartSection?: ElementRef;
 
   // scanner global
   private scannerBuffer = '';
   private scannerTimer: ReturnType<typeof setTimeout> | null = null;
+  private manualSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private manualSearchRequestId = 0;
 
   ngOnInit(): void {
     if (this.tab() === 'history') {
@@ -122,6 +124,9 @@ export class AdminCartPage implements OnInit {
     this.lastAddedId.set(null);
     this.editingSaleId.set(null);
     this.manualTypingMode.set(false);
+    this.manualSearchResults.set([]);
+    this.manualSearchLoading.set(false);
+    this.clearManualSearchTimer();
     this.scannerBuffer = '';
     this.clearScannerTimer();
     this.focusInput();
@@ -138,6 +143,9 @@ export class AdminCartPage implements OnInit {
       this.lastAddedId.set(null);
       this.editingSaleId.set(null);
       this.manualTypingMode.set(false);
+      this.manualSearchResults.set([]);
+      this.manualSearchLoading.set(false);
+      this.clearManualSearchTimer();
       this.scannerBuffer = '';
       this.clearScannerTimer();
       return;
@@ -166,6 +174,9 @@ export class AdminCartPage implements OnInit {
         this.lastAddedId.set(null);
         this.editingSaleId.set(null);
         this.manualTypingMode.set(false);
+        this.manualSearchResults.set([]);
+        this.manualSearchLoading.set(false);
+        this.clearManualSearchTimer();
         this.scannerBuffer = '';
         this.clearScannerTimer();
 
@@ -383,6 +394,9 @@ addToCart(p: any) {
     this.scanInput.set('');
     this.lastAddedId.set(null);
     this.manualTypingMode.set(false);
+    this.manualSearchResults.set([]);
+    this.manualSearchLoading.set(false);
+    this.clearManualSearchTimer();
     this.scannerBuffer = '';
     this.clearScannerTimer();
     this.focusInput();
@@ -450,6 +464,9 @@ addToCart(p: any) {
             this.customerName.set('');
             this.editingSaleId.set(null);
             this.manualTypingMode.set(false);
+            this.manualSearchResults.set([]);
+            this.manualSearchLoading.set(false);
+            this.clearManualSearchTimer();
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -475,6 +492,9 @@ addToCart(p: any) {
             this.customerName.set('');
             this.editingSaleId.set(null);
             this.manualTypingMode.set(false);
+            this.manualSearchResults.set([]);
+            this.manualSearchLoading.set(false);
+            this.clearManualSearchTimer();
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -602,6 +622,9 @@ addToCart(p: any) {
             this.scanInput.set('');
             this.lastAddedId.set(null);
             this.manualTypingMode.set(false);
+            this.manualSearchResults.set([]);
+            this.manualSearchLoading.set(false);
+            this.clearManualSearchTimer();
             this.scannerBuffer = '';
             this.clearScannerTimer();
 
@@ -691,65 +714,220 @@ addToCart(p: any) {
     return new Date(d + 'T23:59:59').toISOString();
   }
 
-  onManualProductSelected(p: any) {
-  if (this.sending()) return;
+  onManualProductSelected(p: ProductResponse) {
+    if (this.sending()) return;
 
-  if ((p.stock ?? 0) <= 0) {
-    this.toast.error(`Sin stock para ${p.nombre}`);
-    return;
+    if ((p.stock ?? 0) <= 0) {
+      this.toast.error(`Sin stock para ${p.nombre}`);
+      return;
+    }
+
+    this.addToCart(p);
+    this.toast.success(`${p.nombre} agregado al pedido`);
+
+    this.scanInput.set('');
+    this.manualSearchResults.set([]);
+    this.manualSearchLoading.set(false);
+    this.clearManualSearchTimer();
+    this.focusInput();
+    this.scrollToCart();
   }
 
-  this.addToCart(p);
-  this.toast.success(`${p.nombre} agregado al pedido`);
+  scrollToCart() {
+    setTimeout(() => {
+      this.cartSection?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 0);
+  }
 
-  this.scrollToCart();   
-}
+  toggleManualTypingMode() {
+    this.manualTypingMode.update((v) => !v);
 
-toggleManualSearchVisible() {
-  this.manualSearchVisible.update(v => !v);
-}
-
-closeManualSearch() {
-  this.manualSearchVisible.set(false);
-}
-
-scrollToCart() {
-  setTimeout(() => {
-    this.cartSection?.nativeElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }, 0);
-}
-
-toggleManualTypingMode() {
-  this.manualTypingMode.update((v) => !v);
-
-  this.scannerBuffer = '';
-  this.clearScannerTimer();
-  this.scanInput.set('');
-
-  this.focusInput();
-}
-
-onScanInputChange(value: string): void {
-  this.scanInput.set(value);
-
-  /**
-   * En modo escritura manual no usamos buffer de scanner.
-   */
-  if (this.manualTypingMode()) {
     this.scannerBuffer = '';
     this.clearScannerTimer();
+    this.clearManualSearchTimer();
+    this.manualSearchResults.set([]);
+    this.manualSearchLoading.set(false);
+    this.scanInput.set('');
+
+    this.focusInput();
   }
-}
 
-scanCodeManual(event?: Event): void {
-  event?.preventDefault();
+  onScanInputChange(value: string): void {
+    this.scanInput.set(value);
 
-  this.scannerBuffer = '';
-  this.clearScannerTimer();
+    if (!this.manualTypingMode()) {
+      return;
+    }
 
-  this.scanCode();
-}
+    this.scannerBuffer = '';
+    this.clearScannerTimer();
+    this.scheduleManualSearch(value);
+  }
+
+  scanCodeManual(event?: Event): void {
+    event?.preventDefault();
+
+    if (!this.manualTypingMode()) {
+      this.scanCode();
+      return;
+    }
+
+    const query = this.scanInput().trim();
+    if (!query || this.loading() || this.sending()) return;
+
+    const exact = this.manualSearchResults().find((p) => {
+      const barcode = String(p.barcode ?? '').trim().toLowerCase();
+      const codigo = String((p as any).codigo ?? '').trim().toLowerCase();
+      const normalizedQuery = query.toLowerCase();
+
+      return barcode === normalizedQuery || codigo === normalizedQuery;
+    });
+
+    if (exact) {
+      this.onManualProductSelected(exact);
+      return;
+    }
+
+    if (this.manualSearchResults().length === 1) {
+      this.onManualProductSelected(this.manualSearchResults()[0]);
+      return;
+    }
+
+    this.scheduleManualSearch(query, true);
+  }
+
+  private scheduleManualSearch(value: string, immediate = false): void {
+    this.clearManualSearchTimer();
+
+    const query = value.trim();
+
+    if (query.length < 2) {
+      this.manualSearchResults.set([]);
+      this.manualSearchLoading.set(false);
+      return;
+    }
+
+    this.manualSearchResults.set([]);
+    this.manualSearchLoading.set(true);
+
+    if (immediate) {
+      this.searchManualProducts(query);
+      return;
+    }
+
+    this.manualSearchTimer = setTimeout(() => {
+      this.searchManualProducts(query);
+    }, 250);
+  }
+
+  private searchManualProducts(query: string): void {
+    if (!this.manualTypingMode()) return;
+
+    const requestId = ++this.manualSearchRequestId;
+    this.manualSearchLoading.set(true);
+
+    this.api.search(query).subscribe({
+      next: (res) => {
+        if (requestId !== this.manualSearchRequestId) return;
+        if (this.scanInput().trim() !== query) return;
+
+        this.manualSearchLoading.set(false);
+        this.manualSearchResults.set(
+          this.rankAndFilterProducts(res ?? [], query)
+        );
+      },
+      error: () => {
+        if (requestId !== this.manualSearchRequestId) return;
+
+        this.manualSearchLoading.set(false);
+        this.manualSearchResults.set([]);
+      },
+    });
+  }
+
+  private clearManualSearchTimer(): void {
+    if (this.manualSearchTimer) {
+      clearTimeout(this.manualSearchTimer);
+      this.manualSearchTimer = null;
+    }
+
+    // Invalida cualquier respuesta anterior que todavía esté en vuelo.
+    this.manualSearchRequestId++;
+  }
+
+  private rankAndFilterProducts(
+    products: ProductResponse[],
+    rawTerm: string
+  ): ProductResponse[] {
+    const term = this.normalizeSearch(rawTerm);
+
+    if (!term) {
+      return [];
+    }
+
+    return products
+      .map((product) => ({
+        product,
+        score: this.getProductScore(product, term),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+
+        return this.normalizeSearch(a.product.nombre).localeCompare(
+          this.normalizeSearch(b.product.nombre)
+        );
+      })
+      .map((item) => item.product);
+  }
+
+  private getProductScore(product: ProductResponse, term: string): number {
+    const p: any = product;
+
+    const nombre = this.normalizeSearch(p.nombre);
+    const marca = this.normalizeSearch(p.marca);
+    const barcode = this.normalizeSearch(p.barcode);
+    const codigo = this.normalizeSearch(p.codigo);
+    const keywords = this.normalizeSearch(p.keywords);
+
+    if (barcode && barcode === term) return 100;
+    if (codigo && codigo === term) return 95;
+    if (marca && marca === term) return 90;
+    if (this.hasExactWord(nombre, term)) return 80;
+    if (this.hasExactWord(keywords, term)) return 75;
+    if (nombre.startsWith(term)) return 70;
+
+    if (term.length <= 3) return 0;
+
+    if (nombre.includes(term)) return 40;
+    if (marca.includes(term)) return 35;
+    if (keywords.includes(term)) return 30;
+
+    return 0;
+  }
+
+  private normalizeSearch(value: string | null | undefined): string {
+    return String(value ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private hasExactWord(text: string, term: string): boolean {
+    if (!text || !term) return false;
+
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(
+      `(^|[\\s\\-_/.,;:()\\[\\]])${escaped}($|[\\s\\-_/.,;:()\\[\\]])`,
+      'i'
+    );
+
+    return regex.test(text);
+  }
 }

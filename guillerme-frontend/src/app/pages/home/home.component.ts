@@ -8,11 +8,12 @@ import { CarritoModal } from '../../components/carrito-modal/carrito-modal';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BrandsCarouselComponent } from '../../components/brands-carousel/brands-carousel.component';
 import { FaqComponent } from '../../components/faq/faq.component';
-import { ProductosPreview } from '../../components/productos/productos-preview'; 
+import { ProductosPreview } from '../../components/productos/productos-preview';
 import { InstagramFeed } from '../../components/instagram-feed/instagram-feed';
 import { CategoriasComponent } from '../../components/categorias-productos/categorias.component';
 import { HomeBeneficiosComponent } from '../../components/beneficios/home-beneficios.component';
 import { NuevosIngresosComponent } from '../../components/nuevos-ingresos/nuevos-ingresos.component';
+import { HomePopupBannerComponent } from '../../components/home-popup-banner/home-popup-banner.component';
 
 @Component({
   selector: 'app-home',
@@ -31,10 +32,11 @@ import { NuevosIngresosComponent } from '../../components/nuevos-ingresos/nuevos
     InstagramFeed,
     CategoriasComponent,
     HomeBeneficiosComponent,
-    NuevosIngresosComponent
+    NuevosIngresosComponent,
+    HomePopupBannerComponent,
   ],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'], 
+  styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
   brands = [

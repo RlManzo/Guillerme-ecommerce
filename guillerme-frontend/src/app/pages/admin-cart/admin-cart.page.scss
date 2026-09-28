@@ -201,7 +201,12 @@ h1 {
 .pos-search-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
+}
+
+.pos-search-heading {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(28, 45, 70, 0.08);
 }
 
 .manual-search-wrap {
@@ -1105,4 +1110,99 @@ tbody td input[type='number']:focus {
 .scan-row button:disabled:hover {
   filter: none;
   transform: none;
+}
+
+/* ========= BUSQUEDA INLINE EN MODO ESCRITURA MANUAL ========= */
+
+.inline-search-loading,
+.inline-search-empty {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: rgba(28, 45, 70, 0.72);
+  background: #f7fafc;
+}
+
+.inline-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.scan-box .inline-search-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(28, 45, 70, 0.1);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--azul, #1c2d46);
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  padding: 12px 14px;
+  box-shadow: none;
+  transition: 0.2s ease;
+}
+
+.scan-box .inline-search-item:hover {
+  background: #f8fafc;
+  border-color: rgba(69, 172, 180, 0.35);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.scan-box .inline-search-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.inline-search-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inline-search-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.inline-search-code {
+  font-size: 12px;
+  color: rgba(28, 45, 70, 0.6);
+}
+
+.inline-search-meta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+}
+
+.inline-search-meta strong {
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .scan-box .inline-search-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inline-search-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

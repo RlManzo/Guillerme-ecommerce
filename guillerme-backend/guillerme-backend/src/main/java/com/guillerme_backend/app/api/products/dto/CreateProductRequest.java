@@ -36,4 +36,5 @@ public class CreateProductRequest {
     public BigDecimal precio;
 
     public Boolean estado;
+    public Boolean mayorista;
 }

@@ -43,87 +43,24 @@
       <div class="pos-layout">
         <!-- COLUMNA IZQUIERDA -->
         <section class="pos-main">
-          <div class="toolbar compact-toolbar">
-            <div class="toolbar-left">
+          <div class="pos-search-card">
+            <div class="pos-search-heading">
               <div class="toolbar-title">
                 {{ editingSaleId() ? ('Editando venta #' + editingSaleId()) : 'Pedido en curso' }}
               </div>
 
               <div class="toolbar-subtitle">
-                Escaneá con la pistola o ingresá el código manualmente.
+                Escaneá con la pistola o activá Escritura manual para buscar por código o nombre.
               </div>
             </div>
 
-            <div class="toolbar-right">
-              <!-- Botón superior: solo ABRE el buscador manual -->
-              <button
-                type="button"
-                class="icon-btn search-toggle-btn"
-                (click)="toggleManualSearchVisible()"
-                aria-label="Abrir búsqueda manual"
-                [disabled]="manualSearchVisible() || loading() || sending()"
-              >
-                <svg viewBox="0 0 24 24" class="icon-search" aria-hidden="true">
-                  <path
-                    d="M10.5 3a7.5 7.5 0 1 0 4.73 13.32l4.72 4.72 1.41-1.41-4.72-4.72A7.5 7.5 0 0 0 10.5 3zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11z"
-                    fill="currentColor"
-                  />
-                </svg>
-
-                <span class="search-toggle-text">Buscar productos</span>
-              </button>
-
-              <button
-                class="btn btn-warning"
-                type="button"
-                (click)="cancelOrder()"
-                [disabled]="sending()"
-              >
-                {{ editingSaleId() ? 'Cancelar edición' : 'Cancelar pedido' }}
-              </button>
-            </div>
-          </div>
-
-          <div class="pos-search-card">
-            <!-- Buscador manual -->
-            <div class="manual-search-wrap" *ngIf="manualSearchVisible()">
-              <div class="manual-search-header">
-                <div>
-                  <div class="manual-search-title">
-                    Buscar producto manualmente
-                  </div>
-
-                  <div class="manual-search-subtitle">
-                    Buscá por nombre, código, marca o palabra clave.
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  class="manual-search-close"
-                  (click)="closeManualSearch()"
-                  aria-label="Cerrar búsqueda manual"
-                >
-                  ×
-                </button>
-              </div>
-
-              <app-admin-product-search-picker
-                (productSelected)="onManualProductSelected($event)"
-              />
-            </div>
-
-            <!-- Buscador por lector / código -->
-            <div
-              class="scan-box pos-scan-box"
-              [class.scan-box-blocked]="manualSearchVisible()"
-            >
+            <div class="scan-box pos-scan-box">
               <label class="switch-mode">
                 <input
                   type="checkbox"
                   [ngModel]="manualTypingMode()"
                   (ngModelChange)="toggleManualTypingMode()"
-                  [disabled]="loading() || sending() || manualSearchVisible()"
+                  [disabled]="loading() || sending()"
                 />
 
                 <span class="switch-slider"></span>
@@ -136,25 +73,61 @@
               <div class="scan-row">
                 <input
                   #scanInputEl
-                  [class.scan-disabled]="manualSearchVisible()"
-                  [class.scan-reader-mode]="!manualTypingMode() && !manualSearchVisible()"
-                  [placeholder]="manualTypingMode() ? 'Ingresá código manualmente' : 'Escaneá código con lector'"
+                  [class.scan-reader-mode]="!manualTypingMode()"
+                  [placeholder]="manualTypingMode() ? 'Escribí código, nombre, marca o palabra clave' : 'Escaneá código con lector'"
                   [ngModel]="scanInput()"
                   (ngModelChange)="onScanInputChange($event)"
                   (keydown.enter)="manualTypingMode() ? scanCodeManual($event) : null"
-                  [readonly]="!manualTypingMode() || manualSearchVisible()"
+                  [readonly]="!manualTypingMode()"
                   [disabled]="loading() || sending()"
+                  autocomplete="off"
                 />
 
                 <button
                   type="button"
-                  [class.scan-disabled]="!manualTypingMode() || manualSearchVisible()"
+                  [class.scan-disabled]="!manualTypingMode()"
                   (click)="scanCodeManual()"
-                  [disabled]="loading() || sending() || manualSearchVisible() || !manualTypingMode() || !scanInput().trim()"
+                  [disabled]="loading() || sending() || manualSearchLoading() || !manualTypingMode() || scanInput().trim().length < 2"
                 >
-                  {{ loading() ? 'Buscando...' : 'Agregar' }}
+                  {{ manualSearchLoading() ? 'Buscando...' : 'Agregar' }}
                 </button>
               </div>
+
+              <ng-container *ngIf="manualTypingMode()">
+                <div class="inline-search-loading" *ngIf="manualSearchLoading()">
+                  Buscando productos...
+                </div>
+
+                <div
+                  class="inline-search-empty"
+                  *ngIf="!manualSearchLoading() && scanInput().trim().length >= 2 && manualSearchResults().length === 0"
+                >
+                  No se encontraron productos.
+                </div>
+
+                <div
+                  class="inline-search-results"
+                  *ngIf="!manualSearchLoading() && manualSearchResults().length > 0"
+                >
+                  <button
+                    type="button"
+                    class="inline-search-item"
+                    *ngFor="let p of manualSearchResults()"
+                    (click)="onManualProductSelected(p)"
+                    [disabled]="sending()"
+                  >
+                    <div class="inline-search-main">
+                      <span class="inline-search-name">{{ p.nombre }}</span>
+                      <span class="inline-search-code">Código: {{ p.barcode || '-' }}</span>
+                    </div>
+
+                    <div class="inline-search-meta">
+                      <span>Stock: {{ p.stock }}</span>
+                      <strong>${{ p.precio | number:'1.0-0' }}</strong>
+                    </div>
+                  </button>
+                </div>
+              </ng-container>
             </div>
           </div>
 
@@ -176,51 +149,51 @@
             <div class="pos-cart-table-wrap" *ngIf="cart().length > 0" #cartSection>
               <table class="pos-cart-table">
                 <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                  </tr>
+                <tr>
+                  <th>Código</th>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
                 </thead>
 
                 <tbody>
-                  <tr
-                    *ngFor="let item of cart()"
-                    [class.highlight]="item.productId === lastAddedId()"
-                  >
-                    <td>{{ item.barcode || '-' }}</td>
-                    <td>{{ item.nombre }}</td>
-                    <td>${{ item.precio | number:'1.0-0' }}</td>
-                    <td>{{ item.stock }}</td>
+                <tr
+                  *ngFor="let item of cart()"
+                  [class.highlight]="item.productId === lastAddedId()"
+                >
+                  <td>{{ item.barcode || '-' }}</td>
+                  <td>{{ item.nombre }}</td>
+                  <td>${{ item.precio | number:'1.0-0' }}</td>
+                  <td>{{ item.stock }}</td>
 
-                    <td>
-                      <input
-                        type="number"
-                        min="1"
-                        [max]="item.stock"
-                        [ngModel]="item.qty"
-                        (ngModelChange)="changeQty(item, +$event)"
-                        [disabled]="sending()"
-                      />
-                    </td>
+                  <td>
+                    <input
+                      type="number"
+                      min="1"
+                      [max]="item.stock"
+                      [ngModel]="item.qty"
+                      (ngModelChange)="changeQty(item, +$event)"
+                      [disabled]="sending()"
+                    />
+                  </td>
 
-                    <td>${{ (item.precio * item.qty) | number:'1.0-0' }}</td>
+                  <td>${{ (item.precio * item.qty) | number:'1.0-0' }}</td>
 
-                    <td>
-                      <button
-                        class="remove-btn"
-                        type="button"
-                        (click)="removeItem(item.productId)"
-                        [disabled]="sending()"
-                      >
-                        X
-                      </button>
-                    </td>
-                  </tr>
+                  <td>
+                    <button
+                      class="remove-btn"
+                      type="button"
+                      (click)="removeItem(item.productId)"
+                      [disabled]="sending()"
+                    >
+                      X
+                    </button>
+                  </td>
+                </tr>
                 </tbody>
               </table>
             </div>
@@ -272,9 +245,9 @@
               [disabled]="sending()"
             >
               {{
-                sending()
-                  ? 'Procesando...'
-                  : (editingSaleId() ? 'Guardar venta reabierta' : 'Finalizar compra')
+              sending()
+              ? 'Procesando...'
+              : (editingSaleId() ? 'Guardar venta reabierta' : 'Finalizar compra')
               }}
             </button>
 
@@ -295,6 +268,7 @@
             >
               {{ editingSaleId() ? 'Cancelar edición' : 'Cancelar pedido' }}
             </button>
+
           </div>
         </aside>
       </div>
@@ -507,33 +481,33 @@
 
           <table class="detail-table">
             <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Código</th>
-                <th>Unitario</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-              </tr>
+            <tr>
+              <th>Producto</th>
+              <th>Código</th>
+              <th>Unitario</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+            </tr>
             </thead>
 
             <tbody>
-              <tr *ngFor="let it of selectedSale()!.items">
-                <td>{{ it.productNombre }}</td>
-                <td>{{ it.barcode || '-' }}</td>
-                <td>${{ it.unitPrice | number:'1.0-0' }}</td>
-                <td>{{ it.qty }}</td>
-                <td>${{ it.subtotal | number:'1.0-0' }}</td>
-              </tr>
+            <tr *ngFor="let it of selectedSale()!.items">
+              <td>{{ it.productNombre }}</td>
+              <td>{{ it.barcode || '-' }}</td>
+              <td>${{ it.unitPrice | number:'1.0-0' }}</td>
+              <td>{{ it.qty }}</td>
+              <td>${{ it.subtotal | number:'1.0-0' }}</td>
+            </tr>
             </tbody>
 
             <tfoot>
-              <tr class="detail-total-row">
-                <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
-                <td><strong>{{ selectedSale()!.totalItems }}</strong></td>
-                <td><strong>${{ selectedSale()!.totalAmount | number:'1.0-0' }}</strong></td>
-              </tr>
+            <tr class="detail-total-row">
+              <td><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td><strong>{{ selectedSale()!.totalItems }}</strong></td>
+              <td><strong>${{ selectedSale()!.totalAmount | number:'1.0-0' }}</strong></td>
+            </tr>
             </tfoot>
           </table>
 

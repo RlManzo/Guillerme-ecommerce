@@ -17,6 +17,9 @@ export interface CreateProductRequest {
   stock: number;
   precio: number;
   estado?: boolean;
+
+  // Indica si el producto debe aparecer en Venta Mayorista
+  mayorista?: boolean;
 }
 
 export type ProductResponse = {
@@ -32,57 +35,95 @@ export type ProductResponse = {
   stock: number;
   precio: number;
   estado?: boolean;
+
+  // Indica si el producto pertenece a Venta Mayorista
+  mayorista?: boolean;
+
   barcode?: string | null;
 };
 
-export type BulkProductCreateRequest = { items: CreateProductRequest[] };
-export type BulkProductCreateResponse = { ids: number[] };
+export type BulkProductCreateRequest = {
+  items: CreateProductRequest[];
+};
+
+export type BulkProductCreateResponse = {
+  ids: number[];
+};
 
 @Injectable({ providedIn: 'root' })
 export class AdminProductsApi {
   constructor(private readonly http: HttpClient) {}
 
   create(body: CreateProductRequest): Observable<ProductResponse> {
-    return this.http.post<ProductResponse>('/api/admin/products', body);
+    return this.http.post<ProductResponse>(
+      '/api/admin/products',
+      body
+    );
   }
 
-  bulkCreate(body: BulkProductCreateRequest): Observable<BulkProductCreateResponse> {
-    return this.http.post<BulkProductCreateResponse>('/api/admin/products/bulk', body);
+  bulkCreate(
+    body: BulkProductCreateRequest
+  ): Observable<BulkProductCreateResponse> {
+    return this.http.post<BulkProductCreateResponse>(
+      '/api/admin/products/bulk',
+      body
+    );
   }
 
-  update(id: number, body: CreateProductRequest): Observable<ProductResponse> {
-    return this.http.put<ProductResponse>(`/api/admin/products/${id}`, body);
+  update(
+    id: number,
+    body: CreateProductRequest
+  ): Observable<ProductResponse> {
+    return this.http.put<ProductResponse>(
+      `/api/admin/products/${id}`,
+      body
+    );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/admin/products/${id}`);
+    return this.http.delete<void>(
+      `/api/admin/products/${id}`
+    );
   }
 
-  uploadImage(file: File): Observable<{ url: string; filename: string }> {
+  uploadImage(
+    file: File
+  ): Observable<{ url: string; filename: string }> {
     const fd = new FormData();
+
     fd.append('file', file);
-    return this.http.post<{ url: string; filename: string }>(
+
+    return this.http.post<{
+      url: string;
+      filename: string;
+    }>(
       '/api/admin/products/image',
       fd
     );
   }
 
   updateEstado(id: number, estado: boolean) {
-  return this.http.patch<void>(`/api/admin/products/${id}/estado`, { estado });
-}
+    return this.http.patch<void>(
+      `/api/admin/products/${id}/estado`,
+      { estado }
+    );
+  }
 
-getByBarcode(code: string) {
-  return this.http.get<ProductResponse>(
-    `/api/admin/products/by-barcode`,
-    { params: { code } }
-  );
-}
+  getByBarcode(code: string) {
+    return this.http.get<ProductResponse>(
+      '/api/admin/products/by-barcode',
+      {
+        params: { code }
+      }
+    );
+  }
 
-search(term: string) {
-  return this.http.get<ProductResponse[]>(
-    '/api/admin/products/search',
-    { params: { q: term } }
-  );
-}
-
+  search(term: string) {
+    return this.http.get<ProductResponse[]>(
+      '/api/admin/products/search',
+      {
+        params: { q: term }
+      }
+    );
+  }
 }

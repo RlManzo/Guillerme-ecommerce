@@ -40,265 +40,267 @@
 
     <!-- ✅ BUSCADOR + FILTRO CATEGORIA + PAGE SIZE -->
     <div class="filters-bar">
-  <input
-    placeholder="Buscar por nombre, descripción, keywords o código..."
-    [ngModel]="searchInput()"
-    (ngModelChange)="searchInput.set($event)"
-    (keydown.enter)="applySearch()"
-  />
+      <input
+        placeholder="Buscar por nombre, descripción, keywords o código..."
+        [ngModel]="searchInput()"
+        (ngModelChange)="searchInput.set($event)"
+        (keydown.enter)="applySearch()"
+      />
 
-  <select
-  [ngModel]="estadoFilter()"
-  (ngModelChange)="estadoFilter.set($event); page.set(1)"
->
-  <option value="ACTIVOS">Activos</option>
-  <option value="INACTIVOS">Inactivos</option>
-  <option value="TODOS">Todos</option>
-</select>
+      <select
+        [ngModel]="estadoFilter()"
+        (ngModelChange)="estadoFilter.set($event); page.set(1)"
+      >
+        <option value="ACTIVOS">Activos</option>
+        <option value="INACTIVOS">Inactivos</option>
+        <option value="TODOS">Todos</option>
+      </select>
 
-  <select
-    [ngModel]="categoriaFilter()"
-    (ngModelChange)="onCategoriaChange($event)"
-  >
-    <option value="ALL">Todas</option>
-    <option value="LIBRERIA">Librería</option>
-    <option value="JUGUETES">Juguetes</option>
-    <option value="COMBOS">Combos</option>
-    <option value="VARIOS">Varios</option>
-  </select>
+      <select
+        [ngModel]="categoriaFilter()"
+        (ngModelChange)="onCategoriaChange($event)"
+      >
+        <option value="ALL">Todas</option>
+        <option value="LIBRERIA">Librería</option>
+        <option value="JUGUETES">Juguetes</option>
+        <option value="COMBOS">Combos</option>
+        <option value="VARIOS">Varios</option>
+      </select>
 
-  <select
-    [ngModel]="sortBy()"
-    (ngModelChange)="onSortChange($event)"
-  >
-    <option value="NEWEST">Más nuevo</option>
-    <option value="OLDEST">Más antiguo</option>
-    <option value="AZ">Nombre (A → Z)</option>
-    <option value="ZA">Nombre (Z → A)</option>
-  </select>
+      <select
+        [ngModel]="sortBy()"
+        (ngModelChange)="onSortChange($event)"
+      >
+        <option value="NEWEST">Más nuevo</option>
+        <option value="OLDEST">Más antiguo</option>
+        <option value="AZ">Nombre (A → Z)</option>
+        <option value="ZA">Nombre (Z → A)</option>
+      </select>
 
-  <button class="btn-search" (click)="applySearch()">
-    Buscar
-  </button>
+      <button class="btn-search" (click)="applySearch()">
+        Buscar
+      </button>
 
-  <button class="btn-clear" (click)="clearSearch()">
-    Limpiar
-  </button>
-</div>
-      
+      <button class="btn-clear" (click)="clearSearch()">
+        Limpiar
+      </button>
+    </div>
+
 
     <div style="overflow:auto;">
       <table class="admin-table" >
         <thead>
-          <tr>
-            <th>Código</th>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Keywords</th>
-            <th>Stock</th>
-            <th>Precio</th>
-            <th style="width: 220px;">Acciones</th>
-          </tr>
+        <tr>
+          <th>Código</th>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Keywords</th>
+          <th>Stock</th>
+          <th>Precio</th>
+          <th>Mayorista</th>
+          <th style="width: 220px;">Acciones</th>
+        </tr>
         </thead>
 
         <tbody>
-          <ng-container *ngFor="let p of pagedProducts(); trackBy: trackById">
-            <!-- FILA NORMAL (solo lectura) -->
-            <tr>
-              <td>{{ p.barcode || '-' }}</td>
-              <td>
-                <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
-                  <img
-                    class="thumb img-grid"
-                    [src]="fileUrl(p.imgUrl || p.img)"
-                    [alt]="p.nombre"
-                  />
-                  <img
-                    *ngIf="p.imgUrl2"
-                    class="thumb img-grid"
-                    [src]="fileUrl(p.imgUrl2)"
-                    [alt]="p.nombre"
-                  />
-                  <img
-                    *ngIf="p.imgUrl3"
-                    class="thumb img-grid"
-                    [src]="fileUrl(p.imgUrl3)"
-                    [alt]="p.nombre"
-                  />
-                </div>
-              </td>
+        <ng-container *ngFor="let p of pagedProducts(); trackBy: trackById">
+          <!-- FILA NORMAL (solo lectura) -->
+          <tr>
+            <td>{{ p.barcode || '-' }}</td>
+            <td>
+              <div style="display:flex; gap:6px; flex-wrap:wrap; min-width: 180px;">
+                <img
+                  class="thumb img-grid"
+                  [src]="fileUrl(p.imgUrl || p.img)"
+                  [alt]="p.nombre"
+                />
+                <img
+                  *ngIf="p.imgUrl2"
+                  class="thumb img-grid"
+                  [src]="fileUrl(p.imgUrl2)"
+                  [alt]="p.nombre"
+                />
+                <img
+                  *ngIf="p.imgUrl3"
+                  class="thumb img-grid"
+                  [src]="fileUrl(p.imgUrl3)"
+                  [alt]="p.nombre"
+                />
+              </div>
+            </td>
 
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.descripcionCorta }}</td>
-              <td>{{ (p.keywords ?? []).join(', ') || '-' }}</td>
-              <td>{{ p.stock ?? 0 }}</td>
-              <td>${{ (p.precio ?? 0) | number:'1.2-2' }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.descripcionCorta }}</td>
+            <td>{{ (p.keywords ?? []).join(', ') || '-' }}</td>
+            <td>{{ p.stock ?? 0 }}</td>
+            <td>${{ (p.precio ?? 0) | number:'1.2-2' }}</td>
+            <td>{{ p.mayorista ? 'Sí' : 'No' }}</td>
 
-              <td style="display:flex; justify-content:space-between; gap:8px;">
-                <td style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
-                  <!-- Toggle -->
-                  <label class="switch">
-                    <input
-                      type="checkbox"
-                      [checked]="isEstadoOn(p)"
-                      (change)="toggleEstado(p)"
-                    />
-                    <span class="slider"></span>
-                  </label>
+            <td style="display:flex; justify-content:space-between; gap:8px;">
+            <td style="display:flex; justify-content:space-between; gap:8px; align-items:center;">
+              <!-- Toggle -->
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  [checked]="isEstadoOn(p)"
+                  (change)="toggleEstado(p)"
+                />
+                <span class="slider"></span>
+              </label>
 
-                  <div style="font-size: 12px; line-height: 1; margin-left: -2px;">
+              <div style="font-size: 12px; line-height: 1; margin-left: -2px;">
                     <span [style.color]="isEstadoOn(p) ? 'green' : '#888'">
                       {{ isEstadoOn(p) ? 'Activo' : 'Desactivado' }}
                     </span>
+              </div>
+
+
+              <button (click)="toggleEdit(p)" class="btn btn-primary">
+                {{ isEditing(p.id) ? 'Cerrar' : 'Modificar' }}
+              </button>
+              <button class="btn btn-danger" (click)="remove(p.id)">Eliminar</button>
+            </td>
+          </tr>
+
+          <!-- FILA DESPLEGABLE (editor) -->
+          <tr *ngIf="isEditing(p.id)">
+            <td colspan="9">
+              <div class="row-editor">
+                <div class="row-editor__top">
+                  <div class="row-editor__title">
+                    Editando: <b>{{ p.nombre }}</b>
                   </div>
 
-
-                <button (click)="toggleEdit(p)" class="btn btn-primary">
-                  {{ isEditing(p.id) ? 'Cerrar' : 'Modificar' }}
-                </button>
-                <button class="btn btn-danger" (click)="remove(p.id)">Eliminar</button>
-              </td>
-            </tr>
-
-            <!-- FILA DESPLEGABLE (editor) -->
-            <tr *ngIf="isEditing(p.id)">
-              <td colspan="7">
-                <div class="row-editor">
-                  <div class="row-editor__top">
-                    <div class="row-editor__title">
-                      Editando: <b>{{ p.nombre }}</b>
-                    </div>
-
-                    <div class="row-editor__actions">
-                      <button (click)="cancelEdit()" class="btn btn-secondary">
-                        Cancelar
-                      </button>
-                      <button
-                        class="btn btn-success"
-                        (click)="saveEdit(p.id)"
-                        [disabled]="savingRow()"
-                      >
-                        {{ savingRow() ? 'Guardando...' : 'Guardar' }}
-                      </button>
-                    </div>
+                  <div class="row-editor__actions">
+                    <button (click)="cancelEdit()" class="btn btn-secondary">
+                      Cancelar
+                    </button>
+                    <button
+                      class="btn btn-success"
+                      (click)="saveEdit(p.id)"
+                      [disabled]="savingRow()"
+                    >
+                      {{ savingRow() ? 'Guardando...' : 'Guardar' }}
+                    </button>
                   </div>
+                </div>
 
-                  <div class="row-editor__grid">
-                    <!-- MEDIA (imagen o video) -->
-                    <div class="row-editor__block">
-                      <div class="row-editor__label"><strong style="font-size: larger;"> Media (imagen o video)</strong></div>
+                <div class="row-editor__grid">
+                  <!-- MEDIA (imagen o video) -->
+                  <div class="row-editor__block">
+                    <div class="row-editor__label"><strong style="font-size: larger;"> Media (imagen o video)</strong></div>
 
-                      <div class="row-editor__uploads">
-                        <label>
-                          <span>Archivo 1</span>
-                          <!-- ✅ edición: onEditMediaSelected -->
-                          <input
-                            type="file"
-                            accept="image/*,video/*"
-                            (change)="onEditMediaSelected($event, 1)"
-                          />
-                        </label>
-
-                        <label>
-                          <span>Archivo 2</span>
-                          <input
-                            type="file"
-                            accept="image/*,video/*"
-                            (change)="onEditMediaSelected($event, 2)"
-                          />
-                        </label>
-
-                        <label>
-                          <span>Archivo 3</span>
-                          <input
-                            type="file"
-                            accept="image/*,video/*"
-                            (change)="onEditMediaSelected($event, 3)"
-                          />
-                        </label>
-
-                        <div *ngIf="uploadingImg()" class="row-editor__hint">
-                          Subiendo archivo...
-                        </div>
-                      </div>
-
-                      <!-- ✅ previews: img o video -->
-                      <div class="row-editor__previews">
-                        <ng-container *ngIf="editRow().imgUrl as e1">
-                          <ng-container *ngIf="!isVideo(e1); else ev1">
-                            <img
-                              class="thumb img-grid"
-                              [src]="fileUrl(e1)"
-                              [alt]="p.nombre"
-                            />
-                          </ng-container>
-                          <ng-template #ev1>
-                            <video
-                              class="thumb img-grid"
-                              [src]="fileUrl(e1)"
-                              controls
-                              muted
-                              playsinline
-                            ></video>
-                          </ng-template>
-                        </ng-container>
-
-                        <ng-container *ngIf="editRow().imgUrl2 as e2">
-                          <ng-container *ngIf="!isVideo(e2); else ev2">
-                            <img
-                              class="thumb img-grid"
-                              [src]="fileUrl(e2)"
-                              [alt]="p.nombre"
-                            />
-                          </ng-container>
-                          <ng-template #ev2>
-                            <video
-                              class="thumb img-grid"
-                              [src]="fileUrl(e2)"
-                              controls
-                              muted
-                              playsinline
-                            ></video>
-                          </ng-template>
-                        </ng-container>
-
-                        <ng-container *ngIf="editRow().imgUrl3 as e3">
-                          <ng-container *ngIf="!isVideo(e3); else ev3">
-                            <img
-                              class="thumb img-grid"
-                              [src]="fileUrl(e3)"
-                              [alt]="p.nombre"
-                            />
-                          </ng-container>
-                          <ng-template #ev3>
-                            <video
-                              class="thumb img-grid"
-                              [src]="fileUrl(e3)"
-                              controls
-                              muted
-                              playsinline
-                            ></video>
-                          </ng-template>
-                        </ng-container>
-                      </div>
-
-                      <div class="row-editor__hint">
-                        * Subís y luego <b>Guardás</b> para confirmar.
-                      </div>
-                    </div>
-
-                    <!-- CAMPOS -->
-                    <div class="row-editor__fields">
+                    <div class="row-editor__uploads">
                       <label>
-                        <span><strong style="font-size: larger;"> Nombre</strong></span>
+                        <span>Archivo 1</span>
+                        <!-- ✅ edición: onEditMediaSelected -->
                         <input
-                          [ngModel]="editRow().nombre"
-                          (ngModelChange)="setEditField('nombre', $event)"
+                          type="file"
+                          accept="image/*,video/*"
+                          (change)="onEditMediaSelected($event, 1)"
                         />
                       </label>
 
                       <label>
+                        <span>Archivo 2</span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          (change)="onEditMediaSelected($event, 2)"
+                        />
+                      </label>
+
+                      <label>
+                        <span>Archivo 3</span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          (change)="onEditMediaSelected($event, 3)"
+                        />
+                      </label>
+
+                      <div *ngIf="uploadingImg()" class="row-editor__hint">
+                        Subiendo archivo...
+                      </div>
+                    </div>
+
+                    <!-- ✅ previews: img o video -->
+                    <div class="row-editor__previews">
+                      <ng-container *ngIf="editRow().imgUrl as e1">
+                        <ng-container *ngIf="!isVideo(e1); else ev1">
+                          <img
+                            class="thumb img-grid"
+                            [src]="fileUrl(e1)"
+                            [alt]="p.nombre"
+                          />
+                        </ng-container>
+                        <ng-template #ev1>
+                          <video
+                            class="thumb img-grid"
+                            [src]="fileUrl(e1)"
+                            controls
+                            muted
+                            playsinline
+                          ></video>
+                        </ng-template>
+                      </ng-container>
+
+                      <ng-container *ngIf="editRow().imgUrl2 as e2">
+                        <ng-container *ngIf="!isVideo(e2); else ev2">
+                          <img
+                            class="thumb img-grid"
+                            [src]="fileUrl(e2)"
+                            [alt]="p.nombre"
+                          />
+                        </ng-container>
+                        <ng-template #ev2>
+                          <video
+                            class="thumb img-grid"
+                            [src]="fileUrl(e2)"
+                            controls
+                            muted
+                            playsinline
+                          ></video>
+                        </ng-template>
+                      </ng-container>
+
+                      <ng-container *ngIf="editRow().imgUrl3 as e3">
+                        <ng-container *ngIf="!isVideo(e3); else ev3">
+                          <img
+                            class="thumb img-grid"
+                            [src]="fileUrl(e3)"
+                            [alt]="p.nombre"
+                          />
+                        </ng-container>
+                        <ng-template #ev3>
+                          <video
+                            class="thumb img-grid"
+                            [src]="fileUrl(e3)"
+                            controls
+                            muted
+                            playsinline
+                          ></video>
+                        </ng-template>
+                      </ng-container>
+                    </div>
+
+                    <div class="row-editor__hint">
+                      * Subís y luego <b>Guardás</b> para confirmar.
+                    </div>
+                  </div>
+
+                  <!-- CAMPOS -->
+                  <div class="row-editor__fields">
+                    <label>
+                      <span><strong style="font-size: larger;"> Nombre</strong></span>
+                      <input
+                        [ngModel]="editRow().nombre"
+                        (ngModelChange)="setEditField('nombre', $event)"
+                      />
+                    </label>
+
+                    <label>
                       <span><strong style="font-size: larger;"> Código de barras</strong></span>
                       <input
                         placeholder="Ej: 7798100960487"
@@ -311,93 +313,105 @@
                       </div>
                     </label>
 
-                      <label>
-                        <span><strong style="font-size: larger;">Descripción corta</strong></span>
-                        <input
-                          [ngModel]="editRow().descripcionCorta"
-                          (ngModelChange)="setEditField('descripcionCorta', $event)"
-                        />
-                      </label>
+                    <label>
+                      <span><strong style="font-size: larger;">Descripción corta</strong></span>
+                      <input
+                        [ngModel]="editRow().descripcionCorta"
+                        (ngModelChange)="setEditField('descripcionCorta', $event)"
+                      />
+                    </label>
 
-                      <label class="full">
-                        <span><strong style="font-size: larger;">Info Modal (larga)</strong></span>
-                        <textarea
-                          rows="3"
-                          [ngModel]="editRow().infoModal"
-                          (ngModelChange)="setEditField('infoModal', $event)"
-                        ></textarea>
-                      </label>
+                    <label class="full">
+                      <span><strong style="font-size: larger;">Info Modal (larga)</strong></span>
+                      <textarea
+                        rows="3"
+                        [ngModel]="editRow().infoModal"
+                        (ngModelChange)="setEditField('infoModal', $event)"
+                      ></textarea>
+                    </label>
 
-                      <label class="full">
-  <span><strong style="font-size: larger;">Marca / palabra clave *</strong></span>
+                    <label class="full">
+                      <span><strong style="font-size: larger;">Marca / palabra clave *</strong></span>
 
-  <div class="kw-box selects-box">
-    <div class="kw-item" *ngFor="let k of keywordsOpts">
-      <label style="display:flex; gap:8px; align-items:center;">
-        <input
-          type="radio"
-          name="editKeyword"
-          [checked]="selectedEditKeyword() === k"
-          (change)="selectEditKeyword(k)"
-        />
-        <span>{{ k }}</span>
-      </label>
-    </div>
-
-    <div style="font-size: 12px; opacity:.75; margin-top:8px;">
-      Seleccionada: {{ selectedEditKeyword() || '-' }}
-    </div>
-
-    <div *ngIf="keywordErrorEdit()" class="field-error">
-      {{ keywordErrorEdit() }}
-    </div>
-  </div>
-</label>
-
-                      <!-- ✅ edición: categoria apunta a editRow + setEditField -->
-                      <label class="full">
-                        <span><strong style="font-size: larger;">Categoría</strong></span>
-                        <select
-                          [ngModel]="editRow().categorias"
-                          (ngModelChange)="setEditField('categorias', $event)"
-                        >
-                          <option value="" disabled>Seleccioná una categoría</option>
-                          <option value="Libreria">Libreria</option>
-                          <option value="juguetes">Juguetes</option>
-                          <option value="combos">Combos</option>
-                          <option value="jugueteria">Varios</option>
-                        </select>
-                        <div style="font-size: 12px; opacity: .7; margin-top: 6px;">
-                          Se guarda en <b>categorias</b> como texto (MVP).
+                      <div class="kw-box selects-box">
+                        <div class="kw-item" *ngFor="let k of keywordsOpts">
+                          <label style="display:flex; gap:8px; align-items:center;">
+                            <input
+                              type="radio"
+                              name="editKeyword"
+                              [checked]="selectedEditKeyword() === k"
+                              (change)="selectEditKeyword(k)"
+                            />
+                            <span>{{ k }}</span>
+                          </label>
                         </div>
-                      </label>
 
-                      <label>
-                        <span><strong style="font-size: larger;">Stock</strong></span>
-                        <input
-                          type="number"
-                          min="0"
-                          [ngModel]="editRow().stock"
-                          (ngModelChange)="setEditField('stock', +$event)"
-                        />
-                      </label>
+                        <div style="font-size: 12px; opacity:.75; margin-top:8px;">
+                          Seleccionada: {{ selectedEditKeyword() || '-' }}
+                        </div>
 
-                      <label>
-                        <span><strong style="font-size: larger;">Precio</strong></span>
+                        <div *ngIf="keywordErrorEdit()" class="field-error">
+                          {{ keywordErrorEdit() }}
+                        </div>
+                      </div>
+                    </label>
+
+                    <!-- ✅ edición: categoria apunta a editRow + setEditField -->
+                    <label class="full">
+                      <span><strong style="font-size: larger;">Categoría</strong></span>
+                      <select
+                        [ngModel]="editRow().categorias"
+                        (ngModelChange)="setEditField('categorias', $event)"
+                      >
+                        <option value="" disabled>Seleccioná una categoría</option>
+                        <option value="Libreria">Libreria</option>
+                        <option value="juguetes">Juguetes</option>
+                        <option value="combos">Combos</option>
+                        <option value="jugueteria">Varios</option>
+                      </select>
+                      <div style="font-size: 12px; opacity: .7; margin-top: 6px;">
+                        Se guarda en <b>categorias</b> como texto (MVP).
+                      </div>
+                    </label>
+
+                    <label class="full">
+                      <span><strong style="font-size: larger;">Venta mayorista</strong></span>
+                      <div style="display:flex; gap:8px; align-items:center;">
                         <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          [ngModel]="editRow().precio"
-                          (ngModelChange)="setEditField('precio', +$event)"
+                          type="checkbox"
+                          [ngModel]="editRow().mayorista ?? false"
+                          (ngModelChange)="setEditField('mayorista', $event)"
                         />
-                      </label>
-                    </div>
+                        <span>Mostrar este producto en Venta mayorista</span>
+                      </div>
+                    </label>
+
+                    <label>
+                      <span><strong style="font-size: larger;">Stock</strong></span>
+                      <input
+                        type="number"
+                        min="0"
+                        [ngModel]="editRow().stock"
+                        (ngModelChange)="setEditField('stock', +$event)"
+                      />
+                    </label>
+
+                    <label>
+                      <span><strong style="font-size: larger;">Precio</strong></span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [ngModel]="editRow().precio"
+                        (ngModelChange)="setEditField('precio', +$event)"
+                      />
+                    </label>
                   </div>
                 </div>
-              </td>
-            </tr>
-          </ng-container>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
         </tbody>
       </table>
 
@@ -594,31 +608,43 @@
         </label>
 
         <label class="full">
-        <span>Marca / palabra clave *</span>
+          <span>Marca / palabra clave *</span>
 
-        <div class="kw-box selects-box">
-          <div class="kw-item" *ngFor="let k of keywordsOpts">
-            <label style="display:flex; gap:8px; align-items:center;">
-              <input
-                type="radio"
-                name="createKeyword"
-                [checked]="selectedKeyword() === k"
-                (change)="selectKeyword(k)"
-              />
-              <span>{{ k }}</span>
-            </label>
-          </div>
+          <div class="kw-box selects-box">
+            <div class="kw-item" *ngFor="let k of keywordsOpts">
+              <label style="display:flex; gap:8px; align-items:center;">
+                <input
+                  type="radio"
+                  name="createKeyword"
+                  [checked]="selectedKeyword() === k"
+                  (change)="selectKeyword(k)"
+                />
+                <span>{{ k }}</span>
+              </label>
+            </div>
 
-          <div style="font-size: 12px; opacity:.75; margin-top:8px;">
-            Seleccionada: {{ selectedKeyword() || '-' }}
-          </div>
+            <div style="font-size: 12px; opacity:.75; margin-top:8px;">
+              Seleccionada: {{ selectedKeyword() || '-' }}
+            </div>
 
-          <div *ngIf="keywordErrorCreate()" class="field-error">
-            {{ keywordErrorCreate() }}
+            <div *ngIf="keywordErrorCreate()" class="field-error">
+              {{ keywordErrorCreate() }}
+            </div>
           </div>
-        </div>
-      </label>
-        
+        </label>
+
+
+        <label class="full">
+          <span><strong style="font-size: larger;">Venta mayorista</strong></span>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input
+              type="checkbox"
+              [ngModel]="form().mayorista ?? false"
+              (ngModelChange)="setField('mayorista', $event)"
+            />
+            <span>Mostrar este producto en Venta mayorista</span>
+          </div>
+        </label>
 
         <!-- ✅ PRECIO con símbolo $ -->
         <label>

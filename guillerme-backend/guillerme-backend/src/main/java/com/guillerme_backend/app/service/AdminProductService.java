@@ -50,6 +50,7 @@ public class AdminProductService {
             p.setActivo(it.activo == null ? true : it.activo);
             p.setPrecio(it.precio);
             p.setEstado(it.estado == null ? p.isEstado() : it.estado);
+            p.setMayorista(it.mayorista != null && it.mayorista);
 
             Product saved = productRepository.save(p);
             ids.add(saved.getId());
@@ -106,6 +107,7 @@ public class AdminProductService {
         p.setActivo(it.activo == null ? p.isActivo() : it.activo);
         p.setPrecio(it.precio == null ? p.getPrecio() : it.precio);
         p.setEstado(it.estado == null ? p.isEstado() : it.estado);
+        p.setMayorista(it.mayorista == null ? p.isMayorista() : it.mayorista);
 
         Product saved = productRepository.save(p);
 

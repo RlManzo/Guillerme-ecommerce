@@ -1,0 +1,27 @@
+<div
+  *ngIf="visible() && banner() as current"
+  class="popup-backdrop"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Promoción"
+  (click)="onBackdropClick($event)"
+>
+  <div class="popup-card">
+    <button type="button" class="close-btn" aria-label="Cerrar promoción" (click)="close()">×</button>
+
+    <img
+      class="popup-image"
+      [src]="current.imageUrl"
+      [alt]="current.altText || 'Promoción'"
+    />
+
+    <button
+      *ngIf="current.targetUrl"
+      type="button"
+      class="more-btn"
+      (click)="goToTarget()"
+    >
+      Ver más
+    </button>
+  </div>
+</div>

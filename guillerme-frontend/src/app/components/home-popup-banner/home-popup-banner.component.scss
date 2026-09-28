@@ -1,0 +1,81 @@
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.56);
+  backdrop-filter: blur(2px);
+}
+
+.popup-card {
+  position: relative;
+  width: min(610px, 94vw);
+  max-height: 90vh;
+  padding: 18px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  overflow: auto;
+}
+
+.popup-image {
+  display: block;
+  width: 100%;
+  max-height: calc(90vh - 36px);
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #102c4e;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18);
+}
+
+.more-btn {
+  position: absolute;
+  right: 38px;
+  bottom: 36px;
+  min-width: 122px;
+  min-height: 44px;
+  padding: 10px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #ef7699;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+}
+
+.more-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .popup-backdrop { padding: 14px; }
+  .popup-card { width: min(96vw, 610px); padding: 12px; }
+  .more-btn {
+    right: 26px;
+    bottom: 26px;
+    min-width: 104px;
+    min-height: 40px;
+    padding: 8px 18px;
+    font-size: 15px;
+  }
+}

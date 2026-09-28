@@ -1,15 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-type ServicioKey = 'filgo1' | 'filgo2' | 'filgo3' | 'filgo4';
-
-interface ServicioItem {
-  key: ServicioKey;
-  label: string;
-  icon: string;
-  banner: string;
-  alt: string;
-}
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { BannerApi, HomeBannerDto } from '../../shared/banners/banner.api';
 
 @Component({
   selector: 'app-carousel-servicios',
@@ -19,75 +10,59 @@ interface ServicioItem {
   styleUrl: './carousel-servicios.scss',
 })
 export class CarouselServicios implements OnInit, OnDestroy {
-  readonly items: ServicioItem[] = [
-    {
-      key: 'filgo1',
-      label: 'filgo_1',
-      icon: 'assets/carousel/vinilos.png',
-      banner: 'assets/carousel/banners/banner_lanzamientos_TNTMarker.jpg',
-      alt: 'vinilos',
-    },
-    {
-      key: 'filgo2',
-      label: 'filgo_2',
-      icon: 'assets/carousel/sublimacion.png',
-      banner: 'assets/carousel/banners/banner_lanzamientos_MultilighterFIT.jpg',
-      alt: 'sublimacion',
-    },
-    {
-      key: 'filgo3',
-      label: 'filgo_3',
-      icon: 'assets/carousel/DTF.png',
-      banner: 'assets/carousel/banners/banner_lanzamientos_Alloy.jpg',
-      alt: 'DTF',
-    },
-    {
-      key: 'filgo4',
-      label: 'filgo_4',
-      icon: 'assets/carousel/serigrafia.png',
-      banner: 'assets/carousel/banners/banner_lanzamientos_Portaminas.jpg',
-      alt: 'serigrafia',
-    },
-  ];
+  private readonly bannerApi = inject(BannerApi);
 
+  items: HomeBannerDto[] = [];
   activeIndex = 0;
-  private intervalId: any;
+  loading = true;
 
+  private intervalId: ReturnType<typeof setInterval> | null = null;
   private touchStartX = 0;
-private touchEndX = 0;
-private minSwipeDistance = 50;
+  private touchEndX = 0;
+  private readonly minSwipeDistance = 50;
 
   ngOnInit(): void {
-    this.startCarousel();
+    this.bannerApi.listPublic().subscribe({
+      next: (items) => {
+        this.items = items ?? [];
+        this.activeIndex = 0;
+        this.loading = false;
+        this.startCarousel();
+      },
+      error: (error) => {
+        console.error('No se pudieron cargar los banners', error);
+        this.items = [];
+        this.loading = false;
+      },
+    });
   }
 
   ngOnDestroy(): void {
     this.stopCarousel();
   }
 
-  private resetTimer(): void {
-    // Reinicia el autoplay cuando el usuario interactúa
-    this.startCarousel();
-  }
-
   next(): void {
+    if (this.items.length <= 1) return;
     this.activeIndex = (this.activeIndex + 1) % this.items.length;
     this.resetTimer();
   }
 
   prev(): void {
+    if (this.items.length <= 1) return;
     this.activeIndex = (this.activeIndex - 1 + this.items.length) % this.items.length;
     this.resetTimer();
   }
 
   goTo(index: number): void {
-    if (index === this.activeIndex) return;
+    if (index === this.activeIndex || index < 0 || index >= this.items.length) return;
     this.activeIndex = index;
     this.resetTimer();
   }
 
   startCarousel(): void {
     this.stopCarousel();
+    if (this.items.length <= 1) return;
+
     this.intervalId = setInterval(() => {
       this.activeIndex = (this.activeIndex + 1) % this.items.length;
     }, 8000);
@@ -108,23 +83,25 @@ private minSwipeDistance = 50;
     this.startCarousel();
   }
 
-  onTouchStart(event: TouchEvent) {
-  this.touchStartX = event.changedTouches[0].screenX;
-}
-
-onTouchMove(event: TouchEvent) {
-  this.touchEndX = event.changedTouches[0].screenX;
-}
-
-onTouchEnd() {
-  const distance = this.touchStartX - this.touchEndX;
-
-  if (Math.abs(distance) < this.minSwipeDistance) return;
-
-  if (distance > 0) {
-    this.next();   // swipe izquierda
-  } else {
-    this.prev();   // swipe derecha
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].screenX;
+    this.touchEndX = this.touchStartX;
   }
-}
+
+  onTouchMove(event: TouchEvent): void {
+    this.touchEndX = event.changedTouches[0].screenX;
+  }
+
+  onTouchEnd(): void {
+    if (this.items.length <= 1) return;
+
+    const distance = this.touchStartX - this.touchEndX;
+    if (Math.abs(distance) < this.minSwipeDistance) return;
+
+    distance > 0 ? this.next() : this.prev();
+  }
+
+  private resetTimer(): void {
+    this.startCarousel();
+  }
 }

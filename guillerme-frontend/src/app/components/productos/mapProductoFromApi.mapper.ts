@@ -43,6 +43,7 @@ export function mapProductFromApi(p: any): Product {
 
     // ✅ CLAVE
     estado: p.estado ?? true,
+    mayorista: p.mayorista ?? false,
 
     colores: [],
     variantes: [],

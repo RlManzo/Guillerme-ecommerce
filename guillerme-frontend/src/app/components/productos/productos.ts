@@ -92,6 +92,7 @@ export class Productos implements AfterViewInit, OnDestroy {
   readonly pageSize = signal<number>(10);
   readonly sortBy = signal<SortBy>('NEWEST');
   readonly brand = signal<BrandKey>('all');
+  readonly wholesaleOnly = signal(false);
 
   readonly minPrice = signal<number | null>(null);
   readonly maxPrice = signal<number | null>(null);
@@ -161,6 +162,10 @@ export class Productos implements AfterViewInit, OnDestroy {
    * Título que se muestra en el lateral y en mobile.
    */
   readonly categoryTitle = computed(() => {
+    if (this.wholesaleOnly()) {
+      return 'VENTA MAYORISTA';
+    }
+
     switch (this.filtro()) {
       case 'libreria':
         return 'LIBRERÍA';
@@ -257,6 +262,10 @@ export class Productos implements AfterViewInit, OnDestroy {
         params.get('brand')
       );
 
+      const wholesaleOnly =
+        params.get('mayorista') === 'true';
+
+      this.wholesaleOnly.set(wholesaleOnly);
       this.filtro.set(category);
       this.brand.set(
         category === 'libreria'
@@ -315,6 +324,10 @@ export class Productos implements AfterViewInit, OnDestroy {
       params.get('brand')
     );
 
+    const wholesaleOnly =
+      params.get('mayorista') === 'true';
+
+    this.wholesaleOnly.set(wholesaleOnly);
     this.filtro.set(category);
     this.brand.set(
       category === 'libreria'
@@ -385,6 +398,8 @@ export class Productos implements AfterViewInit, OnDestroy {
           selectedBrand !== 'all'
             ? selectedBrand
             : null,
+
+        mayorista: null,
       },
       queryParamsHandling: '',
       replaceUrl: true,
@@ -633,8 +648,14 @@ export class Productos implements AfterViewInit, OnDestroy {
         (product.estado ?? true) === true
     );
 
+    const productsByWholesale = this.wholesaleOnly()
+      ? activeProducts.filter(
+          (product) => product.mayorista === true
+        )
+      : activeProducts;
+
     const productsByCategory =
-      activeProducts.filter(
+      productsByWholesale.filter(
         this.tabFilter[selectedCategory]
       );
 
@@ -902,10 +923,19 @@ export class Productos implements AfterViewInit, OnDestroy {
     this.pageSize.set(10);
     this.page.set(0);
 
-    this.updateRouteFilters(
-      this.filtro(),
-      'all'
-    );
+    if (this.wholesaleOnly()) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { mayorista: 'true' },
+        queryParamsHandling: '',
+        replaceUrl: true,
+      });
+    } else {
+      this.updateRouteFilters(
+        this.filtro(),
+        'all'
+      );
+    }
   }
 
   /*

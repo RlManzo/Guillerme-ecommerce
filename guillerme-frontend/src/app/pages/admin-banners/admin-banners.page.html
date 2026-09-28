@@ -1,0 +1,149 @@
+<div class="banner-admin-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Inicio · Banners</p>
+      <h1>Banners del home</h1>
+      <p class="subtitle">
+        Administrá el carrusel principal y el popup promocional que aparece al ingresar a la web.
+      </p>
+    </div>
+    <div class="counter">{{ banners().length }} banners</div>
+  </header>
+
+  <div *ngIf="error()" class="message error">{{ error() }}</div>
+  <div *ngIf="success()" class="message success">{{ success() }}</div>
+
+  <section class="upload-card">
+    <div class="upload-copy">
+      <h2>Agregar nuevo banner</h2>
+      <p>
+        Elegí si será parte del carrusel o si se mostrará como popup al ingresar.
+        JPG, PNG o WEBP. Máximo 12 MB.
+      </p>
+    </div>
+
+    <div class="upload-grid">
+      <label class="field-label">
+        <span>Tipo</span>
+        <select class="form-control" [(ngModel)]="bannerType">
+          <option value="CAROUSEL">Carrusel principal</option>
+          <option value="POPUP">Popup al ingresar</option>
+        </select>
+      </label>
+
+      <label class="file-picker">
+        <span>{{ selectedFile?.name || 'Elegir imagen' }}</span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" />
+      </label>
+
+      <label class="field-label">
+        <span>Descripción</span>
+        <input
+          class="form-control"
+          type="text"
+          [(ngModel)]="altText"
+          placeholder="Descripción opcional de la imagen"
+          maxlength="255"
+        />
+      </label>
+
+      <label class="field-label">
+        <span>Destino de “Ver más”</span>
+        <input
+          class="form-control"
+          type="text"
+          [(ngModel)]="targetUrl"
+          placeholder="Ej: https://libreriaguillermeguillerme.com/productos?cat=libreria"
+        />
+      </label>
+
+      <button class="primary-btn" type="button" [disabled]="!selectedFile || saving()" (click)="addBanner()">
+        {{ saving() ? 'Subiendo...' : 'Agregar banner' }}
+      </button>
+    </div>
+
+    <p class="popup-note" *ngIf="bannerType === 'POPUP'">
+      Al activar un nuevo popup, cualquier otro popup activo se desactiva automáticamente.
+    </p>
+
+    <img *ngIf="previewUrl" class="new-preview" [src]="previewUrl" alt="Vista previa del nuevo banner" />
+  </section>
+
+  <section class="banner-list-card">
+    <div class="section-title-row">
+      <div>
+        <h2>Carrusel principal</h2>
+        <p>Podés cargar la cantidad de imágenes que quieras y cambiar su orden.</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading()" class="empty-state">Cargando banners...</div>
+    <div *ngIf="!loading() && carouselBanners().length === 0" class="empty-state">
+      No hay banners cargados en el carrusel.
+    </div>
+
+    <div class="banner-list" *ngIf="!loading() && carouselBanners().length > 0">
+      <article class="banner-row" *ngFor="let banner of carouselBanners(); let i = index">
+        <div class="position">{{ i + 1 }}</div>
+
+        <img class="banner-thumb" [src]="banner.imageUrl" [alt]="banner.altText || ('Banner ' + (i + 1))" />
+
+        <div class="banner-info">
+          <strong>{{ banner.altText || 'Banner sin descripción' }}</strong>
+          <span [class.inactive]="!banner.active">
+            {{ banner.active ? 'Visible en la web' : 'Oculto' }}
+          </span>
+          <small *ngIf="banner.targetUrl">Destino: {{ banner.targetUrl }}</small>
+        </div>
+
+        <div class="row-actions">
+          <button type="button" class="icon-btn" title="Subir" [disabled]="i === 0" (click)="moveCarousel(i, -1)">↑</button>
+          <button type="button" class="icon-btn" title="Bajar" [disabled]="i === carouselBanners().length - 1" (click)="moveCarousel(i, 1)">↓</button>
+          <button type="button" class="secondary-btn" (click)="toggleActive(banner)">
+            {{ banner.active ? 'Ocultar' : 'Mostrar' }}
+          </button>
+          <button type="button" class="danger-btn" (click)="deleteBanner(banner)">Eliminar</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="banner-list-card">
+    <div class="section-title-row">
+      <div>
+        <h2>Popup al ingresar</h2>
+        <p>
+          Se muestra una vez por sesión cuando el cliente entra al inicio. Solo puede haber uno activo a la vez.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="!loading() && popupBanners().length === 0" class="empty-state">
+      Todavía no hay popups cargados.
+    </div>
+
+    <div class="banner-list popup-list" *ngIf="!loading() && popupBanners().length > 0">
+      <article class="banner-row popup-row" *ngFor="let banner of popupBanners()">
+        <div class="position">POP</div>
+
+        <img class="banner-thumb popup-thumb" [src]="banner.imageUrl" [alt]="banner.altText || 'Popup promocional'" />
+
+        <div class="banner-info">
+          <strong>{{ banner.altText || 'Popup sin descripción' }}</strong>
+          <span [class.inactive]="!banner.active">
+            {{ banner.active ? 'Popup activo' : 'Popup oculto' }}
+          </span>
+          <small *ngIf="banner.targetUrl">“Ver más” lleva a: {{ banner.targetUrl }}</small>
+          <small *ngIf="!banner.targetUrl">Sin destino configurado: no se mostrará el botón “Ver más”.</small>
+        </div>
+
+        <div class="row-actions">
+          <button type="button" class="secondary-btn" (click)="toggleActive(banner)">
+            {{ banner.active ? 'Ocultar' : 'Activar' }}
+          </button>
+          <button type="button" class="danger-btn" (click)="deleteBanner(banner)">Eliminar</button>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

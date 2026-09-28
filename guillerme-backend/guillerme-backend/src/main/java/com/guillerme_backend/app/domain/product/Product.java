@@ -54,11 +54,17 @@ public class Product {
     @Column(nullable = false)
     private boolean estado = true;
 
+    @Column(nullable = false)
+    private boolean mayorista = false;
+
     @Column(name = "barcode", length = 64)
     private String barcode;
 
     public boolean isEstado() { return estado; }
     public void setEstado(boolean estado) { this.estado = estado; }
+
+    public boolean isMayorista() { return mayorista; }
+    public void setMayorista(boolean mayorista) { this.mayorista = mayorista; }
 
     public String getImgUrl2() { return imgUrl2; }
     public void setImgUrl2(String imgUrl2) { this.imgUrl2 = imgUrl2; }
