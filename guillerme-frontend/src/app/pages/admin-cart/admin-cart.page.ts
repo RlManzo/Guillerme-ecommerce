@@ -218,13 +218,20 @@ onGlobalKeydown(event: KeyboardEvent) {
   const target = event.target as HTMLElement | null;
   const tag = target?.tagName?.toLowerCase();
 
-  // No interceptar si el usuario está escribiendo en otro campo distinto del input de escaneo
+  // Si el foco está en el input de escaneo, dejamos que ese input procese
+  // el código. Así evitamos duplicar caracteres entre el ngModel y el
+  // listener global.
+  if (target === this.scanInputEl?.nativeElement) {
+    return;
+  }
+
+  // No interceptar si el usuario está escribiendo en cualquier otro campo.
   if (
     target &&
     (
       tag === 'textarea' ||
       tag === 'select' ||
-      (tag === 'input' && target !== this.scanInputEl?.nativeElement)
+      tag === 'input'
     )
   ) {
     return;
@@ -758,10 +765,23 @@ addToCart(p: any) {
   onScanInputChange(value: string): void {
     this.scanInput.set(value);
 
+    // MODO LECTOR:
+    // el scanner escribe el código completo en este mismo input.
+    // Cada carácter reinicia un timeout corto y, cuando termina de escribir,
+    // buscamos el barcode y agregamos el producto automáticamente.
     if (!this.manualTypingMode()) {
+      this.clearManualSearchTimer();
+      this.manualSearchResults.set([]);
+      this.manualSearchLoading.set(false);
+
+      this.scannerBuffer = value;
+      this.restartScannerTimer();
       return;
     }
 
+    // MODO MANUAL:
+    // acá sí buscamos por nombre/código/marca/keywords y esperamos
+    // que el operador seleccione uno de los resultados.
     this.scannerBuffer = '';
     this.clearScannerTimer();
     this.scheduleManualSearch(value);
@@ -771,6 +791,8 @@ addToCart(p: any) {
     event?.preventDefault();
 
     if (!this.manualTypingMode()) {
+      this.clearScannerTimer();
+      this.scannerBuffer = '';
       this.scanCode();
       return;
     }

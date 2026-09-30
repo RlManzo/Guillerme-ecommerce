@@ -77,17 +77,16 @@
                   [placeholder]="manualTypingMode() ? 'Escribí código, nombre, marca o palabra clave' : 'Escaneá código con lector'"
                   [ngModel]="scanInput()"
                   (ngModelChange)="onScanInputChange($event)"
-                  (keydown.enter)="manualTypingMode() ? scanCodeManual($event) : null"
-                  [readonly]="!manualTypingMode()"
+                  (keydown.enter)="scanCodeManual($event)"
                   [disabled]="loading() || sending()"
                   autocomplete="off"
                 />
 
                 <button
+                  *ngIf="manualTypingMode()"
                   type="button"
-                  [class.scan-disabled]="!manualTypingMode()"
                   (click)="scanCodeManual()"
-                  [disabled]="loading() || sending() || manualSearchLoading() || !manualTypingMode() || scanInput().trim().length < 2"
+                  [disabled]="loading() || sending() || manualSearchLoading() || scanInput().trim().length < 2"
                 >
                   {{ manualSearchLoading() ? 'Buscando...' : 'Agregar' }}
                 </button>
